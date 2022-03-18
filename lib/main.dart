@@ -51,9 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _startSong(VideoHandler handler) {
     setState(() {
-      //_selectedNavigationBarElement = 0;
       _videoHandler = handler;
-      //pageList[0] = PlayerView(video);
     });
   }
 
