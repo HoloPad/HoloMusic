@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '2.16.1'
+          flutter-version: '2.10.13'
 
       - name: Installing dependencies
         if: matrix.os == 'ubuntu-latest'
@@ -28,6 +28,9 @@ jobs:
         run: |
           flutter config --enable-linux-desktop
           flutter build linux
+
+      - name: Running tests
+        run: flutter test
 
       - name: Building for windows
         if: matrix.os == 'windows-latest'
