@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/Views/Player/PlayerView.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:holomusic/Common/PlayerEngine.dart';
+
 
 class PlayBar extends StatefulWidget {
   final VideoHandler handler;
@@ -77,7 +79,7 @@ class _PlayBarState extends State<PlayBar> {
                 child: TextButton(
                     onPressed: _toggle,
                     child: StreamBuilder<PlayerState>(
-                        stream: VideoHandler.player.playerStateStream,
+                        stream: PlayerEngine.player.playerStateStream,
                         builder: (BuildContext context,
                             AsyncSnapshot<PlayerState> snapshot) {
                           if (snapshot.hasData && snapshot.data!.playing && !widget.handler.isEnd()) {

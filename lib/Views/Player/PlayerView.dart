@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -48,7 +49,7 @@ class _PlayerViewState extends State<PlayerView> {
               style: _titleStyle,
             ),
             StreamBuilder<Duration>(
-                stream: VideoHandler.player.positionStream,
+                stream: PlayerEngine.player.positionStream,
                 builder:
                     (BuildContext context, AsyncSnapshot<Duration> snapshot) {
                   return Slider(
@@ -56,9 +57,9 @@ class _PlayerViewState extends State<PlayerView> {
                         ? snapshot.data!.inSeconds.toDouble()
                         : 0,
                     min: 0,
-                    max: VideoHandler.player.duration!.inSeconds.toDouble(),
+                    max: PlayerEngine.player.duration!.inSeconds.toDouble(),
                     onChanged: (d) {
-                      VideoHandler.player.seek(Duration(seconds: d.toInt()));
+                      PlayerEngine.player.seek(Duration(seconds: d.toInt()));
                     },
                   );
                 }),
@@ -75,12 +76,11 @@ class _PlayerViewState extends State<PlayerView> {
                 TextButton(
                     onPressed: _toggle,
                     child: StreamBuilder<PlayerState>(
-                        stream: VideoHandler.player.playerStateStream,
+                        stream: PlayerEngine.player.playerStateStream,
                         builder: (BuildContext context,
                             AsyncSnapshot<PlayerState> snapshot) {
                           if (snapshot.hasData &&
-                              snapshot.data!.playing &&
-                              !widget.handler.isEnd()) {
+                              snapshot.data!.playing) {
                             return pauseIcon;
                           } else {
                             return playIcon;

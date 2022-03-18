@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
@@ -8,7 +9,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 
 void main() {
-  VideoHandler.player = AudioPlayer();
+  PlayerEngine.initialize();
   runApp(const MyApp());
 }
 
