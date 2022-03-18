@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
@@ -43,6 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedNavigationBarElement = 1;
   VideoHandler? _videoHandler;
   late List<Widget> pageList;
+  bool _playBarMustBeShown = false;
 
   void _onNavigationBarTappedItem(int index) {
     setState(() {
@@ -64,6 +66,19 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
+  _getBarWidget(LoadingState state) {
+    final a = List<Widget>.empty(growable: true);
+
+    if (state == LoadingState.loading) {
+      a.add(const Flexible(child: LinearProgressIndicator()));
+    }
+    if (state == LoadingState.loaded || _playBarMustBeShown) {
+      a.add(Flexible(child: PlayBar(handler: _videoHandler!)));
+      _playBarMustBeShown = true;
+    }
+    return a;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,11 +91,12 @@ class _MyHomePageState extends State<MyHomePage> {
           stream: _videoHandler?.getVideoStateStream(),
           initialData: LoadingState.initialized,
           builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data! == LoadingState.loading) {
-              return const LinearProgressIndicator();
-            }
-            if (snapshot.hasData && snapshot.data! == LoadingState.loaded) {
-              return PlayBar(handler: _videoHandler!);
+            if (snapshot.hasData) {
+              final state = snapshot.data!;
+              return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: _getBarWidget(state));
             }
             return const SizedBox();
           }),

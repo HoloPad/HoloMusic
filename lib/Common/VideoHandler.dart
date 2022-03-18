@@ -67,7 +67,9 @@ class VideoHandler {
 
   Future<String> _downloadSong() async {
     Directory tempDir = await getApplicationDocumentsDirectory();
-    var fileName = tempDir.path + "/file" + video.id.value + ".webm";
+    var folderPath = tempDir.path + Platform.pathSeparator+"holomusic"+Platform.pathSeparator;
+    await Directory(folderPath).create(recursive: true);
+    var fileName = folderPath + video.id.value + ".webm";
     var file = File(fileName);
     if (FileSystemEntity.typeSync(fileName) == FileSystemEntityType.notFound) {
       var manifest = await _yt.videos.streamsClient.getManifest(video.id);
