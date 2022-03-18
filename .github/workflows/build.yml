@@ -29,9 +29,6 @@ jobs:
           flutter config --enable-linux-desktop
           flutter build linux
 
-      - name: Running tests
-        run: flutter test
-
       - name: Building for windows
         if: matrix.os == 'windows-latest'
         run: |
