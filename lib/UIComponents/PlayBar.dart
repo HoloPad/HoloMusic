@@ -80,7 +80,7 @@ class _PlayBarState extends State<PlayBar> {
                         stream: VideoHandler.player.playerStateStream,
                         builder: (BuildContext context,
                             AsyncSnapshot<PlayerState> snapshot) {
-                          if (snapshot.hasData && snapshot.data!.playing) {
+                          if (snapshot.hasData && snapshot.data!.playing && !widget.handler.isEnd()) {
                             return pauseIcon;
                           } else {
                             return playIcon;

@@ -4,11 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as YtExplode;
 import 'package:just_audio/just_audio.dart';
 
-enum LoadingState {
-  initialized,
-  loading,
-  loaded
-}
+enum LoadingState { initialized, loading, loaded }
 
 class VideoHandler {
   YtExplode.Video video;
@@ -16,7 +12,7 @@ class VideoHandler {
   static late AudioPlayer player;
   bool autoStart;
 
-  final StreamController _loadingStreamController = StreamController<LoadingState>();
+  final _loadingStreamController = StreamController<LoadingState>();
 
   VideoHandler(this.video, {this.autoStart = false}) {
     _yt = YtExplode.YoutubeExplode();
@@ -36,7 +32,7 @@ class VideoHandler {
     player.pause();
   }
 
-  Stream<LoadingState> getVideoStateStream(){
+  Stream<LoadingState> getVideoStateStream() {
     return _loadingStreamController.stream as Stream<LoadingState>;
   }
 
@@ -46,6 +42,10 @@ class VideoHandler {
     } else {
       play();
     }
+  }
+
+  bool isEnd(){
+    return player.position==player.duration;
   }
 
   void dispose() {

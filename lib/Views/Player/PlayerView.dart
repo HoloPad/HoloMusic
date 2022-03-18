@@ -57,7 +57,7 @@ class _PlayerViewState extends State<PlayerView> {
                         : 0,
                     min: 0,
                     max: VideoHandler.player.duration!.inSeconds.toDouble(),
-                    onChanged: (d){
+                    onChanged: (d) {
                       VideoHandler.player.seek(Duration(seconds: d.toInt()));
                     },
                   );
@@ -78,7 +78,9 @@ class _PlayerViewState extends State<PlayerView> {
                         stream: VideoHandler.player.playerStateStream,
                         builder: (BuildContext context,
                             AsyncSnapshot<PlayerState> snapshot) {
-                          if (snapshot.hasData && snapshot.data!.playing) {
+                          if (snapshot.hasData &&
+                              snapshot.data!.playing &&
+                              !widget.handler.isEnd()) {
                             return pauseIcon;
                           } else {
                             return playIcon;
