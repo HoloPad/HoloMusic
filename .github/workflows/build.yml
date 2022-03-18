@@ -8,26 +8,37 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    name: Build on Linux
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest', 'windows-latest']
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable' # or: 'beta' or 'master'
       - name: Installing dependencies
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libwebkit2gtk-4.0-dev
       - name: Building for linux
+        if: matrix.os == 'ubuntu-latest'
         run: |
           flutter config --enable-linux-desktop
           flutter build linux
+      - name: Building for windows
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          flutter config --enable-windows-desktop
+          flutter build windows
       - uses: actions/setup-java@v2
+        if: matrix.os == 'ubuntu-latest'
         with:
           distribution: 'zulu'
           java-version: '8'
       - name: Building for android
+        if: matrix.os == 'ubuntu-latest'
         run: flutter build apk
 
 
