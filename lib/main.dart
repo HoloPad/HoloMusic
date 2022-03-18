@@ -8,7 +8,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 
 void main() {
-  VideoHandler.player=AudioPlayer();
+  VideoHandler.player = AudioPlayer();
   runApp(const MyApp());
 }
 
@@ -51,9 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _startSong(VideoHandler handler) {
     setState(() {
-      //_selectedNavigationBarElement = 0;
       _videoHandler = handler;
-      //pageList[0] = PlayerView(video);
     });
   }
 
@@ -72,7 +70,19 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: pageList[_selectedNavigationBarElement],
-      bottomSheet: _videoHandler != null ? PlayBar(handler: _videoHandler!) : null,
+      //bottomSheet: _videoHandler != null ? PlayBar(handler: _videoHandler!) : null,
+      bottomSheet: StreamBuilder<LoadingState>(
+          stream: _videoHandler?.getVideoStateStream(),
+          initialData: LoadingState.initialized,
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data! == LoadingState.loading) {
+              return const LinearProgressIndicator();
+            }
+            if (snapshot.hasData && snapshot.data! == LoadingState.loaded) {
+              return PlayBar(handler: _videoHandler!);
+            }
+            return const SizedBox();
+          }),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedNavigationBarElement,
         items: const <BottomNavigationBarItem>[
