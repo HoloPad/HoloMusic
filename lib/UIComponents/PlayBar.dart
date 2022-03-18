@@ -7,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 
 class PlayBar extends StatefulWidget {
   final VideoHandler handler;
+  static bool isVisible = false;
 
   const PlayBar({Key? key, required this.handler}) : super(key: key);
 
@@ -17,7 +18,9 @@ class PlayBar extends StatefulWidget {
 class _PlayBarState extends State<PlayBar> {
   VideoHandler handler;
 
-  _PlayBarState(this.handler);
+  _PlayBarState(this.handler){
+    PlayBar.isVisible = true;
+  }
 
   final playIcon = const Icon(
     Icons.play_circle_outline,
