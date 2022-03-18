@@ -21,12 +21,14 @@ jobs:
           sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libwebkit2gtk-4.0-dev
       - name: Building for linux
         run: |
-        flutter config --enable-linux-desktop
-        flutter build linux
+          flutter config --enable-linux-desktop
+          flutter build linux
       - uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
           java-version: '8'
       - name: Building for android
-        run: |
-        flutter build apk
+        run: flutter build apk
+
+
+
