@@ -1,7 +1,11 @@
 name: Build
 env:
   FLUTTER_VERSION: "2.16.1"
-on: pull_request
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
