@@ -1,6 +1,8 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
@@ -8,7 +10,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 
 void main() {
-  VideoHandler.player=AudioPlayer();
+  PlayerEngine.initialize();
   runApp(const MyApp());
 }
 
@@ -42,6 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedNavigationBarElement = 1;
   VideoHandler? _videoHandler;
   late List<Widget> pageList;
+  bool _playBarMustBeShown = false;
 
   void _onNavigationBarTappedItem(int index) {
     setState(() {
@@ -63,6 +66,19 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
+  _getBarWidget(LoadingState state) {
+    final a = List<Widget>.empty(growable: true);
+
+    if (state == LoadingState.loading) {
+      a.add(const Flexible(child: LinearProgressIndicator()));
+    }
+    if (state == LoadingState.loaded || _playBarMustBeShown) {
+      a.add(Flexible(child: PlayBar(handler: _videoHandler!)));
+      _playBarMustBeShown = true;
+    }
+    return a;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,7 +86,20 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: pageList[_selectedNavigationBarElement],
-      bottomSheet: _videoHandler != null ? PlayBar(handler: _videoHandler!) : null,
+      //bottomSheet: _videoHandler != null ? PlayBar(handler: _videoHandler!) : null,
+      bottomSheet: StreamBuilder<LoadingState>(
+          stream: _videoHandler?.getVideoStateStream(),
+          initialData: LoadingState.initialized,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final state = snapshot.data!;
+              return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: _getBarWidget(state));
+            }
+            return const SizedBox();
+          }),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedNavigationBarElement,
         items: const <BottomNavigationBarItem>[
