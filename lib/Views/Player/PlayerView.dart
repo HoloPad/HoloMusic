@@ -32,13 +32,6 @@ class _PlayerViewState extends State<PlayerView> {
     color: Colors.black,
   );
 
-  void _toggle() {
-    if (PlayerEngine.player.playing) {
-      PlayerEngine.player.pause();
-    } else {
-      PlayerEngine.player.play();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +100,7 @@ class _PlayerViewState extends State<PlayerView> {
                           color: Colors.black,
                         )),
                     TextButton(
-                        onPressed: _toggle,
+                        onPressed: ()=>PlayerEngine.toggle(),
                         child: StreamBuilder<PlayerState>(
                             stream: PlayerEngine.player.playerStateStream,
                             builder: (BuildContext context,

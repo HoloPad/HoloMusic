@@ -40,23 +40,9 @@ class _PlayBarState extends State<PlayBar> {
     fontSize: 15,
   );
 
-  void _toggle() {
-    if (PlayerEngine.player.playing) {
-      PlayerEngine.player.pause();
-    } else {
-      PlayerEngine.player.stop();
-    }
-  }
-
   void _openPlayerView() {
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => PlayerView(handler)));
-  }
-
-  @override
-  void dispose() {
-    print("dispose bar");
-    super.dispose();
   }
 
   @override
@@ -77,28 +63,27 @@ class _PlayBarState extends State<PlayBar> {
                   valueListenable: PlayerEngine.getCurrentVideoPlaying(),
                   builder: (context, value, _) {
                     return Text(
-                      value==null?"...":value.title,
+                      value == null ? "..." : value.title,
                       style: _titleStyle,
                       textAlign: TextAlign.center,
                     );
                   }),
             ),
             TextButton(
-                onPressed: _toggle,
-                child: TextButton(
-                    onPressed: _toggle,
-                    child: StreamBuilder<PlayerState>(
-                        stream: PlayerEngine.player.playerStateStream,
-                        builder: (BuildContext context,
-                            AsyncSnapshot<PlayerState> snapshot) {
-                          if (snapshot.hasData &&
-                              snapshot.data!.playing &&
-                              snapshot.data!.processingState != ProcessingState.completed) {
-                            return pauseIcon;
-                          } else {
-                            return playIcon;
-                          }
-                        }))),
+                onPressed: () => PlayerEngine.toggle(),
+                child: StreamBuilder<PlayerState>(
+                    stream: PlayerEngine.player.playerStateStream,
+                    builder: (BuildContext context,
+                        AsyncSnapshot<PlayerState> snapshot) {
+                      if (snapshot.hasData &&
+                          snapshot.data!.playing &&
+                          snapshot.data!.processingState !=
+                              ProcessingState.completed) {
+                        return pauseIcon;
+                      } else {
+                        return playIcon;
+                      }
+                    })),
             TextButton(
                 onPressed: () {
                   PlayerEngine.playNextSong();
