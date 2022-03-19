@@ -36,9 +36,9 @@ class VideoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
         color: Colors.white38,
-        child: Row(children: [
-          Flexible(
-              flex: 10,
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Expanded(
               child: InkWell(
                   onTap: _videoClicked,
                   child: Row(
@@ -69,16 +69,14 @@ class VideoCard extends StatelessWidget {
                                       )
                                     ]))),
                       ]))),
-          Flexible(
-              flex: 1,
-              child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SongOptions(video: video)));
-                  },
-                  child: const Icon(Icons.arrow_drop_down)))
+          TextButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SongOptions(video: video)));
+              },
+              child: const Icon(Icons.arrow_drop_down))
         ]));
   }
 }
