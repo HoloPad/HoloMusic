@@ -7,67 +7,41 @@ import 'package:just_audio/just_audio.dart';
 
 enum LoadingState { initialized, loading, loaded }
 
+//Each video has this associated object
 class VideoHandler {
-  YtExplode.Video video;
+  late YtExplode.Video video;
   late YtExplode.YoutubeExplode _yt;
-  bool autoStart;
+  late Future<AudioSource> _audioSourceFuture;
 
   final _loadingStreamController = StreamController<LoadingState>();
 
-  VideoHandler(this.video, {this.autoStart = false}) {
+  VideoHandler(this.video) {
     _yt = YtExplode.YoutubeExplode();
     _loadingStreamController.add(LoadingState.loading);
-    _downloadSong().then((value) {
+    _audioSourceFuture = _downloadSong().then((value) {
       final source = AudioSource.uri(Uri.file(value));
-      PlayerEngine.addSongAndPlay(source);
-
-      _loadingStreamController.add(LoadingState.loaded);
+      _onSourceLoaded();
+      return source;
     });
   }
 
-  void play() {
-    PlayerEngine.player.play();
+  void _onSourceLoaded() {
+    //Code called when the song is loaded
+    _loadingStreamController.add(LoadingState.loaded);
   }
 
-  void pause() {
-    PlayerEngine.player.pause();
+  Stream<LoadingState> getVideoState() {
+    return _loadingStreamController.stream;
   }
 
-  Stream<LoadingState> getVideoStateStream() {
-    return _loadingStreamController.stream as Stream<LoadingState>;
-  }
-
-  void toggle() {
-    if (isPlaying()) {
-      pause();
-    } else {
-      play();
-    }
-  }
-
-  bool isEnd() {
-    return PlayerEngine.player.position == PlayerEngine.player.duration;
-  }
-
-  void dispose() {
-    PlayerEngine.player.dispose();
-  }
-
-  void setPosition(Duration duration) {
-    PlayerEngine.player.seek(duration);
-  }
-
-  int getPosition() {
-    return PlayerEngine.player.position.inSeconds;
-  }
-
-  bool isPlaying() {
-    return PlayerEngine.player.playing;
+  Future<AudioSource> getAudioSource() {
+    return _audioSourceFuture;
   }
 
   Future<String> _downloadSong() async {
     Directory tempDir = await getApplicationDocumentsDirectory();
-    var folderPath = tempDir.path + Platform.pathSeparator+"holomusic"+Platform.pathSeparator;
+    var folderPath = tempDir.path + Platform.pathSeparator + "holomusic" +
+        Platform.pathSeparator;
     await Directory(folderPath).create(recursive: true);
     var fileName = folderPath + video.id.value + ".webm";
     var file = File(fileName);

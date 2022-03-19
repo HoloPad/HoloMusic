@@ -5,7 +5,7 @@ import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/Views/Player/PlayerView.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
-
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class PlayBar extends StatefulWidget {
   final VideoHandler handler;
@@ -20,7 +20,7 @@ class PlayBar extends StatefulWidget {
 class _PlayBarState extends State<PlayBar> {
   VideoHandler handler;
 
-  _PlayBarState(this.handler){
+  _PlayBarState(this.handler) {
     PlayBar.isVisible = true;
   }
 
@@ -36,12 +36,16 @@ class _PlayBarState extends State<PlayBar> {
     color: Colors.black,
   );
 
-  final titleStyle = const TextStyle(
+  final _titleStyle = const TextStyle(
     fontSize: 15,
   );
 
   void _toggle() {
-    handler.toggle();
+    if (PlayerEngine.player.playing) {
+      PlayerEngine.player.pause();
+    } else {
+      PlayerEngine.player.stop();
+    }
   }
 
   void _openPlayerView() {
@@ -69,11 +73,16 @@ class _PlayBarState extends State<PlayBar> {
                   color: Colors.black,
                 )),
             Expanded(
-                child: Text(
-              widget.handler.video.title,
-              style: titleStyle,
-              textAlign: TextAlign.center,
-            )),
+              child: ValueListenableBuilder<Video?>(
+                  valueListenable: PlayerEngine.getCurrentVideoPlaying(),
+                  builder: (context, value, _) {
+                    return Text(
+                      value==null?"...":value.title,
+                      style: _titleStyle,
+                      textAlign: TextAlign.center,
+                    );
+                  }),
+            ),
             TextButton(
                 onPressed: _toggle,
                 child: TextButton(
@@ -82,14 +91,18 @@ class _PlayBarState extends State<PlayBar> {
                         stream: PlayerEngine.player.playerStateStream,
                         builder: (BuildContext context,
                             AsyncSnapshot<PlayerState> snapshot) {
-                          if (snapshot.hasData && snapshot.data!.playing && !widget.handler.isEnd()) {
+                          if (snapshot.hasData &&
+                              snapshot.data!.playing &&
+                              snapshot.data!.processingState != ProcessingState.completed) {
                             return pauseIcon;
                           } else {
                             return playIcon;
                           }
                         }))),
             TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  PlayerEngine.playNextSong();
+                },
                 child: const Icon(
                   Icons.skip_next,
                   size: 40,
