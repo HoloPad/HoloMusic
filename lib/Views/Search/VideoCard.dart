@@ -3,6 +3,7 @@ import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Views/SongOptions.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
+import 'package:holomusic/Common/Utils.dart';
 
 class VideoCard extends StatelessWidget {
   final Video video;
@@ -15,16 +16,7 @@ class VideoCard extends StatelessWidget {
   final _titleStyle =
       const TextStyle(fontSize: 12, fontWeight: FontWeight.bold);
 
-  String _durationToText(Duration? duration) {
-    if (duration == null) {
-      return "";
-    }
-    if (duration.inHours < 1) {
-      return "${duration.inMinutes}:${(duration.inSeconds.remainder(60))}";
-    } else {
-      return "${duration.inHours}:${duration.inMinutes.remainder(60)}:${(duration.inSeconds.remainder(60))}";
-    }
-  }
+
 
   void _videoClicked() {
     final handler = VideoHandler(video);
@@ -64,7 +56,7 @@ class VideoCard extends StatelessWidget {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
-                                        _durationToText(video.duration),
+                                        Utils.durationToText(video.duration),
                                         overflow: TextOverflow.ellipsis,
                                       )
                                     ]))),
