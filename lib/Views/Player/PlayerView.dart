@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
+import 'package:holomusic/UIComponents/TimeSlider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:holomusic/Common/Utils.dart';
 
 class PlayerView extends StatefulWidget {
   final VideoHandler handler;
@@ -32,7 +34,6 @@ class _PlayerViewState extends State<PlayerView> {
     color: Colors.black,
   );
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +41,7 @@ class _PlayerViewState extends State<PlayerView> {
           title: Text("HoloMusic"),
         ),
         body: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(20),
             child: Column(
               children: [
                 ValueListenableBuilder<Video?>(
@@ -73,20 +74,18 @@ class _PlayerViewState extends State<PlayerView> {
                     stream: PlayerEngine.player.positionStream,
                     builder: (BuildContext context,
                         AsyncSnapshot<Duration> snapshot) {
-                      return Slider(
-                        value: snapshot.hasData
-                            ? snapshot.data!.inSeconds.toDouble()
-                            : 0,
-                        min: 0,
-                        max: PlayerEngine.player.duration == null
-                            ? 0
-                            : PlayerEngine.player.duration!.inSeconds
-                                .toDouble(),
-                        onChanged: (d) {
-                          PlayerEngine.player
-                              .seek(Duration(seconds: d.toInt()));
-                        },
-                      );
+                      if(snapshot.hasData) {
+                        return TimeSlider(
+                            current: snapshot.data,
+                            end: PlayerEngine.player.duration,
+                            onChange: (d) {
+                              PlayerEngine.player
+                                  .seek(Duration(seconds: d.toInt()));
+                            });
+                      }
+                      else {
+                        return const SizedBox();
+                      }
                     }),
                 const SizedBox(height: 15),
                 Row(
@@ -100,7 +99,7 @@ class _PlayerViewState extends State<PlayerView> {
                           color: Colors.black,
                         )),
                     TextButton(
-                        onPressed: ()=>PlayerEngine.toggle(),
+                        onPressed: () => PlayerEngine.toggle(),
                         child: StreamBuilder<PlayerState>(
                             stream: PlayerEngine.player.playerStateStream,
                             builder: (BuildContext context,
