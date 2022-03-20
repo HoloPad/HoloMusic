@@ -27,16 +27,16 @@ class PlayerEngine {
 
   static void onTrackEnd() async {
     if (_mainPlaylist.isNotEmpty) {
-      playNextSong();
+      PlayerEngine.playNextSong();
     } else {
       await PlayerEngine.player.pause();
       await PlayerEngine.player.load();
     }
   }
 
-  static void play(VideoHandler source, {bool play = true}) async {
+  static Future play(VideoHandler source, {bool play = true}) async {
     final audioSource = await source.getAudioSource();
-    await PlayerEngine.player.stop();
+    await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
     _valueListenable.value = source.video;
     _history.add(source);
@@ -46,7 +46,7 @@ class PlayerEngine {
 
   static void playNextSong() {
     if (_mainPlaylist.isNotEmpty) {
-      play(_mainPlaylist.removeLast());
+      play(_mainPlaylist.removeAt(0));
     }
   }
 
