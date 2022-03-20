@@ -13,26 +13,15 @@ class VideoHandler {
   late YtExplode.YoutubeExplode _yt;
   late Future<AudioSource> _audioSourceFuture;
 
-  final _loadingStreamController = StreamController<LoadingState>();
 
   VideoHandler(this.video) {
     _yt = YtExplode.YoutubeExplode();
-    _loadingStreamController.add(LoadingState.loading);
     _audioSourceFuture = _downloadSong().then((value) {
       final source = AudioSource.uri(Uri.file(value));
-      _onSourceLoaded();
       return source;
     });
   }
 
-  void _onSourceLoaded() {
-    //Code called when the song is loaded
-    _loadingStreamController.add(LoadingState.loaded);
-  }
-
-  Stream<LoadingState> getVideoState() {
-    return _loadingStreamController.stream;
-  }
 
   Future<AudioSource> getAudioSource() {
     return _audioSourceFuture;

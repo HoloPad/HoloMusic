@@ -105,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: pageList[_selectedNavigationBarElement],
       //bottomSheet: _videoHandler != null ? PlayBar(handler: _videoHandler!) : null,
       bottomSheet: StreamBuilder<LoadingState>(
-          stream: _videoHandler?.getVideoState(),
+          stream: PlayerEngine.getLoadingStateStream(),
           initialData: LoadingState.initialized,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
