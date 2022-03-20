@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SongOptions extends StatelessWidget {
   final Video video;
@@ -43,10 +44,10 @@ class SongOptions extends StatelessWidget {
                         },
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text("Add to queue"),
-                              SizedBox(width: 5),
-                              Icon(Icons.add)
+                            children: [
+                              Text(AppLocalizations.of(context)!.addToQueue),
+                              const SizedBox(width: 5),
+                              const Icon(Icons.add)
                             ])),
                     const SizedBox(height: 20),
                     TextButton(
@@ -55,10 +56,10 @@ class SongOptions extends StatelessWidget {
                         },
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text("Cancel"),
-                              SizedBox(width: 5),
-                              Icon(Icons.cancel)
+                            children: [
+                              Text(AppLocalizations.of(context)!.cancel),
+                              const SizedBox(width: 5),
+                              const Icon(Icons.cancel)
                             ])),
                     const SizedBox(height: 20)
                   ]))),

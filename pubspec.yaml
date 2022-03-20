@@ -39,6 +39,11 @@ dependencies:
   just_audio: ^0.9.20
   just_audio_libwinmedia: any # substitute version number
 
+  #For internationalization
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.17.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -55,7 +60,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
+  generate: true
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

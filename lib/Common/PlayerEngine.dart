@@ -11,6 +11,8 @@ class PlayerEngine {
   static late List<VideoHandler> _history;
   static VideoHandler? _currentPlaying;
   static final ValueNotifier<Video?> _valueListenable = ValueNotifier(null);
+  static final _loadingStreamController = StreamController<LoadingState>();
+
 
   static void initialize() {
     PlayerEngine.player = AudioPlayer();
@@ -27,16 +29,19 @@ class PlayerEngine {
 
   static void onTrackEnd() async {
     if (_mainPlaylist.isNotEmpty) {
-      playNextSong();
+      PlayerEngine.playNextSong();
     } else {
       await PlayerEngine.player.pause();
       await PlayerEngine.player.load();
     }
   }
 
-  static void play(VideoHandler source, {bool play = true}) async {
-    final audioSource = await source.getAudioSource();
-    await PlayerEngine.player.stop();
+  static Future play(VideoHandler source, {bool play = true}) async {
+    _loadingStreamController.add(LoadingState.loading);
+    final futureAudioSource = source.getAudioSource();
+    futureAudioSource.then((value) =>  _loadingStreamController.add(LoadingState.loaded));
+    final audioSource = await futureAudioSource;
+    await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
     _valueListenable.value = source.video;
     _history.add(source);
@@ -46,7 +51,7 @@ class PlayerEngine {
 
   static void playNextSong() {
     if (_mainPlaylist.isNotEmpty) {
-      play(_mainPlaylist.removeLast());
+      play(_mainPlaylist.removeAt(0));
     }
   }
 
@@ -69,6 +74,10 @@ class PlayerEngine {
 
   static ValueNotifier<Video?> getCurrentVideoPlaying() {
     return _valueListenable;
+  }
+
+  static Stream<LoadingState> getLoadingStateStream(){
+    return _loadingStreamController.stream;
   }
 
   static void addSongToQueue(VideoHandler source) async {

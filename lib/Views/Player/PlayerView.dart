@@ -4,7 +4,7 @@ import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/UIComponents/TimeSlider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'package:holomusic/Common/Utils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PlayerView extends StatefulWidget {
   final VideoHandler handler;
@@ -38,7 +38,7 @@ class _PlayerViewState extends State<PlayerView> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("HoloMusic"),
+          title: Text(AppLocalizations.of(context)!.appTitle),
         ),
         body: Padding(
             padding: const EdgeInsets.all(20),

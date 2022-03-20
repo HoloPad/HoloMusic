@@ -6,8 +6,9 @@ import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() {
   PlayerEngine.initialize();
@@ -18,16 +19,32 @@ class MyApp extends StatelessWidget {
   static late final AudioPlayer player;
 
   const MyApp({Key? key}) : super(key: key);
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      onGenerateTitle: (context){
+        return AppLocalizations.of(context)!.appTitle;
+      },
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        // 'en' is the language code. We could optionally provide a
+        // a country code as the second param, e.g.
+        // Locale('en', 'US'). If we do that, we may want to
+        // provide an additional app_en_US.arb file for
+        // region-specific translations.
+        Locale('it', ''),
+        Locale('en', ''),
+      ],
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const MyHomePage(title: 'Holo Music'),
+      home: const MyHomePage(title: 'HoloMusic'),
     );
   }
 }
@@ -83,12 +100,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(AppLocalizations.of(context)!.appTitle),
       ),
       body: pageList[_selectedNavigationBarElement],
       //bottomSheet: _videoHandler != null ? PlayBar(handler: _videoHandler!) : null,
       bottomSheet: StreamBuilder<LoadingState>(
-          stream: _videoHandler?.getVideoState(),
+          stream: PlayerEngine.getLoadingStateStream(),
           initialData: LoadingState.initialized,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -102,13 +119,13 @@ class _MyHomePageState extends State<MyHomePage> {
           }),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedNavigationBarElement,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: const Icon(Icons.home), label:AppLocalizations.of(context)!.home),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: "Search",
+            icon: const Icon(Icons.search),
+            label: AppLocalizations.of(context)!.search,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Playlist")
+          BottomNavigationBarItem(icon: const Icon(Icons.list), label: AppLocalizations.of(context)!.library)
         ],
         onTap: _onNavigationBarTappedItem,
       ),
