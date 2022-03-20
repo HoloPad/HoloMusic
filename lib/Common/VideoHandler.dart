@@ -13,42 +13,21 @@ class VideoHandler {
   late YtExplode.YoutubeExplode _yt;
   late Future<AudioSource> _audioSourceFuture;
 
-
   VideoHandler(this.video) {
     _yt = YtExplode.YoutubeExplode();
-    _audioSourceFuture = _downloadSong().then((value) {
-      final source = AudioSource.uri(Uri.file(value));
+    _audioSourceFuture = _getSongStream().then((value) {
+      final source = AudioSource.uri(value);
       return source;
     });
   }
-
 
   Future<AudioSource> getAudioSource() {
     return _audioSourceFuture;
   }
 
-  Future<String> _downloadSong() async {
-    Directory tempDir = await getApplicationDocumentsDirectory();
-    var folderPath = tempDir.path + Platform.pathSeparator + "holomusic" +
-        Platform.pathSeparator;
-    await Directory(folderPath).create(recursive: true);
-    var fileName = folderPath + video.id.value + ".webm";
-    var file = File(fileName);
-    if (FileSystemEntity.typeSync(fileName) == FileSystemEntityType.notFound) {
-      var manifest = await _yt.videos.streamsClient.getManifest(video.id);
-      var streamInfo = manifest.audioOnly.withHighestBitrate();
-      var stream = _yt.videos.streamsClient.get(streamInfo);
-      print("Saved on " + fileName);
-      var fileStream = file.openWrite();
-      print("Saveing");
-      await stream.pipe(fileStream);
-      print("Saved");
-      // Close the file.
-      await fileStream.flush();
-      await fileStream.close();
-    } else {
-      print("Cache used");
-    }
-    return fileName;
+  Future<Uri> _getSongStream() async {
+    var manifest = await _yt.videos.streamsClient.getManifest(video.id);
+    var streamInfo = manifest.audioOnly.withHighestBitrate();
+    return streamInfo.url;
   }
 }

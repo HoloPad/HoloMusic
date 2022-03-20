@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -83,13 +84,13 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
-  _getBarWidget(LoadingState state) {
+  _getBarWidget(ProcessingState state) {
     final a = List<Widget>.empty(growable: true);
 
-    if (state == LoadingState.loading) {
+    if (state == ProcessingState.buffering || state == ProcessingState.loading) {
       a.add(const Flexible(child: LinearProgressIndicator()));
     }
-    if (state == LoadingState.loaded || _playBarMustBeShown) {
+    if (state == ProcessingState.ready || _playBarMustBeShown) {
       a.add(Flexible(child: PlayBar(handler: _videoHandler!)));
       _playBarMustBeShown = true;
     }
@@ -104,9 +105,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: pageList[_selectedNavigationBarElement],
       //bottomSheet: _videoHandler != null ? PlayBar(handler: _videoHandler!) : null,
-      bottomSheet: StreamBuilder<LoadingState>(
-          stream: PlayerEngine.getLoadingStateStream(),
-          initialData: LoadingState.initialized,
+      bottomSheet: StreamBuilder<ProcessingState>(
+          stream: PlayerEngine.player.processingStateStream,
+          initialData: ProcessingState.idle,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final state = snapshot.data!;
