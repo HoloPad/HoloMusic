@@ -4,6 +4,7 @@ import 'package:holomusic/Views/Search/VideoCard.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SearchView extends StatefulWidget {
   final void Function(VideoHandler) playSongFunction;
@@ -64,10 +65,10 @@ class _SearchViewState extends State<SearchView> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             TextField(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: "Search a song",
-                icon: Icon(Icons.search),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: AppLocalizations.of(context)!.searchASong,
+                icon: const Icon(Icons.search),
               ),
               onSubmitted: _onSubmitted,
             ),
