@@ -5,5 +5,7 @@
   "library": "Raccolta",
   "searchASong": "Cerca una canzone",
   "addToQueue": "Aggiungi in coda",
-  "cancel": "Annulla"
+  "cancel": "Annulla",
+  "millions": "Milioni",
+  "billions": "Miliardi"
 }

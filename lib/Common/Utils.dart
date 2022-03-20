@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class Utils {
   static String durationToText(Duration? duration) {
     if (duration == null) {
@@ -17,6 +20,19 @@ class Utils {
       if (seconds < 10) s += "0";
       s += seconds.toString();
       return s;
+    }
+  }
+
+  static String viewToString(int views, BuildContext context) {
+    const oneBilion = 1000000000;
+    const oneMilion = 1000000;
+    if(views>oneBilion) {
+      return (views/oneBilion).toStringAsFixed(1)+" "+AppLocalizations.of(context)!.billions;
+    }
+    if(views>oneMilion) {
+      return (views/oneMilion).toStringAsFixed(1)+" "+AppLocalizations.of(context)!.millions;
+    } else {
+      return views.toString();
     }
   }
 }

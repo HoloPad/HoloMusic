@@ -5,5 +5,7 @@
   "library": "Library",
   "searchASong": "Search a song",
   "addToQueue": "Add to queue",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "millions": "Millions",
+  "billions": "Billions"
 }

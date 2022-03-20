@@ -11,7 +11,6 @@ class PlayerEngine {
   static late List<VideoHandler> _history;
   static VideoHandler? _currentPlaying;
   static final ValueNotifier<Video?> _valueListenable = ValueNotifier(null);
-  static final _loadingStreamController = StreamController<LoadingState>();
 
 
   static void initialize() {
@@ -37,10 +36,8 @@ class PlayerEngine {
   }
 
   static Future play(VideoHandler source, {bool play = true}) async {
-    _loadingStreamController.add(LoadingState.loading);
-    final futureAudioSource = source.getAudioSource();
-    futureAudioSource.then((value) =>  _loadingStreamController.add(LoadingState.loaded));
-    final audioSource = await futureAudioSource;
+    final futureAudioSource = await source.getAudioSource();
+    final audioSource = AudioSource.uri(futureAudioSource);
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
     _valueListenable.value = source.video;
@@ -74,10 +71,6 @@ class PlayerEngine {
 
   static ValueNotifier<Video?> getCurrentVideoPlaying() {
     return _valueListenable;
-  }
-
-  static Stream<LoadingState> getLoadingStateStream(){
-    return _loadingStreamController.stream;
   }
 
   static void addSongToQueue(VideoHandler source) async {

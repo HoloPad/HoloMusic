@@ -40,7 +40,7 @@ class VideoCard extends StatelessWidget {
                       children: [
                         Image(
                           image: NetworkImage(video.thumbnails.lowResUrl),
-                          height: 60,
+                          width: 80,
                         ),
                         Expanded(
                             child: Padding(
@@ -57,6 +57,10 @@ class VideoCard extends StatelessWidget {
                                       ),
                                       Text(
                                         Utils.durationToText(video.duration),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        Utils.viewToString(video.engagement.viewCount, context),
                                         overflow: TextOverflow.ellipsis,
                                       )
                                     ]))),
