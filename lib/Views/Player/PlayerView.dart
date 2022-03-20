@@ -23,15 +23,27 @@ class _PlayerViewState extends State<PlayerView> {
 
   final _titleStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-  final playIcon = const Icon(
-    Icons.play_circle_fill,
-    size: 70,
-    color: Colors.black,
-  );
-  final pauseIcon = const Icon(
-    Icons.pause,
-    size: 70,
-    color: Colors.black,
+
+  final playIcon = TextButton(
+      onPressed: () => PlayerEngine.toggle(),
+      child: const Icon(
+        Icons.play_circle_fill,
+        size: 70,
+        color: Colors.black,
+      ));
+
+  final pauseIcon = TextButton(
+      onPressed: () => PlayerEngine.toggle(),
+      child: const Icon(
+        Icons.pause,
+        size: 70,
+        color: Colors.black,
+      ));
+
+  final loadingIcon = const SizedBox(
+    height: 70,
+    width: 70,
+    child: CircularProgressIndicator(),
   );
 
   @override
@@ -74,7 +86,7 @@ class _PlayerViewState extends State<PlayerView> {
                     stream: PlayerEngine.player.positionStream,
                     builder: (BuildContext context,
                         AsyncSnapshot<Duration> snapshot) {
-                      if(snapshot.hasData) {
+                      if (snapshot.hasData) {
                         return TimeSlider(
                             current: snapshot.data,
                             end: PlayerEngine.player.duration,
@@ -82,8 +94,7 @@ class _PlayerViewState extends State<PlayerView> {
                               PlayerEngine.player
                                   .seek(Duration(seconds: d.toInt()));
                             });
-                      }
-                      else {
+                      } else {
                         return const SizedBox();
                       }
                     }),
@@ -98,18 +109,28 @@ class _PlayerViewState extends State<PlayerView> {
                           size: 40,
                           color: Colors.black,
                         )),
-                    TextButton(
-                        onPressed: () => PlayerEngine.toggle(),
-                        child: StreamBuilder<PlayerState>(
-                            stream: PlayerEngine.player.playerStateStream,
-                            builder: (BuildContext context,
-                                AsyncSnapshot<PlayerState> snapshot) {
-                              if (snapshot.hasData && snapshot.data!.playing) {
-                                return pauseIcon;
-                              } else {
-                                return playIcon;
-                              }
-                            })),
+                    StreamBuilder<PlayerState>(
+                        stream: PlayerEngine.player.playerStateStream,
+                        builder: (BuildContext context,
+                            AsyncSnapshot<PlayerState> snapshot) {
+                          if (snapshot.hasData) {
+                            switch (snapshot.data!.processingState) {
+                              case ProcessingState.loading:
+                              case ProcessingState.buffering:
+                                return loadingIcon;
+                              case ProcessingState.idle:
+                              case ProcessingState.ready:
+                              case ProcessingState.completed:
+                                if (snapshot.data!.playing) {
+                                  return pauseIcon;
+                                } else {
+                                  return playIcon;
+                                }
+                            }
+                          } else {
+                            return playIcon;
+                          }
+                        }),
                     TextButton(
                         onPressed: () => PlayerEngine.playNextSong(),
                         child: const Icon(

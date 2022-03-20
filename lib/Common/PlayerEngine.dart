@@ -36,8 +36,8 @@ class PlayerEngine {
   }
 
   static Future play(VideoHandler source, {bool play = true}) async {
-    final futureAudioSource = source.getAudioSource();
-    final audioSource = await futureAudioSource;
+    final futureAudioSource = await source.getAudioSource();
+    final audioSource = AudioSource.uri(futureAudioSource);
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
     _valueListenable.value = source.video;

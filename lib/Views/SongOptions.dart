@@ -39,7 +39,7 @@ class SongOptions extends StatelessWidget {
                     const SizedBox(height: 20),
                     TextButton(
                         onPressed: () {
-                          PlayerEngine.addSongToQueue(VideoHandler(video));
+                          PlayerEngine.addSongToQueue(VideoHandler(video,preload: true));
                           Navigator.pop(context);
                         },
                         child: Row(
