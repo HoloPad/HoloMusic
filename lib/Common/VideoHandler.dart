@@ -56,6 +56,7 @@ class VideoHandler {
     await Directory(folderPath).create(recursive: true);
     var fileName = folderPath + video.id.value + ".webm";
     var file = File(fileName);
+    print(file.path);
     //Downloading
     var manifest = await _yt.videos.streamsClient.getManifest(video.id);
     var streamInfo = manifest.audioOnly.withHighestBitrate();

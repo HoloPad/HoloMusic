@@ -7,19 +7,15 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PlayerView extends StatefulWidget {
-  final VideoHandler handler;
 
-  PlayerView(this.handler, {Key? key}) : super(key: key);
+  PlayerView({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _PlayerViewState(handler);
+  State<StatefulWidget> createState() => _PlayerViewState();
 }
 
 class _PlayerViewState extends State<PlayerView> {
-  final VideoHandler _handler;
   bool updatePosition = false;
-
-  _PlayerViewState(this._handler);
 
   final _titleStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);

@@ -1,15 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:holomusic/Views/Search/VideoCard.dart';
+import 'package:holomusic/UIComponents/SongItem.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SearchView extends StatefulWidget {
-  final void Function(VideoHandler) playSongFunction;
 
-  const SearchView({Key? key, required this.playSongFunction})
+  const SearchView({Key? key})
       : super(key: key);
 
   @override
@@ -50,11 +49,6 @@ class _SearchViewState extends State<SearchView> {
     });
   }
 
-  void _startSong(VideoHandler handler) {
-    setState(() {});
-    widget.playSongFunction(handler);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -88,17 +82,16 @@ class _SearchViewState extends State<SearchView> {
                             }
                             return true; //To stop the notification bubble
                           },
-                          child: ListView.builder(
-                              padding: const EdgeInsets.all(8),
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemCount: snapshot.data?.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return VideoCard(
-                                  video: list.elementAt(index),
-                                  playSongFunction: _startSong,
-                                );
-                              })));
+                          child: ListView(
+                            clipBehavior: Clip.antiAlias,
+                            children: list
+                                .map((p0) => SongItem(
+                                      p0.title,
+                                      p0.thumbnails.lowResUrl,
+                                      video: p0,
+                                    ))
+                                .toList(),
+                          )));
                 } else {
                   return Text("No data");
                 }
