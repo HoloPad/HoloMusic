@@ -7,5 +7,9 @@
   "addToQueue": "Aggiungi in coda",
   "cancel": "Annulla",
   "millions": "Milioni",
-  "billions": "Miliardi"
+  "billions": "Miliardi",
+  "charts": "Classifiche",
+  "follow": "Segui",
+  "cannotLoadSong": "Impossibile caricare il brano"
+
 }

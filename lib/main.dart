@@ -4,7 +4,9 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
+import 'package:holomusic/Common/class%20LoadingNotification.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
+import 'package:holomusic/Views/Home/HomeView.dart';
 import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
@@ -20,11 +22,12 @@ class MyApp extends StatelessWidget {
   static late final AudioPlayer player;
 
   const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      onGenerateTitle: (context){
+      onGenerateTitle: (context) {
         return AppLocalizations.of(context)!.appTitle;
       },
       localizationsDelegates: const [
@@ -46,6 +49,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
       ),
       home: const MyHomePage(title: 'HoloMusic'),
+      scrollBehavior: MyCustomScrollBehavior(),
     );
   }
 }
@@ -60,9 +64,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedNavigationBarElement = 1;
-  VideoHandler? _videoHandler;
   late List<Widget> pageList;
   bool _playBarMustBeShown = false;
+  bool _forceLoading = false;
 
   void _onNavigationBarTappedItem(int index) {
     setState(() {
@@ -70,28 +74,23 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _startSong(VideoHandler handler) {
-    setState(() {
-      _videoHandler = handler;
-    });
-  }
-
   _MyHomePageState() {
     pageList = [
-      Text("To implement"),
-      SearchView(playSongFunction: _startSong),
+      HomeView(),
+      SearchView(),
       Text("To implement"),
     ];
   }
 
   _getBarWidget(ProcessingState state) {
     final a = List<Widget>.empty(growable: true);
-
-    if (state == ProcessingState.buffering || state == ProcessingState.loading) {
+    if (state == ProcessingState.buffering ||
+        state == ProcessingState.loading ||
+        _forceLoading) {
       a.add(const Flexible(child: LinearProgressIndicator()));
     }
     if (state == ProcessingState.ready || _playBarMustBeShown) {
-      a.add(Flexible(child: PlayBar(handler: _videoHandler!)));
+      a.add(const Flexible(child: PlayBar()));
       _playBarMustBeShown = true;
     }
     return a;
@@ -99,37 +98,65 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.appTitle),
-      ),
-      body: pageList[_selectedNavigationBarElement],
-      //bottomSheet: _videoHandler != null ? PlayBar(handler: _videoHandler!) : null,
-      bottomSheet: StreamBuilder<ProcessingState>(
-          stream: PlayerEngine.player.processingStateStream,
-          initialData: ProcessingState.idle,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final state = snapshot.data!;
-              return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: _getBarWidget(state));
-            }
-            return const SizedBox();
-          }),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedNavigationBarElement,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: const Icon(Icons.home), label:AppLocalizations.of(context)!.home),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.search),
-            label: AppLocalizations.of(context)!.search,
+    return Container(
+        decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.blue, Color.fromRGBO(18, 18, 18, 1)],
+                stops: [0.01, 0.4])),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: NotificationListener<LoadingNotification>(
+              onNotification: (notification) {
+                setState(() {
+                  _forceLoading = notification.isLoading;
+                });
+                return true;
+              },
+              child: pageList[_selectedNavigationBarElement]),
+          bottomSheet: StreamBuilder<ProcessingState>(
+              stream: PlayerEngine.player.processingStateStream,
+              initialData: ProcessingState.idle,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final state = snapshot.data!;
+                  return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: _getBarWidget(state));
+                }
+                return const SizedBox();
+              }),
+          bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: const Color.fromRGBO(34, 35, 39, 1.0),
+            selectedItemColor: Colors.white,
+            unselectedItemColor: const Color.fromRGBO(124, 125, 129, 1),
+            currentIndex: _selectedNavigationBarElement,
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                  icon: const Icon(Icons.home),
+                  label: AppLocalizations.of(context)!.home),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.search),
+                label: AppLocalizations.of(context)!.search,
+              ),
+              BottomNavigationBarItem(
+                  icon: const Icon(Icons.list),
+                  label: AppLocalizations.of(context)!.library)
+            ],
+            onTap: _onNavigationBarTappedItem,
           ),
-          BottomNavigationBarItem(icon: const Icon(Icons.list), label: AppLocalizations.of(context)!.library)
-        ],
-        onTap: _onNavigationBarTappedItem,
-      ),
-    );
+        ));
   }
+}
+
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  // Override behavior methods and getters like dragDevices
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        // etc.
+      };
 }
