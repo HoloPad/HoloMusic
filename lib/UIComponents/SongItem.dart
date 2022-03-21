@@ -58,7 +58,8 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
     if (video != null) {
       PlayerEngine.play(VideoHandler(video));
     } else {
-      final snackbar = SnackBar(content: Text(AppLocalizations.of(context)!.cannotLoadSong));
+      final snackbar =
+          SnackBar(content: Text(AppLocalizations.of(context)!.cannotLoadSong));
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
     }
   }
@@ -84,11 +85,12 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
-                          child: Image(
-                              image: NetworkImage(widget.thumbnail!),
+                          child: Image.network(
+                              widget.thumbnail!,
                               width: 60,
                               height: 60,
-                              fit: BoxFit.fill),
+                              fit: BoxFit.fill
+                          ),
                           borderRadius: const BorderRadius.horizontal(
                               left: Radius.circular(itemRadius)),
                         ),
