@@ -4,10 +4,13 @@ import 'package:holomusic/Views/Player/PlayerView.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
+import '../Common/LoadingNotification.dart';
+
 class PlayBar extends StatefulWidget {
   static bool isVisible = false;
+  final Stream<bool> showLoading;
 
-  const PlayBar({Key? key}) : super(key: key);
+  const PlayBar(this.showLoading, {Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PlayBarState();
@@ -34,7 +37,9 @@ class _PlayBarState extends State<PlayBar> {
 
   void _openPlayerView() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => PlayerView()));
+        context,
+        MaterialPageRoute(
+            builder: (context) => PlayerView(widget.showLoading)));
   }
 
   @override
@@ -83,6 +88,7 @@ class _PlayBarState extends State<PlayBar> {
                           })),
                   TextButton(
                       onPressed: () {
+                        LoadingNotification(true).dispatch(context);
                         PlayerEngine.playNextSong();
                       },
                       child: const Icon(

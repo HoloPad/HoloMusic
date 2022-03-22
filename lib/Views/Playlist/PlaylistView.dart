@@ -73,14 +73,21 @@ class _PlaylistViewState extends State<PlaylistView> {
                           if (snapshot.hasData) {
                             return ListBody(
                               children: snapshot.data!
-                                  .map((e) => SongItem(e.title, e.thumbnail,
-                                      url: e.url))
+                                  .map((e) => SongItem(
+                                        e.title,
+                                        e.thumbnail,
+                                        url: e.url,
+                                        playlist: widget.playlist,
+                                      ))
                                   .toList(),
                             );
                           } else {
                             return const CircularProgressIndicator();
                           }
                         },
+                      ),
+                      const SizedBox(
+                        height: 50,
                       )
                     ])
                   ])))

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -11,6 +12,7 @@ import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'Common/AppColors.dart';
 
@@ -46,9 +48,7 @@ class MyApp extends StatelessWidget {
         Locale('it', ''),
         Locale('en', ''),
       ],
-      theme: ThemeData(
-        primaryColor: Colors.white,
-      ),
+      theme: ThemeData(primarySwatch: Colors.grey),
       home: const MyHomePage(title: 'HoloMusic'),
       scrollBehavior: MyCustomScrollBehavior(),
     );
@@ -68,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late List<Widget> pageList;
   bool _playBarMustBeShown = false;
   bool _forceLoading = false;
+  StreamController<bool> showLoadingStreamController = StreamController();
 
   void _onNavigationBarTappedItem(int index) {
     setState(() {
@@ -81,6 +82,14 @@ class _MyHomePageState extends State<MyHomePage> {
       SearchView(),
       Text("To implement"),
     ];
+    PlayerEngine.player.playerStateStream.listen((event) {
+      if (event.processingState == ProcessingState.ready) {
+        setState(() {
+          _forceLoading = false;
+        });
+        showLoadingStreamController.add(false);
+      }
+    });
   }
 
   _getBarWidget(ProcessingState state) {
@@ -88,13 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if (state == ProcessingState.buffering ||
         state == ProcessingState.loading ||
         _forceLoading) {
-      a.add(const Flexible(
-          child: LinearProgressIndicator(
-              color: Color.fromRGBO(85, 200, 90, 1),
-              backgroundColor: Color.fromRGBO(53, 124, 56, 1))));
+      a.add(const Flexible(child: LinearProgressIndicator()));
     }
     if (state == ProcessingState.ready || _playBarMustBeShown) {
-      a.add(const Flexible(child: PlayBar()));
+      a.add( Flexible(child: PlayBar(showLoadingStreamController.stream)));
       _playBarMustBeShown = true;
     }
     return a;
@@ -111,22 +117,31 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState(() {
                   _forceLoading = notification.isLoading;
                 });
+                showLoadingStreamController.add(notification.isLoading);
                 return true;
               },
               child: pageList[_selectedNavigationBarElement]),
-          bottomSheet: StreamBuilder<ProcessingState>(
-              stream: PlayerEngine.player.processingStateStream,
-              initialData: ProcessingState.idle,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final state = snapshot.data!;
-                  return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: _getBarWidget(state));
-                }
-                return const SizedBox();
-              }),
+          bottomSheet: NotificationListener<LoadingNotification>(
+              onNotification: (notification) {
+                setState(() {
+                  _forceLoading = notification.isLoading;
+                });
+                showLoadingStreamController.add(notification.isLoading);
+                return true;
+              },
+              child: StreamBuilder<ProcessingState>(
+                  stream: PlayerEngine.player.processingStateStream,
+                  initialData: ProcessingState.idle,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final state = snapshot.data!;
+                      return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: _getBarWidget(state));
+                    }
+                    return const SizedBox();
+                  })),
           bottomNavigationBar: BottomNavigationBar(
             backgroundColor: const Color.fromRGBO(34, 35, 39, 1.0),
             selectedItemColor: Colors.white,

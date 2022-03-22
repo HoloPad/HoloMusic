@@ -8,10 +8,14 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:palette_generator/palette_generator.dart';
 
+import '../../Common/LoadingNotification.dart';
+
 enum RepetitionMode { disabled, oneSongs, allSongs }
 
 class PlayerView extends StatefulWidget {
-  PlayerView({Key? key}) : super(key: key);
+  final Stream<bool> loadingStream;
+
+  PlayerView(this.loadingStream, {Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PlayerViewState();
@@ -89,13 +93,17 @@ class _PlayerViewState extends State<PlayerView> {
   }
 
   Future _updateBackground(ImageProvider provider) async {
+    /*
     final palette = await PaletteGenerator.fromImageProvider(provider);
     if (palette.dominantColor != null) {
       final newColor = palette.dominantColor!.color;
-      setState(() {
-        _mainColor = newColor;
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+        setState(() {
+          _mainColor = newColor;
+        });
       });
     }
+     */
   }
 
   @override
@@ -111,8 +119,8 @@ class _PlayerViewState extends State<PlayerView> {
                 Row(children: [
                   TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child:
-                          const Icon(Icons.arrow_back_ios, color: Colors.white))
+                      child: const Icon(Icons.arrow_drop_down,
+                          color: Colors.white))
                 ]),
                 const SizedBox(height: 15),
                 ValueListenableBuilder<Video?>(
@@ -177,30 +185,43 @@ class _PlayerViewState extends State<PlayerView> {
                           size: 40,
                           color: Colors.white,
                         )),
-                    StreamBuilder<PlayerState>(
-                        stream: PlayerEngine.player.playerStateStream,
-                        builder: (BuildContext context,
-                            AsyncSnapshot<PlayerState> snapshot) {
-                          if (snapshot.hasData) {
-                            switch (snapshot.data!.processingState) {
-                              case ProcessingState.loading:
-                              case ProcessingState.buffering:
-                                return loadingIcon;
-                              case ProcessingState.idle:
-                              case ProcessingState.ready:
-                              case ProcessingState.completed:
-                                if (snapshot.data!.playing) {
-                                  return pauseIcon;
-                                } else {
-                                  return playIcon;
-                                }
-                            }
+                    StreamBuilder<bool>(
+                        stream: widget.loadingStream,
+                        builder: (BuildContext context1,
+                            AsyncSnapshot<bool> snapshot1) {
+                          if (snapshot1.hasData) {
+                            return StreamBuilder<PlayerState>(
+                                stream: PlayerEngine.player.playerStateStream,
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<PlayerState> snapshot) {
+                                  if (snapshot.hasData) {
+                                    switch (snapshot.data!.processingState) {
+                                      case ProcessingState.loading:
+                                      case ProcessingState.buffering:
+                                        return loadingIcon;
+                                      case ProcessingState.idle:
+                                      case ProcessingState.ready:
+                                      case ProcessingState.completed:
+                                        if (snapshot.data!.playing) {
+                                          return pauseIcon;
+                                        } else {
+                                          return playIcon;
+                                        }
+                                    }
+                                  } else {
+                                    return playIcon;
+                                  }
+                                });
                           } else {
-                            return playIcon;
+                            print("force loading");
+                            return loadingIcon;
                           }
                         }),
                     TextButton(
-                        onPressed: () => PlayerEngine.playNextSong(),
+                        onPressed: () {
+                          LoadingNotification(true).dispatch(context);
+                          PlayerEngine.playNextSong();
+                        },
                         child: const Icon(
                           Icons.skip_next,
                           size: 40,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as YtExplode;
@@ -15,8 +16,9 @@ class VideoHandler {
   late Future<Uri> _onlineStream;
   Future<Uri>? _offlineStream;
   bool _offlineCompleted = false;
+  Playlist? playlist;
 
-  VideoHandler(this.video, {bool preload = false}) {
+  VideoHandler(this.video, {bool preload = false, this.playlist}) {
     _yt = YtExplode.YoutubeExplode();
     _onlineStream = _getOnlineStream();
     print("Video preload " + preload.toString());
@@ -26,6 +28,12 @@ class VideoHandler {
         _offlineStream?.whenComplete(() => _offlineCompleted = true);
       });
     }
+  }
+
+  static Future<VideoHandler> createFromUrl(String url,{Playlist? playlist}) async {
+    final instance = YtExplode.YoutubeExplode();
+    final video = await instance.videos.get(url);
+    return VideoHandler(video,playlist: playlist);
   }
 
   //Call this method when you really need the track.
@@ -69,5 +77,27 @@ class VideoHandler {
     print("Preloading completed");
 
     return file.uri;
+  }
+
+  //Returns -1 if not found
+  Future<int> getCurrentIndexInsideAPlaylist() async {
+    final listVideos = await playlist?.getVideosInfo();
+    return listVideos?.indexWhere((element) => element.url == video.url) ?? -1;
+  }
+
+  bool isAPlaylist(){
+    return playlist!=null;
+  }
+
+  Future<VideoHandler?> getNext() async {
+    final currentIndex = await getCurrentIndexInsideAPlaylist();
+    final listVideos = await playlist?.getVideosInfo();
+    if (listVideos != null && currentIndex + 1 < listVideos.length) {
+      //there is a next element
+      final nextVideo = listVideos.elementAt(currentIndex + 1);
+      final nextVideoHandler = VideoHandler.createFromUrl(nextVideo.url, playlist: playlist);
+      return nextVideoHandler;
+    }
+    return null;
   }
 }
