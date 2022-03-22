@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart';
@@ -20,17 +21,17 @@ class TheGotOfficial extends Playlist {
 
   @override
   Future<List<VideoInfo>> getVideosInfo() async {
-    RegExp exp = RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
 
     final response = await http.get(url);
     if (response.statusCode != 200) {
       return List.empty();
     }
-    final elements = response.body
+
+    final elements = const Utf8Decoder().convert(response.bodyBytes)
         .split("<tr")
         .where((element) => element.contains("</tr>"))
         .map((e) => "<tr" + e)
-        .map((e) => parseFragment(e, container: "tr"))
+        .map((e) => parseFragment(e, container: "tr",encoding: "UTF-8"))
         .where((element) => element.querySelectorAll(".rank").isEmpty)
         .map((e) {
           final name = e

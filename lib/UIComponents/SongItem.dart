@@ -1,12 +1,14 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
-import 'package:holomusic/Common/class%20LoadingNotification.dart';
+import 'package:holomusic/Common/LoadingNotification.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../Views/Playlist/SongOptions.dart';
+import 'Shimmer.dart';
 
 class SongItem extends StatefulWidget {
   String title;
@@ -24,6 +26,7 @@ class SongItem extends StatefulWidget {
 
 class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
   bool _isLoading = false;
+  bool _imageIsLoading = false;
 
   Future<Video?> _getVideo() async {
     if (widget.video != null) {
@@ -64,6 +67,15 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
     }
   }
 
+  Widget? _onImageLoaded(ExtendedImageState state) {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      setState(() {
+        _imageIsLoading = state.extendedImageLoadState != LoadState.completed;
+      });
+    });
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     const _titleStyle = TextStyle(color: Colors.white);
@@ -84,16 +96,23 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipRRect(
-                          child: Image.network(
-                              widget.thumbnail!,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.fill
-                          ),
-                          borderRadius: const BorderRadius.horizontal(
-                              left: Radius.circular(itemRadius)),
-                        ),
+                        Shimmer.fromColors(
+                            baseColor: const Color.fromRGBO(34, 35, 39, 1),
+                            highlightColor:
+                                const Color.fromRGBO(100, 103, 115, 1),
+                            enabled: _imageIsLoading,
+                            child: ClipRRect(
+                              child: ExtendedImage.network(
+                                widget.thumbnail!,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.fill,
+                                enableLoadState: true,
+                                loadStateChanged: _onImageLoaded,
+                              ),
+                              borderRadius: const BorderRadius.horizontal(
+                                  left: Radius.circular(itemRadius)),
+                            )),
                         Expanded(
                             child: Padding(
                                 padding: const EdgeInsets.all(4),

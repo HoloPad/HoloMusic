@@ -4,12 +4,11 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
-import 'package:holomusic/Common/class%20LoadingNotification.dart';
+import 'package:holomusic/Common/LoadingNotification.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Home/HomeView.dart';
 import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
