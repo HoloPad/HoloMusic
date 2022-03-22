@@ -88,7 +88,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if (state == ProcessingState.buffering ||
         state == ProcessingState.loading ||
         _forceLoading) {
-      a.add(const Flexible(child: LinearProgressIndicator()));
+      a.add(const Flexible(
+          child: LinearProgressIndicator(
+              color: Color.fromRGBO(85, 200, 90, 1),
+              backgroundColor: Color.fromRGBO(53, 124, 56, 1))));
     }
     if (state == ProcessingState.ready || _playBarMustBeShown) {
       a.add(const Flexible(child: PlayBar()));
