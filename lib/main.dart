@@ -12,6 +12,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'Common/AppColors.dart';
+
 void main() {
   PlayerEngine.initialize();
   runApp(const MyApp());
@@ -45,7 +47,7 @@ class MyApp extends StatelessWidget {
         Locale('en', ''),
       ],
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primaryColor: Colors.white,
       ),
       home: const MyHomePage(title: 'HoloMusic'),
       scrollBehavior: MyCustomScrollBehavior(),
@@ -86,7 +88,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if (state == ProcessingState.buffering ||
         state == ProcessingState.loading ||
         _forceLoading) {
-      a.add(const Flexible(child: LinearProgressIndicator()));
+      a.add(const Flexible(
+          child: LinearProgressIndicator(
+              color: Color.fromRGBO(85, 200, 90, 1),
+              backgroundColor: Color.fromRGBO(53, 124, 56, 1))));
     }
     if (state == ProcessingState.ready || _playBarMustBeShown) {
       a.add(const Flexible(child: PlayBar()));
@@ -98,12 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.blue, Color.fromRGBO(18, 18, 18, 1)],
-                stops: [0.01, 0.4])),
+        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: NotificationListener<LoadingNotification>(

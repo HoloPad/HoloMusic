@@ -1,13 +1,16 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:holomusic/Common/AppColors.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
-import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/UIComponents/TimeSlider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:palette_generator/palette_generator.dart';
+
+enum RepetitionMode { disabled, oneSongs, allSongs }
 
 class PlayerView extends StatefulWidget {
-
   PlayerView({Key? key}) : super(key: key);
 
   @override
@@ -16,16 +19,18 @@ class PlayerView extends StatefulWidget {
 
 class _PlayerViewState extends State<PlayerView> {
   bool updatePosition = false;
+  RepetitionMode _repetitionMode = RepetitionMode.disabled;
+  Color _mainColor = Colors.blue;
 
-  final _titleStyle =
-      const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+  final _titleStyle = const TextStyle(
+      fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white);
 
   final playIcon = TextButton(
       onPressed: () => PlayerEngine.toggle(),
       child: const Icon(
         Icons.play_circle_fill,
         size: 70,
-        color: Colors.black,
+        color: Colors.white,
       ));
 
   final pauseIcon = TextButton(
@@ -33,7 +38,7 @@ class _PlayerViewState extends State<PlayerView> {
       child: const Icon(
         Icons.pause,
         size: 70,
-        color: Colors.black,
+        color: Colors.white,
       ));
 
   final loadingIcon = const SizedBox(
@@ -42,25 +47,84 @@ class _PlayerViewState extends State<PlayerView> {
     child: CircularProgressIndicator(),
   );
 
+  RepetitionMode _getNextRepetitionState() {
+    switch (_repetitionMode) {
+      case RepetitionMode.disabled:
+        return RepetitionMode.oneSongs;
+      case RepetitionMode.oneSongs:
+        return RepetitionMode.allSongs;
+      case RepetitionMode.allSongs:
+        return RepetitionMode.disabled;
+    }
+  }
+
+  IconData _getRepetitionIcon() {
+    switch (_repetitionMode) {
+      case RepetitionMode.disabled:
+        return Icons.repeat;
+      case RepetitionMode.oneSongs:
+        return Icons.repeat_one_on;
+      case RepetitionMode.allSongs:
+        return Icons.repeat_on;
+    }
+  }
+
+  void _onRepetitionClick() {
+    final next = _getNextRepetitionState();
+    switch (next) {
+      case RepetitionMode.disabled:
+        PlayerEngine.player.setLoopMode(LoopMode.off);
+        break;
+      case RepetitionMode.oneSongs:
+        PlayerEngine.player.setLoopMode(LoopMode.one);
+        break;
+      case RepetitionMode.allSongs:
+        //TODO must be implemented when playlist are done
+        PlayerEngine.player.setLoopMode(LoopMode.all);
+        break;
+    }
+    setState(() {
+      _repetitionMode = next;
+    });
+  }
+
+  Future _updateBackground(ImageProvider provider) async {
+    final palette = await PaletteGenerator.fromImageProvider(provider);
+    if (palette.dominantColor != null) {
+      final newColor = palette.dominantColor!.color;
+      setState(() {
+        _mainColor = newColor;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.appTitle),
-        ),
-        body: Padding(
+        body: Container(
             padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+                gradient: AppColors.getStandardPaletteWithAnotherMainColor(
+                    _mainColor)),
             child: Column(
               children: [
+                Row(children: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child:
+                          const Icon(Icons.arrow_back_ios, color: Colors.white))
+                ]),
+                const SizedBox(height: 15),
                 ValueListenableBuilder<Video?>(
                     valueListenable: PlayerEngine.getCurrentVideoPlaying(),
                     builder: (context, value, _) {
                       if (value != null) {
-                        return Image(
-                            height: 250,
-                            image: NetworkImage(value.thumbnails.highResUrl));
+                        final img = ExtendedImage.network(
+                            value.thumbnails.highResUrl,
+                            height: 250);
+                        _updateBackground(img.image);
+                        return img;
                       } else {
-                        //TODO implements a default image
                         return const Image(
                             height: 250,
                             image: NetworkImage(
@@ -77,7 +141,7 @@ class _PlayerViewState extends State<PlayerView> {
                         textAlign: TextAlign.center,
                       );
                     }),
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
                 StreamBuilder<Duration>(
                     stream: PlayerEngine.player.positionStream,
                     builder: (BuildContext context,
@@ -86,6 +150,7 @@ class _PlayerViewState extends State<PlayerView> {
                         return TimeSlider(
                             current: snapshot.data,
                             end: PlayerEngine.player.duration,
+                            textColor: Colors.white,
                             onChange: (d) {
                               PlayerEngine.player
                                   .seek(Duration(seconds: d.toInt()));
@@ -99,11 +164,18 @@ class _PlayerViewState extends State<PlayerView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextButton(
+                        onPressed: () => {},
+                        child: const Icon(
+                          Icons.monitor_heart_outlined,
+                          size: 30,
+                          color: Colors.white,
+                        )),
+                    TextButton(
                         onPressed: () => PlayerEngine.playPreviousSong(),
                         child: const Icon(
                           Icons.skip_previous,
                           size: 40,
-                          color: Colors.black,
+                          color: Colors.white,
                         )),
                     StreamBuilder<PlayerState>(
                         stream: PlayerEngine.player.playerStateStream,
@@ -132,7 +204,14 @@ class _PlayerViewState extends State<PlayerView> {
                         child: const Icon(
                           Icons.skip_next,
                           size: 40,
-                          color: Colors.black,
+                          color: Colors.white,
+                        )),
+                    TextButton(
+                        onPressed: _onRepetitionClick,
+                        child: Icon(
+                          _getRepetitionIcon(),
+                          size: 30,
+                          color: Colors.white,
                         )),
                   ],
                 )

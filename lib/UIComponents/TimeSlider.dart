@@ -5,10 +5,10 @@ class TimeSlider extends StatelessWidget {
   Duration? current;
   Duration? end;
   Function(double)? onChange;
+  Color? textColor;
 
-  TimeSlider({this.current, this.end, this.onChange, Key? key})
+  TimeSlider({this.current, this.end, this.onChange, this.textColor, Key? key})
       : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +19,12 @@ class TimeSlider extends StatelessWidget {
     return Column(children: [
       SliderTheme(
           data: SliderThemeData(
-            thumbColor: Colors.green,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: thumbRadius),
-            overlayShape: SliderComponentShape.noThumb
-          ),
+              thumbColor: const Color.fromRGBO(213, 213, 213, 1.0),
+              activeTrackColor: const Color.fromRGBO(255, 255, 255, 1),
+              inactiveTrackColor: const Color.fromRGBO(255, 255, 255, 0.1),
+              thumbShape:
+                  const RoundSliderThumbShape(enabledThumbRadius: thumbRadius),
+              overlayShape: SliderComponentShape.noThumb),
           child: Slider(
             value: current!.inSeconds.toDouble(),
             min: 0,
@@ -34,8 +36,10 @@ class TimeSlider extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(Utils.durationToText(current)),
-              Text(Utils.durationToText(end))
+              Text(Utils.durationToText(current),
+                  style: TextStyle(color: textColor)),
+              Text(Utils.durationToText(end),
+                  style: TextStyle(color: textColor))
             ],
           ))
     ]);

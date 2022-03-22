@@ -45,6 +45,7 @@ dependencies:
   intl: ^0.17.0
   html: ^0.15.0
   extended_image: ^6.0.2+1
+  palette_generator: ^0.3.3
 
 dev_dependencies:
   flutter_test:

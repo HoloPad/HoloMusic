@@ -4,6 +4,8 @@ import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../Common/AppColors.dart';
+
 class SongOptions extends StatelessWidget {
   final Video video;
 
@@ -16,12 +18,7 @@ class SongOptions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-            decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Colors.blue, Color.fromRGBO(18, 18, 18, 1)],
-                    stops: [0.01, 0.4])),
+            decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               Expanded(
                   child: Padding(
