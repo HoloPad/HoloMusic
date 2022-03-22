@@ -7,9 +7,7 @@ import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SearchView extends StatefulWidget {
-
-  const SearchView({Key? key})
-      : super(key: key);
+  const SearchView({Key? key}) : super(key: key);
 
   @override
   State<SearchView> createState() => _SearchViewState();
@@ -59,10 +57,15 @@ class _SearchViewState extends State<SearchView> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             TextField(
+              style: const TextStyle(color:Colors.white), //Text entered by the user
               decoration: InputDecoration(
+                labelStyle:
+                    const TextStyle(color: Color.fromRGBO(200, 200, 200, 1)),
+                enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white)),
                 border: const OutlineInputBorder(),
                 labelText: AppLocalizations.of(context)!.searchASong,
-                icon: const Icon(Icons.search),
+                icon: const Icon(Icons.search, color: Colors.white),
               ),
               onSubmitted: _onSubmitted,
             ),
