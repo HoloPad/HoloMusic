@@ -5,7 +5,6 @@ import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/UIComponents/TimeSlider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 import '../../Common/LoadingNotification.dart';
@@ -25,6 +24,7 @@ class _PlayerViewState extends State<PlayerView> {
   bool updatePosition = false;
   RepetitionMode _repetitionMode = RepetitionMode.disabled;
   Color _mainColor = Colors.blue;
+  ImageProvider? _lastProvider;
 
   final _titleStyle = const TextStyle(
       fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white);
@@ -92,8 +92,12 @@ class _PlayerViewState extends State<PlayerView> {
     });
   }
 
+
   Future _updateBackground(ImageProvider provider) async {
-    /*
+    if (provider == _lastProvider) {
+      return;
+    }
+    _lastProvider = provider;
     final palette = await PaletteGenerator.fromImageProvider(provider);
     if (palette.dominantColor != null) {
       final newColor = palette.dominantColor!.color;
@@ -103,7 +107,6 @@ class _PlayerViewState extends State<PlayerView> {
         });
       });
     }
-     */
   }
 
   @override
@@ -185,36 +188,26 @@ class _PlayerViewState extends State<PlayerView> {
                           size: 40,
                           color: Colors.white,
                         )),
-                    StreamBuilder<bool>(
-                        stream: widget.loadingStream,
-                        builder: (BuildContext context1,
-                            AsyncSnapshot<bool> snapshot1) {
-                          if (snapshot1.hasData) {
-                            return StreamBuilder<PlayerState>(
-                                stream: PlayerEngine.player.playerStateStream,
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<PlayerState> snapshot) {
-                                  if (snapshot.hasData) {
-                                    switch (snapshot.data!.processingState) {
-                                      case ProcessingState.loading:
-                                      case ProcessingState.buffering:
-                                        return loadingIcon;
-                                      case ProcessingState.idle:
-                                      case ProcessingState.ready:
-                                      case ProcessingState.completed:
-                                        if (snapshot.data!.playing) {
-                                          return pauseIcon;
-                                        } else {
-                                          return playIcon;
-                                        }
-                                    }
-                                  } else {
-                                    return playIcon;
-                                  }
-                                });
+                    StreamBuilder<PlayerState>(
+                        stream: PlayerEngine.player.playerStateStream,
+                        builder: (BuildContext context,
+                            AsyncSnapshot<PlayerState> snapshot) {
+                          if (snapshot.hasData) {
+                            switch (snapshot.data!.processingState) {
+                              case ProcessingState.loading:
+                              case ProcessingState.buffering:
+                                return loadingIcon;
+                              case ProcessingState.idle:
+                              case ProcessingState.ready:
+                              case ProcessingState.completed:
+                                if (snapshot.data!.playing) {
+                                  return pauseIcon;
+                                } else {
+                                  return playIcon;
+                                }
+                            }
                           } else {
-                            print("force loading");
-                            return loadingIcon;
+                            return playIcon;
                           }
                         }),
                     TextButton(
