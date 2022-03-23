@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:holomusic/Common/PlayerStateController.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Views/Player/PlayerView.dart';
 import 'package:just_audio/just_audio.dart';
@@ -8,17 +9,28 @@ import '../Common/LoadingNotification.dart';
 
 class PlayBar extends StatefulWidget {
   static bool isVisible = false;
-  final Stream<bool> showLoading;
+  final ValueNotifier<int> playerState;
 
-  const PlayBar(this.showLoading, {Key? key}) : super(key: key);
+  const PlayBar(this.playerState, {Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PlayBarState();
 }
 
 class _PlayBarState extends State<PlayBar> {
+  late PlayerView _playerView;
+
   _PlayBarState() {
     PlayBar.isVisible = true;
+  }
+
+  @override
+  void initState() {
+    _playerView = PlayerView(widget.playerState);
+    _playerView.getRequestLoadingViewStream().listen((event) {
+      LoadingNotification(event).dispatch(context);
+    });
+    super.initState();
   }
 
   final playIcon = const Icon(
@@ -39,7 +51,7 @@ class _PlayBarState extends State<PlayBar> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => PlayerView(widget.showLoading)));
+            builder: (context) =>_playerView));
   }
 
   @override
@@ -73,17 +85,13 @@ class _PlayBarState extends State<PlayBar> {
                   ),
                   TextButton(
                       onPressed: () => PlayerEngine.toggle(),
-                      child: StreamBuilder<PlayerState>(
-                          stream: PlayerEngine.player.playerStateStream,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<PlayerState> snapshot) {
-                            if (snapshot.hasData &&
-                                snapshot.data!.playing &&
-                                snapshot.data!.processingState !=
-                                    ProcessingState.completed) {
-                              return pauseIcon;
-                            } else {
+                      child: ValueListenableBuilder<int>(
+                          valueListenable: widget.playerState,
+                          builder: (context, data, child) {
+                            if (data & MyPlayerState.play == 0) {
                               return playIcon;
+                            } else {
+                              return pauseIcon;
                             }
                           })),
                   TextButton(

@@ -24,6 +24,8 @@ class PlayerEngine {
         case ProcessingState.completed:
           onTrackEnd();
           break;
+        default:
+          break;
       }
     });
   }

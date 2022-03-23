@@ -1,20 +1,27 @@
+import 'dart:async';
+
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/AppColors.dart';
+import 'package:holomusic/Common/PlayerStateController.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/UIComponents/TimeSlider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:palette_generator/palette_generator.dart';
-
 import '../../Common/LoadingNotification.dart';
 
 enum RepetitionMode { disabled, oneSongs, allSongs }
 
 class PlayerView extends StatefulWidget {
-  final Stream<bool> loadingStream;
+  final ValueNotifier<int> playerStateStream;
+  StreamController<bool> _outputStreamLoading = StreamController();
 
-  PlayerView(this.loadingStream, {Key? key}) : super(key: key);
+  PlayerView(this.playerStateStream, {Key? key}) : super(key: key);
+
+  Stream<bool> getRequestLoadingViewStream(){
+    return _outputStreamLoading.stream;
+  }
 
   @override
   State<StatefulWidget> createState() => _PlayerViewState();
@@ -91,7 +98,6 @@ class _PlayerViewState extends State<PlayerView> {
       _repetitionMode = next;
     });
   }
-
 
   Future _updateBackground(ImageProvider provider) async {
     if (provider == _lastProvider) {
@@ -188,31 +194,20 @@ class _PlayerViewState extends State<PlayerView> {
                           size: 40,
                           color: Colors.white,
                         )),
-                    StreamBuilder<PlayerState>(
-                        stream: PlayerEngine.player.playerStateStream,
-                        builder: (BuildContext context,
-                            AsyncSnapshot<PlayerState> snapshot) {
-                          if (snapshot.hasData) {
-                            switch (snapshot.data!.processingState) {
-                              case ProcessingState.loading:
-                              case ProcessingState.buffering:
-                                return loadingIcon;
-                              case ProcessingState.idle:
-                              case ProcessingState.ready:
-                              case ProcessingState.completed:
-                                if (snapshot.data!.playing) {
-                                  return pauseIcon;
-                                } else {
-                                  return playIcon;
-                                }
-                            }
-                          } else {
+                    ValueListenableBuilder<int>(
+                        valueListenable: widget.playerStateStream,
+                        builder: (BuildContext context, value, child) {
+                          if (value & MyPlayerState.loading != 0) {
+                            return loadingIcon;
+                          } else if (value & MyPlayerState.play == 0) {
                             return playIcon;
+                          } else {
+                            return pauseIcon;
                           }
                         }),
                     TextButton(
                         onPressed: () {
-                          LoadingNotification(true).dispatch(context);
+                          widget._outputStreamLoading.add(true);
                           PlayerEngine.playNextSong();
                         },
                         child: const Icon(
