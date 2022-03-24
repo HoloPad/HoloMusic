@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 
 class TheGotOfficial extends Playlist {
   late Uri url;
+  Future<List<VideoInfo>>? _listVideoCache;
 
   TheGotOfficial(String countryCode)
       : super(
@@ -20,12 +21,27 @@ class TheGotOfficial extends Playlist {
   }
 
   @override
+  String? getReferenceUrl(){
+    return "https://www.thegotofficial.com/";
+  }
+
+  @override
   Future<List<VideoInfo>> getVideosInfo() async {
 
-    final response = await http.get(url);
-    if (response.statusCode != 200) {
-      return List.empty();
+    _listVideoCache ??= _getVideosInfo();
+    return _listVideoCache!;
+  }
+
+  Future<List<VideoInfo>> _getVideosInfo() async {
+    const maxAttempts = 5;
+    var numberOfAttempt = 0;
+    http.Response response;
+    do {
+      response = await http.get(url).timeout(const Duration(seconds: 5));
+      numberOfAttempt++;
+      print("Attemp "+numberOfAttempt.toString()+" "+response.statusCode.toString());
     }
+    while (response.statusCode!=200 && numberOfAttempt<maxAttempts);
 
     final elements = const Utf8Decoder().convert(response.bodyBytes)
         .split("<tr")

@@ -28,7 +28,7 @@ class _HomeState extends State<HomeView> {
     chartsWidgets = <Widget>[
       PlayListWidget(playlist: TheGotOfficial("it"), onClick: onClicked),
       PlayListWidget(playlist: TheGotOfficial("it"), onClick: onClicked),
-      PlayListWidget(playlist: TheGotOfficial("it"), onClick: onClicked)
+      PlayListWidget(playlist: TheGotOfficial("es"), onClick: onClicked)
     ];
   }
 

@@ -6,6 +6,7 @@ import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/DataFetcher/VideoInfo.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PlaylistView extends StatefulWidget {
   Playlist playlist;
@@ -19,6 +20,12 @@ class PlaylistView extends StatefulWidget {
 
 class _PlaylistViewState extends State<PlaylistView> {
   double _imageSize = 150;
+
+  void _onLinkClicked() async {
+    if (!await launch(widget.playlist.getReferenceUrl()!)) {
+      print("Cannot launch url");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,15 +64,24 @@ class _PlaylistViewState extends State<PlaylistView> {
                       const SizedBox(height: 15),
                       Text(widget.playlist.name, style: _nameTextStyle),
                       const SizedBox(height: 15),
-                      OutlinedButton(
-                        onPressed: () {},
-                        child: Text(AppLocalizations.of(context)!.follow),
-                        style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                                width: 0.5, color: Colors.white),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50))),
-                      ),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            OutlinedButton(
+                              onPressed: () {},
+                              child: Text(AppLocalizations.of(context)!.follow),
+                              style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(
+                                      width: 0.5, color: Colors.white),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50))),
+                            ),
+                            widget.playlist.getReferenceUrl() != null
+                                ? TextButton(
+                                    onPressed: _onLinkClicked,
+                                    child: const Icon(Icons.link_rounded))
+                                : const SizedBox()
+                          ]),
                       const SizedBox(height: 15),
                       FutureBuilder<List<VideoInfo>>(
                         future: widget.playlist.getVideosInfo(),
