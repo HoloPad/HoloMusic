@@ -10,6 +10,7 @@
   "billions": "Miliardi",
   "charts": "Classifiche",
   "follow": "Segui",
-  "cannotLoadSong": "Impossibile caricare il brano"
+  "cannotLoadSong": "Impossibile caricare il brano",
+  "noRecentSearch": "Non ci sono ricerche recenti"
 
 }
