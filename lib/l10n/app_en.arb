@@ -10,5 +10,7 @@
   "billions": "Billions",
   "charts": "Charts",
   "follow": "Follow",
-  "cannotLoadSong": "Cannot load the song"
+  "cannotLoadSong": "Cannot load the song",
+  "noRecentSearch": "There aren't recent searches"
+
 }
