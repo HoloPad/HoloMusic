@@ -18,13 +18,16 @@ class PlayListWidget extends StatefulWidget {
 
 class _PlayListWidgetState extends State<PlayListWidget> {
   bool _imageIsLoading = false;
+  bool imageLoadedFantore = true;
 
   Widget? _onImageLoaded(ExtendedImageState state) {
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      setState(() {
-        _imageIsLoading = state.extendedImageLoadState != LoadState.completed;
+    if(state.extendedImageLoadState==LoadState.completed) {
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+        setState(() {
+          _imageIsLoading = false;
+        });
       });
-    });
+    }
     return null;
   }
 
@@ -54,7 +57,6 @@ class _PlayListWidgetState extends State<PlayListWidget> {
                       width: 150,
                       height: 150,
                       fit: BoxFit.contain,
-                      enableLoadState: true,
                       loadStateChanged: _onImageLoaded,
                     ))),
             Text(widget.playlist.name, style: _nameTextStyle)

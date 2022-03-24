@@ -3,15 +3,20 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+
+enum RepetitionState { Off, OneItem, AllItems }
 
 class PlayerEngine {
   static late AudioPlayer player;
   static late List<VideoHandler> _mainPlaylist;
   static late List<VideoHandler> _history;
   static VideoHandler? _currentPlaying;
-  static final ValueNotifier<Video?> _valueListenable = ValueNotifier(null);
-
+  static final ValueNotifier<VideoHandler?> _currentVideoHandlerListenable =
+      ValueNotifier(null);
+  static final ValueNotifier<bool> _hasNextStream = ValueNotifier(true);
+  static bool _isPlaylistLooping = false;
+  static final ValueNotifier<RepetitionState> _repetitionState =
+      ValueNotifier(RepetitionState.Off);
 
   static void initialize() {
     PlayerEngine.player = AudioPlayer();
@@ -22,12 +27,15 @@ class PlayerEngine {
         case ProcessingState.completed:
           onTrackEnd();
           break;
+        default:
+          break;
       }
     });
   }
 
   static void onTrackEnd() async {
-    if (_mainPlaylist.isNotEmpty) {
+    if (_mainPlaylist.isNotEmpty ||
+        (_currentPlaying != null && _currentPlaying!.isAPlaylist())) {
       PlayerEngine.playNextSong();
     } else {
       await PlayerEngine.player.pause();
@@ -40,15 +48,35 @@ class PlayerEngine {
     final audioSource = AudioSource.uri(futureAudioSource);
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
-    _valueListenable.value = source.video;
+    _currentVideoHandlerListenable.value = source;
     _history.add(source);
     _currentPlaying = source;
     if (play) await PlayerEngine.player.play();
+    _hasNextStream.value = await hasNext();
   }
 
-  static void playNextSong() {
+  static Future playNextSong() async {
+    //Check in the queue
     if (_mainPlaylist.isNotEmpty) {
-      play(_mainPlaylist.removeAt(0));
+      await play(_mainPlaylist.removeAt(0));
+      return;
+    }
+
+    //if belong to a playlist
+    if (_currentPlaying != null && _currentPlaying!.isAPlaylist()) {
+      VideoHandler? nextSong;
+
+      if (await _currentPlaying!.hasNext()) {
+        //Get the next song
+        nextSong = await _currentPlaying?.getNext();
+      } else if (_isPlaylistLooping) {
+        //Get the first song
+        nextSong = await _currentPlaying?.getFirstOfThePlaylist();
+      }
+      //Play the song
+      if (nextSong != null) {
+        await PlayerEngine.play(nextSong);
+      }
     }
   }
 
@@ -69,11 +97,47 @@ class PlayerEngine {
     PlayerEngine.play(previousSong);
   }
 
-  static ValueNotifier<Video?> getCurrentVideoPlaying() {
-    return _valueListenable;
+  static ValueNotifier<VideoHandler?> getCurrentVideoHandlerPlaying() {
+    return _currentVideoHandlerListenable;
   }
 
   static void addSongToQueue(VideoHandler source) async {
     _mainPlaylist.add(source);
+    _hasNextStream.value = await hasNext();
+  }
+
+  static Future<bool> hasNext() async {
+    return _mainPlaylist.isNotEmpty ||
+        (_currentPlaying != null && await _currentPlaying!.hasNext());
+  }
+
+  static ValueNotifier<bool> hasNextStream() {
+    return _hasNextStream;
+  }
+
+  static void setPlaylistLoop(bool isLoop) {
+    _isPlaylistLooping = isLoop;
+  }
+
+  static void setRepetitionState(RepetitionState state) {
+    _repetitionState.value = state;
+    switch (_repetitionState.value) {
+      case RepetitionState.Off:
+        PlayerEngine.player.setLoopMode(LoopMode.off);
+        PlayerEngine.setPlaylistLoop(false);
+        break;
+      case RepetitionState.OneItem:
+        PlayerEngine.player.setLoopMode(LoopMode.one);
+        PlayerEngine.setPlaylistLoop(false);
+        break;
+      case RepetitionState.AllItems:
+        PlayerEngine.player.setLoopMode(LoopMode.off);
+        PlayerEngine.setPlaylistLoop(true);
+        break;
+    }
+  }
+
+  static ValueNotifier<RepetitionState> getRepetitionStateValueNotifier() {
+    return _repetitionState;
   }
 }

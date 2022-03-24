@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:holomusic/Common/PlayerStateController.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Common/LoadingNotification.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
@@ -11,7 +12,6 @@ import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 import 'Common/AppColors.dart';
 
 void main() {
@@ -46,9 +46,7 @@ class MyApp extends StatelessWidget {
         Locale('it', ''),
         Locale('en', ''),
       ],
-      theme: ThemeData(
-        primaryColor: Colors.white,
-      ),
+      theme: ThemeData(primarySwatch: Colors.grey),
       home: const MyHomePage(title: 'HoloMusic'),
       scrollBehavior: MyCustomScrollBehavior(),
     );
@@ -66,8 +64,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedNavigationBarElement = 1;
   late List<Widget> pageList;
-  bool _playBarMustBeShown = false;
-  bool _forceLoading = false;
+  PlayerStateController playerStateController = PlayerStateController();
 
   void _onNavigationBarTappedItem(int index) {
     setState(() {
@@ -78,26 +75,33 @@ class _MyHomePageState extends State<MyHomePage> {
   _MyHomePageState() {
     pageList = [
       HomeView(),
-      SearchView(),
+      const SearchView(),
       Text("To implement"),
     ];
-  }
 
-  _getBarWidget(ProcessingState state) {
-    final a = List<Widget>.empty(growable: true);
-    if (state == ProcessingState.buffering ||
-        state == ProcessingState.loading ||
-        _forceLoading) {
-      a.add(const Flexible(
-          child: LinearProgressIndicator(
-              color: Color.fromRGBO(85, 200, 90, 1),
-              backgroundColor: Color.fromRGBO(53, 124, 56, 1))));
-    }
-    if (state == ProcessingState.ready || _playBarMustBeShown) {
-      a.add(const Flexible(child: PlayBar()));
-      _playBarMustBeShown = true;
-    }
-    return a;
+    PlayerEngine.getCurrentVideoHandlerPlaying().addListener(() {
+      final value = PlayerEngine.getCurrentVideoHandlerPlaying().value;
+      if(value!=null){
+        playerStateController.isVisible(true);
+      }
+    });
+    PlayerEngine.player.playingStream.listen((event) {
+      playerStateController.isPlaying(event);
+    });
+    PlayerEngine.player.playerStateStream.listen((event) {
+      switch (event.processingState) {
+        case ProcessingState.loading:
+        case ProcessingState.buffering:
+          playerStateController.isLoading(true);
+          break;
+        case ProcessingState.ready:
+        case ProcessingState.completed:
+        case ProcessingState.idle:
+          playerStateController.isLoading(false);
+          break;
+      }
+    });
+
   }
 
   @override
@@ -108,25 +112,33 @@ class _MyHomePageState extends State<MyHomePage> {
           backgroundColor: Colors.transparent,
           body: NotificationListener<LoadingNotification>(
               onNotification: (notification) {
-                setState(() {
-                  _forceLoading = notification.isLoading;
-                });
+                playerStateController.isLoading(notification.isLoading);
                 return true;
               },
               child: pageList[_selectedNavigationBarElement]),
-          bottomSheet: StreamBuilder<ProcessingState>(
-              stream: PlayerEngine.player.processingStateStream,
-              initialData: ProcessingState.idle,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final state = snapshot.data!;
-                  return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: _getBarWidget(state));
-                }
-                return const SizedBox();
-              }),
+          bottomSheet: NotificationListener<LoadingNotification>(
+              onNotification: (notification) {
+                playerStateController.isLoading(notification.isLoading);
+                return true;
+              },
+              child: ValueListenableBuilder<int>(
+                  valueListenable:
+                      playerStateController.getPlayerStateValueNotifier(),
+                  builder: (context, value, child) {
+                    List<Widget> children = List.empty(growable: true);
+                    if (value & MyPlayerState.loading != 0) {
+                      children.add(const LinearProgressIndicator());
+                    }
+                    if (value & MyPlayerState.visible != 0) {
+                      children.add(Flexible(
+                          child: PlayBar(playerStateController
+                              .getPlayerStateValueNotifier())));
+                    }
+                    return Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: children);
+                  })),
           bottomNavigationBar: BottomNavigationBar(
             backgroundColor: const Color.fromRGBO(34, 35, 39, 1.0),
             selectedItemColor: Colors.white,

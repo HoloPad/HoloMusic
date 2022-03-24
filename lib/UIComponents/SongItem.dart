@@ -1,5 +1,4 @@
 import 'package:extended_image/extended_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
@@ -8,6 +7,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../Views/Playlist/SongOptions.dart';
+import '../Common/DataFetcher/Providers/Playlist.dart' as MyPlaylist;
 import 'Shimmer.dart';
 
 class SongItem extends StatefulWidget {
@@ -15,9 +15,11 @@ class SongItem extends StatefulWidget {
   String? thumbnail;
   String? url;
   Video? video;
+  MyPlaylist.Playlist? playlist;
   var yt = YoutubeExplode();
 
-  SongItem(this.title, this.thumbnail, {this.url, this.video, Key? key})
+  SongItem(this.title, this.thumbnail,
+      {this.url, this.video, this.playlist, Key? key})
       : super(key: key);
 
   @override
@@ -27,6 +29,11 @@ class SongItem extends StatefulWidget {
 class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
   bool _isLoading = false;
   bool _imageIsLoading = false;
+
+  @override
+  initState() {
+    super.initState();
+  }
 
   Future<Video?> _getVideo() async {
     if (widget.video != null) {
@@ -57,9 +64,9 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
   void _onPlayClicked() async {
     LoadingNotification(true).dispatch(context);
     final video = await _getVideo();
-    LoadingNotification(false).dispatch(context);
+    //LoadingNotification(false).dispatch(context);
     if (video != null) {
-      PlayerEngine.play(VideoHandler(video));
+      PlayerEngine.play(VideoHandler(video,playlist: widget.playlist));
     } else {
       final snackbar =
           SnackBar(content: Text(AppLocalizations.of(context)!.cannotLoadSong));
@@ -68,11 +75,13 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
   }
 
   Widget? _onImageLoaded(ExtendedImageState state) {
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      setState(() {
-        _imageIsLoading = state.extendedImageLoadState != LoadState.completed;
+    if(state.extendedImageLoadState==LoadingState.loaded) {
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+        setState(() {
+          _imageIsLoading = false;
+        });
       });
-    });
+    }
     return null;
   }
 

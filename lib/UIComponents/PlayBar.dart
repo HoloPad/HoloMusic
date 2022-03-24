@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:holomusic/Common/PlayerStateController.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
+import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/Views/Player/PlayerView.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:marquee_text/marquee_text.dart';
+
+import '../Common/LoadingNotification.dart';
 
 class PlayBar extends StatefulWidget {
   static bool isVisible = false;
+  final ValueNotifier<int> playerState;
 
-  const PlayBar({Key? key}) : super(key: key);
+  const PlayBar(this.playerState, {Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PlayBarState();
 }
 
 class _PlayBarState extends State<PlayBar> {
+  late PlayerView _playerView;
+
   _PlayBarState() {
     PlayBar.isVisible = true;
+  }
+
+  @override
+  void initState() {
+    _playerView = PlayerView(widget.playerState);
+    _playerView.getRequestLoadingViewStream().listen((event) {
+      LoadingNotification(event).dispatch(context);
+    });
+    super.initState();
   }
 
   final playIcon = const Icon(
@@ -34,7 +49,7 @@ class _PlayBarState extends State<PlayBar> {
 
   void _openPlayerView() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => PlayerView()));
+        context, MaterialPageRoute(builder: (context) => _playerView));
   }
 
   @override
@@ -47,6 +62,7 @@ class _PlayBarState extends State<PlayBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   TextButton(
                       onPressed: _openPlayerView,
@@ -56,40 +72,48 @@ class _PlayBarState extends State<PlayBar> {
                         color: Colors.white,
                       )),
                   Expanded(
-                    child: ValueListenableBuilder<Video?>(
-                        valueListenable: PlayerEngine.getCurrentVideoPlaying(),
-                        builder: (context, value, _) {
-                          return Text(
-                            value == null ? "..." : value.title,
-                            style: _titleStyle,
-                            textAlign: TextAlign.center,
-                          );
-                        }),
-                  ),
-                  TextButton(
-                      onPressed: () => PlayerEngine.toggle(),
-                      child: StreamBuilder<PlayerState>(
-                          stream: PlayerEngine.player.playerStateStream,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<PlayerState> snapshot) {
-                            if (snapshot.hasData &&
-                                snapshot.data!.playing &&
-                                snapshot.data!.processingState !=
-                                    ProcessingState.completed) {
-                              return pauseIcon;
-                            } else {
-                              return playIcon;
-                            }
+                      child: ValueListenableBuilder<VideoHandler?>(
+                          valueListenable:
+                              PlayerEngine.getCurrentVideoHandlerPlaying(),
+                          builder: (context, value, _) {
+                            return MarqueeText(
+                              text: TextSpan(
+                                  text:
+                                      value == null ? "..." : value.video.title,
+                                  style: _titleStyle),
+                              textAlign: TextAlign.center,
+                              speed: 25,
+                            );
                           })),
                   TextButton(
-                      onPressed: () {
-                        PlayerEngine.playNextSong();
-                      },
-                      child: const Icon(
-                        Icons.skip_next,
-                        size: 40,
-                        color: Colors.white,
-                      )),
+                      onPressed: () => PlayerEngine.toggle(),
+                      child: ValueListenableBuilder<int>(
+                          valueListenable: widget.playerState,
+                          builder: (context, data, child) {
+                            if (data & MyPlayerState.play == 0) {
+                              return playIcon;
+                            } else {
+                              return pauseIcon;
+                            }
+                          })),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: PlayerEngine.hasNextStream(),
+                    builder: (_, value, __) {
+                      return TextButton(
+                          onPressed: () {
+                            if (value) {
+                              LoadingNotification(true).dispatch(context);
+                              PlayerEngine.playNextSong();
+                            }
+                          },
+                          child: Icon(
+                            Icons.skip_next,
+                            size: 40,
+                            color:
+                                Color.fromRGBO(255, 255, 255, value ? 1 : 0.5),
+                          ));
+                    },
+                  )
                 ],
               ),
               Container(
