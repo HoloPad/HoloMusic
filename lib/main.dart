@@ -79,8 +79,8 @@ class _MyHomePageState extends State<MyHomePage> {
       Text("To implement"),
     ];
 
-    PlayerEngine.getCurrentVideoPlaying().addListener(() {
-      final value = PlayerEngine.getCurrentVideoPlaying().value;
+    PlayerEngine.getCurrentVideoHandlerPlaying().addListener(() {
+      final value = PlayerEngine.getCurrentVideoHandlerPlaying().value;
       if(value!=null){
         playerStateController.isVisible(true);
       }

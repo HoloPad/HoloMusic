@@ -1,19 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart'
-    as MyPlaylist;
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class PlayerEngine {
   static late AudioPlayer player;
   static late List<VideoHandler> _mainPlaylist;
   static late List<VideoHandler> _history;
   static VideoHandler? _currentPlaying;
-  static final ValueNotifier<Video?> _valueListenable = ValueNotifier(null);
-  static MyPlaylist.Playlist? _currentPlaylist;
+  static final ValueNotifier<VideoHandler?> _currentVideoHandlerListenable =
+      ValueNotifier(null);
 
   static void initialize() {
     PlayerEngine.player = AudioPlayer();
@@ -30,16 +27,9 @@ class PlayerEngine {
     });
   }
 
-  static void setCurrentPlaylist(MyPlaylist.Playlist playlist) {
-    PlayerEngine._currentPlaylist = playlist;
-  }
-
-  static void dismissPlaylist() {
-    PlayerEngine._currentPlaylist = null;
-  }
-
   static void onTrackEnd() async {
-    if (_mainPlaylist.isNotEmpty || (_currentPlaying != null && _currentPlaying!.isAPlaylist()) ) {
+    if (_mainPlaylist.isNotEmpty ||
+        (_currentPlaying != null && _currentPlaying!.isAPlaylist())) {
       PlayerEngine.playNextSong();
     } else {
       await PlayerEngine.player.pause();
@@ -52,7 +42,7 @@ class PlayerEngine {
     final audioSource = AudioSource.uri(futureAudioSource);
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
-    _valueListenable.value = source.video;
+    _currentVideoHandlerListenable.value = source;
     _history.add(source);
     _currentPlaying = source;
     if (play) await PlayerEngine.player.play();
@@ -92,11 +82,16 @@ class PlayerEngine {
     PlayerEngine.play(previousSong);
   }
 
-  static ValueNotifier<Video?> getCurrentVideoPlaying() {
-    return _valueListenable;
+  static ValueNotifier<VideoHandler?> getCurrentVideoHandlerPlaying() {
+    return _currentVideoHandlerListenable;
   }
 
   static void addSongToQueue(VideoHandler source) async {
     _mainPlaylist.add(source);
+  }
+
+  static Future<bool> hasNext() async {
+    return _mainPlaylist.isNotEmpty ||
+        (_currentPlaying != null && await _currentPlaying!.hasNext());
   }
 }

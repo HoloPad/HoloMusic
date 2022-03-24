@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/AppColors.dart';
-import 'package:holomusic/Common/PlayerStateController.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
+import 'package:holomusic/Common/PlayerStateController.dart';
+import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/UIComponents/TimeSlider.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:marquee_text/marquee_text.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 enum RepetitionMode { disabled, oneSongs, allSongs }
@@ -31,6 +32,7 @@ class _PlayerViewState extends State<PlayerView> {
   RepetitionMode _repetitionMode = RepetitionMode.disabled;
   Color _mainColor = Colors.blue;
   ImageProvider? _lastProvider;
+  bool _hasNextEnabled = true;
 
   final _titleStyle = const TextStyle(
       fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white);
@@ -92,6 +94,7 @@ class _PlayerViewState extends State<PlayerView> {
     });
   }
 
+  //Called also when there is a new song
   Future _updateBackground(ImageProvider provider) async {
     if (provider == _lastProvider) {
       return;
@@ -106,6 +109,11 @@ class _PlayerViewState extends State<PlayerView> {
         });
       });
     }
+    PlayerEngine.hasNext().then((value) {
+      setState(() {
+        _hasNextEnabled = value;
+      });
+    });
   }
 
   @override
@@ -125,12 +133,12 @@ class _PlayerViewState extends State<PlayerView> {
                         const Icon(Icons.arrow_drop_down, color: Colors.white))
               ]),
               const SizedBox(height: 15),
-              ValueListenableBuilder<Video?>(
-                  valueListenable: PlayerEngine.getCurrentVideoPlaying(),
+              ValueListenableBuilder<VideoHandler?>(
+                  valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
                   builder: (context, value, _) {
                     if (value != null) {
                       final img = ExtendedImage.network(
-                          value.thumbnails.highResUrl,
+                          value.video.thumbnails.highResUrl,
                           height: 250);
                       _updateBackground(img.image);
                       return img;
@@ -142,14 +150,18 @@ class _PlayerViewState extends State<PlayerView> {
                     }
                   }),
               const SizedBox(height: 20),
-              ValueListenableBuilder<Video?>(
-                  valueListenable: PlayerEngine.getCurrentVideoPlaying(),
+              ValueListenableBuilder<VideoHandler?>(
+                  valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
                   builder: (context, value, _) {
-                    return Text(
-                      value == null ? "..." : value.title,
-                      style: _titleStyle,
-                      textAlign: TextAlign.center,
-                    );
+                    return Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        child: MarqueeText(
+                          text: TextSpan(
+                              text: value == null ? "..." : value.video.title,
+                              style: _titleStyle),
+                          textAlign: TextAlign.center,
+                          speed: 25,
+                        ));
                   }),
               const SizedBox(height: 15),
               StreamBuilder<Duration>(
@@ -198,13 +210,16 @@ class _PlayerViewState extends State<PlayerView> {
                       }),
                   TextButton(
                       onPressed: () {
-                        widget._outputStreamLoading.add(true);
-                        PlayerEngine.playNextSong();
+                        if (_hasNextEnabled) {
+                          widget._outputStreamLoading.add(true);
+                          PlayerEngine.playNextSong();
+                        }
                       },
-                      child: const Icon(
+                      child: Icon(
                         Icons.skip_next,
                         size: 40,
-                        color: Colors.white,
+                        color: Color.fromRGBO(
+                            255, 255, 255, _hasNextEnabled ? 1 : 0.5),
                       )),
                   TextButton(
                       onPressed: _onRepetitionClick,

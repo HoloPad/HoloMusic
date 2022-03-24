@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/PlayerStateController.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
+import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/Views/Player/PlayerView.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:marquee_text/marquee_text.dart';
 
 import '../Common/LoadingNotification.dart';
 
@@ -48,9 +49,7 @@ class _PlayBarState extends State<PlayBar> {
 
   void _openPlayerView() {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>_playerView));
+        context, MaterialPageRoute(builder: (context) => _playerView));
   }
 
   @override
@@ -63,6 +62,7 @@ class _PlayBarState extends State<PlayBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   TextButton(
                       onPressed: _openPlayerView,
@@ -72,16 +72,19 @@ class _PlayBarState extends State<PlayBar> {
                         color: Colors.white,
                       )),
                   Expanded(
-                    child: ValueListenableBuilder<Video?>(
-                        valueListenable: PlayerEngine.getCurrentVideoPlaying(),
-                        builder: (context, value, _) {
-                          return Text(
-                            value == null ? "..." : value.title,
-                            style: _titleStyle,
-                            textAlign: TextAlign.center,
-                          );
-                        }),
-                  ),
+                      child: ValueListenableBuilder<VideoHandler?>(
+                          valueListenable:
+                              PlayerEngine.getCurrentVideoHandlerPlaying(),
+                          builder: (context, value, _) {
+                            return MarqueeText(
+                              text: TextSpan(
+                                  text:
+                                      value == null ? "..." : value.video.title,
+                                  style: _titleStyle),
+                              textAlign: TextAlign.center,
+                              speed: 25,
+                            );
+                          })),
                   TextButton(
                       onPressed: () => PlayerEngine.toggle(),
                       child: ValueListenableBuilder<int>(

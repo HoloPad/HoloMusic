@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart';
-import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as YtExplode;
-import 'package:just_audio/just_audio.dart';
-import 'package:http/http.dart' as http;
 
 enum LoadingState { initialized, loading, loaded }
 
@@ -30,10 +28,11 @@ class VideoHandler {
     }
   }
 
-  static Future<VideoHandler> createFromUrl(String url,{Playlist? playlist}) async {
+  static Future<VideoHandler> createFromUrl(String url,
+      {Playlist? playlist}) async {
     final instance = YtExplode.YoutubeExplode();
     final video = await instance.videos.get(url);
-    return VideoHandler(video,playlist: playlist);
+    return VideoHandler(video, playlist: playlist);
   }
 
   //Call this method when you really need the track.
@@ -85,8 +84,8 @@ class VideoHandler {
     return listVideos?.indexWhere((element) => element.url == video.url) ?? -1;
   }
 
-  bool isAPlaylist(){
-    return playlist!=null;
+  bool isAPlaylist() {
+    return playlist != null;
   }
 
   Future<VideoHandler?> getNext() async {
@@ -95,9 +94,18 @@ class VideoHandler {
     if (listVideos != null && currentIndex + 1 < listVideos.length) {
       //there is a next element
       final nextVideo = listVideos.elementAt(currentIndex + 1);
-      final nextVideoHandler = VideoHandler.createFromUrl(nextVideo.url, playlist: playlist);
+      final nextVideoHandler =
+          VideoHandler.createFromUrl(nextVideo.url, playlist: playlist);
       return nextVideoHandler;
     }
     return null;
+  }
+
+  Future<bool> hasNext() async {
+    if (isAPlaylist()) {
+      return await getNext() != null;
+    } else {
+      return false;
+    }
   }
 }
