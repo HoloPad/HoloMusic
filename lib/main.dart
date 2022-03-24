@@ -1,20 +1,25 @@
-import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/PlayerStateController.dart';
-import 'package:holomusic/Common/PlayerEngine.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:holomusic/Common/LoadingNotification.dart';
+import 'package:holomusic/Common/PlayerEngine.dart';
+import 'package:holomusic/Common/PlayerStateController.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Home/HomeView.dart';
 import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+
 import 'Common/AppColors.dart';
 
-void main() {
+Future<void> main() async {
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
   PlayerEngine.initialize();
   runApp(const MyApp());
 }
@@ -81,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     PlayerEngine.getCurrentVideoHandlerPlaying().addListener(() {
       final value = PlayerEngine.getCurrentVideoHandlerPlaying().value;
-      if(value!=null){
+      if (value != null) {
         playerStateController.isVisible(true);
       }
     });
@@ -101,64 +106,64 @@ class _MyHomePageState extends State<MyHomePage> {
           break;
       }
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: NotificationListener<LoadingNotification>(
-              onNotification: (notification) {
-                playerStateController.isLoading(notification.isLoading);
-                return true;
-              },
-              child: pageList[_selectedNavigationBarElement]),
-          bottomSheet: NotificationListener<LoadingNotification>(
-              onNotification: (notification) {
-                playerStateController.isLoading(notification.isLoading);
-                return true;
-              },
-              child: ValueListenableBuilder<int>(
-                  valueListenable:
-                      playerStateController.getPlayerStateValueNotifier(),
-                  builder: (context, value, child) {
-                    List<Widget> children = List.empty(growable: true);
-                    if (value & MyPlayerState.loading != 0) {
-                      children.add(const LinearProgressIndicator());
-                    }
-                    if (value & MyPlayerState.visible != 0) {
-                      children.add(Flexible(
-                          child: PlayBar(playerStateController
-                              .getPlayerStateValueNotifier())));
-                    }
-                    return Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: children);
-                  })),
-          bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: const Color.fromRGBO(34, 35, 39, 1.0),
-            selectedItemColor: Colors.white,
-            unselectedItemColor: const Color.fromRGBO(124, 125, 129, 1),
-            currentIndex: _selectedNavigationBarElement,
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                  icon: const Icon(Icons.home),
-                  label: AppLocalizations.of(context)!.home),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.search),
-                label: AppLocalizations.of(context)!.search,
+    return SafeArea(
+        child: Container(
+            decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: NotificationListener<LoadingNotification>(
+                  onNotification: (notification) {
+                    playerStateController.isLoading(notification.isLoading);
+                    return true;
+                  },
+                  child: pageList[_selectedNavigationBarElement]),
+              bottomSheet: NotificationListener<LoadingNotification>(
+                  onNotification: (notification) {
+                    playerStateController.isLoading(notification.isLoading);
+                    return true;
+                  },
+                  child: ValueListenableBuilder<int>(
+                      valueListenable:
+                          playerStateController.getPlayerStateValueNotifier(),
+                      builder: (context, value, child) {
+                        List<Widget> children = List.empty(growable: true);
+                        if (value & MyPlayerState.loading != 0) {
+                          children.add(const LinearProgressIndicator());
+                        }
+                        if (value & MyPlayerState.visible != 0) {
+                          children.add(Flexible(
+                              child: PlayBar(playerStateController
+                                  .getPlayerStateValueNotifier())));
+                        }
+                        return Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: children);
+                      })),
+              bottomNavigationBar: BottomNavigationBar(
+                backgroundColor: const Color.fromRGBO(34, 35, 39, 1.0),
+                selectedItemColor: Colors.white,
+                unselectedItemColor: const Color.fromRGBO(124, 125, 129, 1),
+                currentIndex: _selectedNavigationBarElement,
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                      icon: const Icon(Icons.home),
+                      label: AppLocalizations.of(context)!.home),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.search),
+                    label: AppLocalizations.of(context)!.search,
+                  ),
+                  BottomNavigationBarItem(
+                      icon: const Icon(Icons.list),
+                      label: AppLocalizations.of(context)!.library)
+                ],
+                onTap: _onNavigationBarTappedItem,
               ),
-              BottomNavigationBarItem(
-                  icon: const Icon(Icons.list),
-                  label: AppLocalizations.of(context)!.library)
-            ],
-            onTap: _onNavigationBarTappedItem,
-          ),
-        ));
+            )));
   }
 }
 

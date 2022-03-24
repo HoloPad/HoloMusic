@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 enum RepetitionState { Off, OneItem, AllItems }
 
@@ -45,7 +46,12 @@ class PlayerEngine {
 
   static Future play(VideoHandler source, {bool play = true}) async {
     final futureAudioSource = await source.getAudioSource();
-    final audioSource = AudioSource.uri(futureAudioSource);
+    final audioSource = AudioSource.uri(futureAudioSource,
+        tag: MediaItem(
+            id: source.video.id.value,
+            title: source.video.title,
+            artUri: Uri.parse(source.video.thumbnails.lowResUrl),
+            duration: source.video.duration));
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
     _currentVideoHandlerListenable.value = source;

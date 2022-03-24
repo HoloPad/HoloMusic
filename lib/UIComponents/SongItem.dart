@@ -66,7 +66,7 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
     final video = await _getVideo();
     //LoadingNotification(false).dispatch(context);
     if (video != null) {
-      PlayerEngine.play(VideoHandler(video,playlist: widget.playlist));
+      PlayerEngine.play(VideoHandler(video, playlist: widget.playlist));
     } else {
       final snackbar =
           SnackBar(content: Text(AppLocalizations.of(context)!.cannotLoadSong));
@@ -75,7 +75,7 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
   }
 
   Widget? _onImageLoaded(ExtendedImageState state) {
-    if(state.extendedImageLoadState==LoadingState.loaded) {
+    if (state.extendedImageLoadState == LoadingState.loaded) {
       WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
         setState(() {
           _imageIsLoading = false;
