@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:holomusic/Common/PlayerStateController.dart';
 import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Views/Player/PlayerView.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../Common/LoadingNotification.dart';

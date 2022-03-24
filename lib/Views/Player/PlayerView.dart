@@ -9,7 +9,6 @@ import 'package:holomusic/UIComponents/TimeSlider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:palette_generator/palette_generator.dart';
-import '../../Common/LoadingNotification.dart';
 
 enum RepetitionMode { disabled, oneSongs, allSongs }
 
@@ -19,7 +18,7 @@ class PlayerView extends StatefulWidget {
 
   PlayerView(this.playerStateStream, {Key? key}) : super(key: key);
 
-  Stream<bool> getRequestLoadingViewStream(){
+  Stream<bool> getRequestLoadingViewStream() {
     return _outputStreamLoading.stream;
   }
 
@@ -51,12 +50,6 @@ class _PlayerViewState extends State<PlayerView> {
         size: 70,
         color: Colors.white,
       ));
-
-  final loadingIcon = const SizedBox(
-    height: 70,
-    width: 70,
-    child: CircularProgressIndicator(),
-  );
 
   RepetitionMode _getNextRepetitionState() {
     switch (_repetitionMode) {
@@ -118,113 +111,121 @@ class _PlayerViewState extends State<PlayerView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-                gradient: AppColors.getStandardPaletteWithAnotherMainColor(
-                    _mainColor)),
-            child: Column(
-              children: [
-                Row(children: [
+      body: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+              gradient:
+                  AppColors.getStandardPaletteWithAnotherMainColor(_mainColor)),
+          child: Column(
+            children: [
+              Row(children: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child:
+                        const Icon(Icons.arrow_drop_down, color: Colors.white))
+              ]),
+              const SizedBox(height: 15),
+              ValueListenableBuilder<Video?>(
+                  valueListenable: PlayerEngine.getCurrentVideoPlaying(),
+                  builder: (context, value, _) {
+                    if (value != null) {
+                      final img = ExtendedImage.network(
+                          value.thumbnails.highResUrl,
+                          height: 250);
+                      _updateBackground(img.image);
+                      return img;
+                    } else {
+                      return const Image(
+                          height: 250,
+                          image: NetworkImage(
+                              "https://27mi124bz6zg1hqy6n192jkb-wpengine.netdna-ssl.com/wp-content/uploads/2019/10/Our-Top-10-Songs-About-School-768x569.png"));
+                    }
+                  }),
+              const SizedBox(height: 20),
+              ValueListenableBuilder<Video?>(
+                  valueListenable: PlayerEngine.getCurrentVideoPlaying(),
+                  builder: (context, value, _) {
+                    return Text(
+                      value == null ? "..." : value.title,
+                      style: _titleStyle,
+                      textAlign: TextAlign.center,
+                    );
+                  }),
+              const SizedBox(height: 15),
+              StreamBuilder<Duration>(
+                  stream: PlayerEngine.player.positionStream,
+                  builder:
+                      (BuildContext context, AsyncSnapshot<Duration> snapshot) {
+                    if (snapshot.hasData) {
+                      return TimeSlider(
+                          current: snapshot.data,
+                          end: PlayerEngine.player.duration,
+                          textColor: Colors.white,
+                          onChange: (d) {
+                            PlayerEngine.player
+                                .seek(Duration(seconds: d.toInt()));
+                          });
+                    } else {
+                      return const SizedBox();
+                    }
+                  }),
+              const SizedBox(height: 15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Icon(Icons.arrow_drop_down,
-                          color: Colors.white))
-                ]),
-                const SizedBox(height: 15),
-                ValueListenableBuilder<Video?>(
-                    valueListenable: PlayerEngine.getCurrentVideoPlaying(),
-                    builder: (context, value, _) {
-                      if (value != null) {
-                        final img = ExtendedImage.network(
-                            value.thumbnails.highResUrl,
-                            height: 250);
-                        _updateBackground(img.image);
-                        return img;
-                      } else {
-                        return const Image(
-                            height: 250,
-                            image: NetworkImage(
-                                "https://27mi124bz6zg1hqy6n192jkb-wpengine.netdna-ssl.com/wp-content/uploads/2019/10/Our-Top-10-Songs-About-School-768x569.png"));
-                      }
-                    }),
-                const SizedBox(height: 20),
-                ValueListenableBuilder<Video?>(
-                    valueListenable: PlayerEngine.getCurrentVideoPlaying(),
-                    builder: (context, value, _) {
-                      return Text(
-                        value == null ? "..." : value.title,
-                        style: _titleStyle,
-                        textAlign: TextAlign.center,
-                      );
-                    }),
-                const SizedBox(height: 15),
-                StreamBuilder<Duration>(
-                    stream: PlayerEngine.player.positionStream,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<Duration> snapshot) {
-                      if (snapshot.hasData) {
-                        return TimeSlider(
-                            current: snapshot.data,
-                            end: PlayerEngine.player.duration,
-                            textColor: Colors.white,
-                            onChange: (d) {
-                              PlayerEngine.player
-                                  .seek(Duration(seconds: d.toInt()));
-                            });
-                      } else {
-                        return const SizedBox();
-                      }
-                    }),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                        onPressed: () => {},
-                        child: const Icon(
-                          Icons.monitor_heart_outlined,
-                          size: 30,
-                          color: Colors.white,
-                        )),
-                    TextButton(
-                        onPressed: () => PlayerEngine.playPreviousSong(),
-                        child: const Icon(
-                          Icons.skip_previous,
-                          size: 40,
-                          color: Colors.white,
-                        )),
-                    ValueListenableBuilder<int>(
-                        valueListenable: widget.playerStateStream,
-                        builder: (BuildContext context, value, child) {
-                          if (value & MyPlayerState.loading != 0) {
-                            return loadingIcon;
-                          } else if (value & MyPlayerState.play == 0) {
-                            return playIcon;
-                          } else {
-                            return pauseIcon;
-                          }
-                        }),
-                    TextButton(
-                        onPressed: () {
-                          widget._outputStreamLoading.add(true);
-                          PlayerEngine.playNextSong();
-                        },
-                        child: const Icon(
-                          Icons.skip_next,
-                          size: 40,
-                          color: Colors.white,
-                        )),
-                    TextButton(
-                        onPressed: _onRepetitionClick,
-                        child: Icon(
-                          _getRepetitionIcon(),
-                          size: 30,
-                          color: Colors.white,
-                        )),
-                  ],
-                )
-              ],
-            )));
+                      onPressed: () => {},
+                      child: const Icon(
+                        Icons.monitor_heart_outlined,
+                        size: 30,
+                        color: Colors.white,
+                      )),
+                  TextButton(
+                      onPressed: () => PlayerEngine.playPreviousSong(),
+                      child: const Icon(
+                        Icons.skip_previous,
+                        size: 40,
+                        color: Colors.white,
+                      )),
+                  ValueListenableBuilder<int>(
+                      valueListenable: widget.playerStateStream,
+                      builder: (BuildContext context, value, child) {
+                        if (value & MyPlayerState.play == 0) {
+                          return playIcon;
+                        } else {
+                          return pauseIcon;
+                        }
+                      }),
+                  TextButton(
+                      onPressed: () {
+                        widget._outputStreamLoading.add(true);
+                        PlayerEngine.playNextSong();
+                      },
+                      child: const Icon(
+                        Icons.skip_next,
+                        size: 40,
+                        color: Colors.white,
+                      )),
+                  TextButton(
+                      onPressed: _onRepetitionClick,
+                      child: Icon(
+                        _getRepetitionIcon(),
+                        size: 30,
+                        color: Colors.white,
+                      )),
+                ],
+              ),
+            ],
+          )),
+      bottomSheet: ValueListenableBuilder<int>(
+          valueListenable: widget.playerStateStream,
+          builder: (_, value, __) {
+            if (value & MyPlayerState.loading != 0) {
+              return const LinearProgressIndicator();
+            } else {
+              return const SizedBox();
+            }
+          }),
+    );
   }
 }
