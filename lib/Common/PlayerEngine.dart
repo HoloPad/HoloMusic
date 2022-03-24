@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:just_audio/just_audio.dart';
 
+enum RepetitionState { Off, OneItem, AllItems }
+
 class PlayerEngine {
   static late AudioPlayer player;
   static late List<VideoHandler> _mainPlaylist;
@@ -12,6 +14,9 @@ class PlayerEngine {
   static final ValueNotifier<VideoHandler?> _currentVideoHandlerListenable =
       ValueNotifier(null);
   static final ValueNotifier<bool> _hasNextStream = ValueNotifier(true);
+  static bool _isPlaylistLooping = false;
+  static final ValueNotifier<RepetitionState> _repetitionState =
+      ValueNotifier(RepetitionState.Off);
 
   static void initialize() {
     PlayerEngine.player = AudioPlayer();
@@ -47,7 +52,7 @@ class PlayerEngine {
     _history.add(source);
     _currentPlaying = source;
     if (play) await PlayerEngine.player.play();
-    _hasNextStream.value=await hasNext();
+    _hasNextStream.value = await hasNext();
   }
 
   static Future playNextSong() async {
@@ -59,8 +64,16 @@ class PlayerEngine {
 
     //if belong to a playlist
     if (_currentPlaying != null && _currentPlaying!.isAPlaylist()) {
-      //Get the next song
-      final nextSong = await _currentPlaying?.getNext();
+      VideoHandler? nextSong;
+
+      if (await _currentPlaying!.hasNext()) {
+        //Get the next song
+        nextSong = await _currentPlaying?.getNext();
+      } else if (_isPlaylistLooping) {
+        //Get the first song
+        nextSong = await _currentPlaying?.getFirstOfThePlaylist();
+      }
+      //Play the song
       if (nextSong != null) {
         await PlayerEngine.play(nextSong);
       }
@@ -90,7 +103,7 @@ class PlayerEngine {
 
   static void addSongToQueue(VideoHandler source) async {
     _mainPlaylist.add(source);
-    _hasNextStream.value=await hasNext();
+    _hasNextStream.value = await hasNext();
   }
 
   static Future<bool> hasNext() async {
@@ -100,5 +113,31 @@ class PlayerEngine {
 
   static ValueNotifier<bool> hasNextStream() {
     return _hasNextStream;
+  }
+
+  static void setPlaylistLoop(bool isLoop) {
+    _isPlaylistLooping = isLoop;
+  }
+
+  static void setRepetitionState(RepetitionState state) {
+    _repetitionState.value = state;
+    switch (_repetitionState.value) {
+      case RepetitionState.Off:
+        PlayerEngine.player.setLoopMode(LoopMode.off);
+        PlayerEngine.setPlaylistLoop(false);
+        break;
+      case RepetitionState.OneItem:
+        PlayerEngine.player.setLoopMode(LoopMode.one);
+        PlayerEngine.setPlaylistLoop(false);
+        break;
+      case RepetitionState.AllItems:
+        PlayerEngine.player.setLoopMode(LoopMode.off);
+        PlayerEngine.setPlaylistLoop(true);
+        break;
+    }
+  }
+
+  static ValueNotifier<RepetitionState> getRepetitionStateValueNotifier() {
+    return _repetitionState;
   }
 }

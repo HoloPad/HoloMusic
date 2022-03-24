@@ -17,7 +17,6 @@ class VideoHandler {
   Playlist? playlist;
   Future<VideoHandler?>? _nextSongFuture;
 
-
   VideoHandler(this.video, {bool preload = false, this.playlist}) {
     _yt = YtExplode.YoutubeExplode();
     _onlineStream = _getOnlineStream();
@@ -91,7 +90,7 @@ class VideoHandler {
   }
 
   Future<VideoHandler?> getNext() async {
-    if(_nextSongFuture!=null){
+    if (_nextSongFuture != null) {
       return _nextSongFuture!;
     }
     final currentIndex = await getCurrentIndexInsideAPlaylist();
@@ -112,5 +111,16 @@ class VideoHandler {
     } else {
       return false;
     }
+  }
+
+  Future<VideoHandler?> getFirstOfThePlaylist() async {
+    if (isAPlaylist()) {
+      final videoList = await playlist?.getVideosInfo();
+      final firstVideo = videoList?.first;
+      if (firstVideo != null) {
+        return await VideoHandler.createFromUrl(firstVideo.url, playlist: playlist);
+      }
+    }
+    return null;
   }
 }

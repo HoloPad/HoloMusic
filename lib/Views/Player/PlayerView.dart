@@ -7,11 +7,8 @@ import 'package:holomusic/Common/PlayerEngine.dart';
 import 'package:holomusic/Common/PlayerStateController.dart';
 import 'package:holomusic/Common/VideoHandler.dart';
 import 'package:holomusic/UIComponents/TimeSlider.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:marquee_text/marquee_text.dart';
 import 'package:palette_generator/palette_generator.dart';
-
-enum RepetitionMode { disabled, oneSongs, allSongs }
 
 class PlayerView extends StatefulWidget {
   final ValueNotifier<int> playerStateStream;
@@ -29,7 +26,6 @@ class PlayerView extends StatefulWidget {
 
 class _PlayerViewState extends State<PlayerView> {
   bool updatePosition = false;
-  RepetitionMode _repetitionMode = RepetitionMode.disabled;
   Color _mainColor = Colors.blue;
   ImageProvider? _lastProvider;
   bool _hasNextEnabled = true;
@@ -53,45 +49,36 @@ class _PlayerViewState extends State<PlayerView> {
         color: Colors.white,
       ));
 
-  RepetitionMode _getNextRepetitionState() {
-    switch (_repetitionMode) {
-      case RepetitionMode.disabled:
-        return RepetitionMode.oneSongs;
-      case RepetitionMode.oneSongs:
-        return RepetitionMode.allSongs;
-      case RepetitionMode.allSongs:
-        return RepetitionMode.disabled;
+  RepetitionState _getNextRepetitionState() {
+    switch (PlayerEngine.getRepetitionStateValueNotifier().value) {
+      case RepetitionState.Off:
+        return RepetitionState.OneItem;
+      case RepetitionState.OneItem:
+        return RepetitionState.AllItems;
+      case RepetitionState.AllItems:
+        return RepetitionState.Off;
     }
   }
 
-  IconData _getRepetitionIcon() {
-    switch (_repetitionMode) {
-      case RepetitionMode.disabled:
-        return Icons.repeat;
-      case RepetitionMode.oneSongs:
-        return Icons.repeat_one_on;
-      case RepetitionMode.allSongs:
-        return Icons.repeat_on;
-    }
-  }
+  final repetitionIcon = ValueListenableBuilder<RepetitionState>(
+    valueListenable: PlayerEngine.getRepetitionStateValueNotifier(),
+    builder: (_, value, __) {
+      const _size = 30.0;
+      const _color = Colors.white;
+      switch (value) {
+        case RepetitionState.Off:
+          return const Icon(Icons.repeat, size: _size, color: _color);
+        case RepetitionState.OneItem:
+          return const Icon(Icons.repeat_one_on, size: _size, color: _color);
+        case RepetitionState.AllItems:
+          return const Icon(Icons.repeat_on, size: _size, color: _color);
+      }
+    },
+  );
 
   void _onRepetitionClick() {
     final next = _getNextRepetitionState();
-    switch (next) {
-      case RepetitionMode.disabled:
-        PlayerEngine.player.setLoopMode(LoopMode.off);
-        break;
-      case RepetitionMode.oneSongs:
-        PlayerEngine.player.setLoopMode(LoopMode.one);
-        break;
-      case RepetitionMode.allSongs:
-        //TODO must be implemented when playlist are done
-        PlayerEngine.player.setLoopMode(LoopMode.all);
-        break;
-    }
-    setState(() {
-      _repetitionMode = next;
-    });
+    PlayerEngine.setRepetitionState(next);
   }
 
   //Called also when there is a new song
@@ -223,11 +210,7 @@ class _PlayerViewState extends State<PlayerView> {
                       )),
                   TextButton(
                       onPressed: _onRepetitionClick,
-                      child: Icon(
-                        _getRepetitionIcon(),
-                        size: 30,
-                        color: Colors.white,
-                      )),
+                      child: repetitionIcon),
                 ],
               ),
             ],
