@@ -11,6 +11,7 @@ class PlayerEngine {
   static VideoHandler? _currentPlaying;
   static final ValueNotifier<VideoHandler?> _currentVideoHandlerListenable =
       ValueNotifier(null);
+  static final ValueNotifier<bool> _hasNextStream = ValueNotifier(true);
 
   static void initialize() {
     PlayerEngine.player = AudioPlayer();
@@ -46,6 +47,7 @@ class PlayerEngine {
     _history.add(source);
     _currentPlaying = source;
     if (play) await PlayerEngine.player.play();
+    _hasNextStream.value=await hasNext();
   }
 
   static Future playNextSong() async {
@@ -88,10 +90,15 @@ class PlayerEngine {
 
   static void addSongToQueue(VideoHandler source) async {
     _mainPlaylist.add(source);
+    _hasNextStream.value=await hasNext();
   }
 
   static Future<bool> hasNext() async {
     return _mainPlaylist.isNotEmpty ||
         (_currentPlaying != null && await _currentPlaying!.hasNext());
+  }
+
+  static ValueNotifier<bool> hasNextStream() {
+    return _hasNextStream;
   }
 }

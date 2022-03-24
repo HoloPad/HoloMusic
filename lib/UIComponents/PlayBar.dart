@@ -96,16 +96,24 @@ class _PlayBarState extends State<PlayBar> {
                               return pauseIcon;
                             }
                           })),
-                  TextButton(
-                      onPressed: () {
-                        LoadingNotification(true).dispatch(context);
-                        PlayerEngine.playNextSong();
-                      },
-                      child: const Icon(
-                        Icons.skip_next,
-                        size: 40,
-                        color: Colors.white,
-                      )),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: PlayerEngine.hasNextStream(),
+                    builder: (_, value, __) {
+                      return TextButton(
+                          onPressed: () {
+                            if (value) {
+                              LoadingNotification(true).dispatch(context);
+                              PlayerEngine.playNextSong();
+                            }
+                          },
+                          child: Icon(
+                            Icons.skip_next,
+                            size: 40,
+                            color:
+                                Color.fromRGBO(255, 255, 255, value ? 1 : 0.5),
+                          ));
+                    },
+                  )
                 ],
               ),
               Container(
