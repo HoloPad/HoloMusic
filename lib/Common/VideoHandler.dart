@@ -15,17 +15,19 @@ class VideoHandler {
   Future<Uri>? _offlineStream;
   bool _offlineCompleted = false;
   Playlist? playlist;
+  Future<VideoHandler?>? _nextSongFuture;
+
 
   VideoHandler(this.video, {bool preload = false, this.playlist}) {
     _yt = YtExplode.YoutubeExplode();
     _onlineStream = _getOnlineStream();
-    print("Video preload " + preload.toString());
     if (preload) {
       _onlineStream.whenComplete(() {
         _offlineStream = _getOfflineStream();
         _offlineStream?.whenComplete(() => _offlineCompleted = true);
       });
     }
+    _nextSongFuture = getNext();
   }
 
   static Future<VideoHandler> createFromUrl(String url,
@@ -89,6 +91,9 @@ class VideoHandler {
   }
 
   Future<VideoHandler?> getNext() async {
+    if(_nextSongFuture!=null){
+      return _nextSongFuture!;
+    }
     final currentIndex = await getCurrentIndexInsideAPlaylist();
     final listVideos = await playlist?.getVideosInfo();
     if (listVideos != null && currentIndex + 1 < listVideos.length) {
