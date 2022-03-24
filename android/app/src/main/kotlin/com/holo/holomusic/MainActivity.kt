@@ -1,4 +1,4 @@
-package com.holo.holomusic.holomusic
+package com.holo.holomusic
 
 import io.flutter.embedding.android.FlutterActivity
 
