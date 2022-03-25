@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart';
-import 'package:holomusic/Common/DataFetcher/VideoInfo.dart';
 import 'package:html/parser.dart' show parse, parseFragment;
 import 'package:http/http.dart' as http;
+
+import '../VideoInfo.dart';
+import 'Playlist.dart';
 
 class TheGotOfficial extends Playlist {
   late Uri url;

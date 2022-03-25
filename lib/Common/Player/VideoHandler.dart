@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as YtExplode;
+
+import '../Playlist/Providers/Playlist.dart';
 
 enum LoadingState { initialized, loading, loaded }
 

@@ -1,7 +1,8 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart';
+
+import '../../../Common/Playlist/Providers/Playlist.dart';
 import '../../../UIComponents/Shimmer.dart';
 
 class PlayListWidget extends StatefulWidget {
@@ -21,7 +22,7 @@ class _PlayListWidgetState extends State<PlayListWidget> {
   bool imageLoadedFantore = true;
 
   Widget? _onImageLoaded(ExtendedImageState state) {
-    if(state.extendedImageLoadState==LoadState.completed) {
+    if (state.extendedImageLoadState == LoadState.completed) {
       WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
         setState(() {
           _imageIsLoading = false;

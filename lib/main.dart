@@ -3,16 +3,16 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:holomusic/Common/LoadingNotification.dart';
-import 'package:holomusic/Common/PlayerEngine.dart';
-import 'package:holomusic/Common/PlayerStateController.dart';
+import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
+import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Home/HomeView.dart';
 import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
-import 'Common/AppColors.dart';
+import 'Common/Parameters/AppColors.dart';
+import 'Common/Player/PlayerStateController.dart';
 
 Future<void> main() async {
   await JustAudioBackground.init(

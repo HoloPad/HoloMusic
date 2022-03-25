@@ -2,11 +2,12 @@ import 'dart:math';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:holomusic/Common/DataFetcher/VideoInfo.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../Common/Playlist/Providers/Playlist.dart';
+import '../../Common/Playlist/VideoInfo.dart';
 
 class PlaylistView extends StatefulWidget {
   Playlist playlist;

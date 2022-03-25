@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/Utils.dart';
+import 'package:holomusic/Common/Misc/Utils.dart';
 
 class TimeSlider extends StatelessWidget {
   Duration? current;

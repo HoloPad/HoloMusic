@@ -1,12 +1,11 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/DataFetcher/Providers/Playlist.dart';
-import 'package:holomusic/Common/DataFetcher/Providers/TheGotOfficial.dart';
-import 'package:holomusic/Common/DataFetcher/VideoInfo.dart';
 import 'package:holomusic/Views/Home/Components/PlayListWidget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Views/Playlist/PlaylistView.dart';
+
+import '../../Common/Playlist/Providers/Playlist.dart';
+import '../../Common/Playlist/Providers/TheGotOfficial.dart';
+import '../../Common/Playlist/VideoInfo.dart';
 
 class HomeView extends StatefulWidget {
   late Future<List<VideoInfo>> theGotOfficialChart;

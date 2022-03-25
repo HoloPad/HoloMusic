@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/PlayerStateController.dart';
-import 'package:holomusic/Common/PlayerEngine.dart';
-import 'package:holomusic/Common/VideoHandler.dart';
+import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Views/Player/PlayerView.dart';
 import 'package:marquee_text/marquee_text.dart';
 
-import '../Common/LoadingNotification.dart';
+import '../Common/Notifications/LoadingNotification.dart';
+import '../Common/Player/PlayerStateController.dart';
+import '../Common/Player/VideoHandler.dart';
 
 class PlayBar extends StatefulWidget {
   static bool isVisible = false;

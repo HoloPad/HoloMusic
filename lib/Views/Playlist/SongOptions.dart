@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/PlayerEngine.dart';
-import 'package:holomusic/Common/VideoHandler.dart';
+import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../Common/AppColors.dart';
+import '../../Common/Parameters/AppColors.dart';
+import '../../Common/Player/VideoHandler.dart';
 
 class SongOptions extends StatelessWidget {
   final Video video;

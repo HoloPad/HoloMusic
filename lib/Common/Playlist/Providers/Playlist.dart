@@ -1,6 +1,7 @@
 import 'dart:ui';
 
-import 'package:holomusic/Common/DataFetcher/VideoInfo.dart';
+import '../VideoInfo.dart';
+
 
 abstract class Playlist {
   late String imageUrl;

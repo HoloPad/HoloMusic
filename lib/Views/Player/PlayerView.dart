@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/AppColors.dart';
-import 'package:holomusic/Common/PlayerEngine.dart';
-import 'package:holomusic/Common/PlayerStateController.dart';
-import 'package:holomusic/Common/VideoHandler.dart';
-import 'package:holomusic/UIComponents/TimeSlider.dart';
+import 'package:holomusic/Common/Parameters/AppColors.dart';
+import 'package:holomusic/Common/Player/PlayerEngine.dart';
+import 'package:holomusic/Views/Player/Components/TimeSlider.dart';
 import 'package:marquee_text/marquee_text.dart';
 import 'package:palette_generator/palette_generator.dart';
+
+import '../../Common/Player/PlayerStateController.dart';
+import '../../Common/Player/VideoHandler.dart';
 
 class PlayerView extends StatefulWidget {
   final ValueNotifier<int> playerStateStream;
@@ -209,8 +210,7 @@ class _PlayerViewState extends State<PlayerView> {
                             255, 255, 255, _hasNextEnabled ? 1 : 0.5),
                       )),
                   TextButton(
-                      onPressed: _onRepetitionClick,
-                      child: repetitionIcon),
+                      onPressed: _onRepetitionClick, child: repetitionIcon),
                 ],
               ),
             ],
