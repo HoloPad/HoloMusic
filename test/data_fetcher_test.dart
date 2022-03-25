@@ -1,4 +1,4 @@
-import 'package:holomusic/Common/DataFetcher/Providers/TheGotOfficial.dart';
+import 'package:holomusic/Common/Playlist/Providers/TheGotOfficial.dart';
 import 'package:test/test.dart';
 
 void main() {

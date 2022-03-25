@@ -17,7 +17,7 @@ class AppColors {
     return LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [color, Color.fromRGBO(31, 31, 31, 1.0)],
+        colors: [color, const Color.fromRGBO(31, 31, 31, 1.0)],
         stops: const [0.01, 0.4]);
   }
 }

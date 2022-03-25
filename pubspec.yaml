@@ -49,6 +49,7 @@ dependencies:
   marquee_text: ^2.5.0+1
   url_launcher: ^6.0.20
   just_audio_background: ^0.0.1-beta.5
+  localstore: ^1.2.3
 
 dev_dependencies:
   flutter_test:

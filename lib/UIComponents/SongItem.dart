@@ -1,13 +1,13 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/PlayerEngine.dart';
-import 'package:holomusic/Common/VideoHandler.dart';
-import 'package:holomusic/Common/LoadingNotification.dart';
+import 'package:holomusic/Common/Player/PlayerEngine.dart';
+import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../Common/Player/VideoHandler.dart';
 import '../Views/Playlist/SongOptions.dart';
-import '../Common/DataFetcher/Providers/Playlist.dart' as MyPlaylist;
+import '../Common/Playlist/Providers/Playlist.dart' as MyPlaylist;
 import 'Shimmer.dart';
 
 class SongItem extends StatefulWidget {
