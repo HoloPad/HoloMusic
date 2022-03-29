@@ -7,6 +7,7 @@ abstract class Playlist {
   late String imageUrl;
   late String name;
   late Color? backgroundColor;
+  bool isOnline=true;
 
   Playlist(this.name, this.imageUrl, this.backgroundColor);
 

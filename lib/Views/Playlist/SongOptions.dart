@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:holomusic/Common/Player/OfflineSong.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'dart:io';
@@ -58,8 +57,7 @@ class SongOptions extends StatelessWidget {
                                           OfflineStorage.saveSong(
                                               song as OnlineSong);
                                         } else {
-                                          OfflineStorage.deleteSong(
-                                              song as OfflineSong);
+                                          OfflineStorage.deleteSongById(song.id);
                                         }
                                         Navigator.pop(context);
                                       },

@@ -1,5 +1,7 @@
 {
   "appTitle": "HoloMusic",
+  "yes": "Si",
+  "no": "No",
   "search": "Cerca",
   "home": "Home",
   "library": "Raccolta",
@@ -14,6 +16,7 @@
   "noRecentSearch": "Non ci sono ricerche recenti",
   "saveOffline": "Salva offline",
   "deleteSong": "Elimina brano",
-  "offlineContent": "Contenuto offline"
-
+  "offlineContent": "Contenuto offline",
+  "areYouSure": "Sei sicuro?",
+  "deletePlaylistConfirm": "Vuoi eliminare la playlist?"
 }

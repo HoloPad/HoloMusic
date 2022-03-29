@@ -22,7 +22,9 @@ class OfflineSong extends Song {
     if (firstVideo == null) {
       return null;
     }
-    return OfflineStorage.getSongById(firstVideo.id);
+    final song = await OfflineStorage.getSongById(firstVideo.id);
+    song?.playlist = playlist;
+    return song;
   }
 
   @override
@@ -40,7 +42,6 @@ class OfflineSong extends Song {
         videoList[currentSongIndex].id != id) {
       currentSongIndex++;
     }
-    print("Current at " + currentSongIndex.toString());
 
     if (currentSongIndex + 1 >= videoList.length) {
       //Not found
@@ -48,6 +49,7 @@ class OfflineSong extends Song {
     } else {
       //Return next
       final next = videoList[currentSongIndex + 1];
+      next.playlist=playlist;
       return next;
     }
   }

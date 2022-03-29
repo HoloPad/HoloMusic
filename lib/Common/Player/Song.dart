@@ -26,7 +26,8 @@ abstract class Song {
 
   Future<bool> hasNext() async {
     if (isAPlaylist()) {
-      return await getNext() != null;
+      final next = await getNext();
+      return next != null;
     } else {
       return false;
     }

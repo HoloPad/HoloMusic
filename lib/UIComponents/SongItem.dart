@@ -1,6 +1,8 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:holomusic/Common/Notifications/DownloadNotification.dart';
 import 'package:holomusic/Common/Offline/OfflineStorage.dart';
+import 'package:holomusic/Common/Parameters/AppColors.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -32,14 +34,6 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
   }
 
   void _onOptionClick(BuildContext context) async {
-    setState(() {
-      _isLoading = true;
-    });
-    //widget.video = await _getVideo();
-    setState(() {
-      _isLoading = false;
-    });
-
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => SongOptions(widget.song)));
   }
@@ -132,11 +126,45 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                                       ),
                                     ]))),
                       ]))),
-          TextButton(
-              onPressed: () => _onOptionClick(context),
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.more_vert))
+          Row(children: [
+            FutureBuilder<List<DownloadNotification>>(
+                future: OfflineStorage.getCurrentState(),
+                builder: (_, s0) {
+                  if (s0.hasData) {
+                    return StreamBuilder<List<DownloadNotification>>(
+                        stream: OfflineStorage.getDownloadStream(),
+                        initialData: s0.data!,
+                        builder: (_, s1) {
+                          if (s1.hasData) {
+                            for (var e in s1.data!) {
+                              if (e.id == widget.song.id) {
+                                switch (e.state) {
+                                  case DownloadState.nope:
+                                  case DownloadState.waiting:
+                                    return const SizedBox();
+                                  case DownloadState.downloading:
+                                    return const CircularProgressIndicator(
+                                        color: Colors.grey);
+                                  case DownloadState.downloaded:
+                                    return Icon(Icons.download_done,
+                                        color: AppColors.text);
+                                  case DownloadState.error:
+                                    return Icon(Icons.clear,color: AppColors.text);
+                                }
+                              }
+                            }
+                          }
+                          return const SizedBox();
+                        });
+                  } else
+                    return const SizedBox();
+                }),
+            TextButton(
+                onPressed: () => _onOptionClick(context),
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : const Icon(Icons.more_vert))
+          ])
         ]));
   }
 }

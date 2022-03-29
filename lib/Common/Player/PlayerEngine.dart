@@ -46,7 +46,6 @@ class PlayerEngine {
   }
 
   static Future play(Song source, {bool play = true}) async {
-
     final futureAudioSource = await source.getAudioUri();
     final audioSource = AudioSource.uri(futureAudioSource,
         tag: MediaItem(
@@ -100,12 +99,29 @@ class PlayerEngine {
     }
   }
 
-  static void playPreviousSong() {
-    if (_history.isEmpty) {
-      return;
+  static Future playPreviousSong() async {
+    Song? previousSong;
+    if (_history.isNotEmpty) {
+      //Search in history the previous different from the current
+      final currentIndex =
+          _history.indexWhere((element) => element.id == _currentPlaying?.id);
+      if (currentIndex - 1 >= 0) {
+        previousSong = _history.elementAt(currentIndex - 1);
+      }
     }
-    final previousSong =
-        _history.lastWhere((element) => element != _currentPlaying);
+    if (previousSong == null) {
+      //Search on playlist
+      final songs = await _currentPlaying?.playlist?.getVideosInfo();
+      if (songs == null) {
+        return;
+      }
+      final currentIndex =
+          songs.indexWhere((element) => element.id == _currentPlaying?.id);
+      if (currentIndex - 1 < 0) {
+        return;
+      }
+      previousSong = songs.elementAt(currentIndex - 1);
+    }
     PlayerEngine.play(previousSong);
   }
 

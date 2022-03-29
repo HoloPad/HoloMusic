@@ -76,7 +76,6 @@ class OnlineSong extends Song {
   }
 
   Future<Uri> _getOnlineStream() async {
-    print("Getting online stream");
     final _video = await getVideo();
     var manifest = await _yt.videos.streamsClient.getManifest(_video.id);
     var streamInfo = manifest.audioOnly.withHighestBitrate();
@@ -138,7 +137,6 @@ class OnlineSong extends Song {
       return _nextSongFuture!;
     }
     final currentIndex = await getCurrentIndexInsideAPlaylist();
-    print("Current index " + currentIndex.toString());
     final listVideos = await playlist?.getVideosInfo();
     if (listVideos != null && currentIndex + 1 < listVideos.length) {
       //there is a next element
