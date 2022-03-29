@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:holomusic/Common/Playlist/Providers/OfflinePlaylist.dart';
 import 'package:holomusic/Views/Home/Components/PlayListWidget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Views/Playlist/PlaylistView.dart';
 
+import '../../Common/Player/Song.dart';
 import '../../Common/Playlist/Providers/Playlist.dart';
 import '../../Common/Playlist/Providers/TheGotOfficial.dart';
-import '../../Common/Playlist/VideoInfo.dart';
 
 class HomeView extends StatefulWidget {
-  late Future<List<VideoInfo>> theGotOfficialChart;
+  late Future<List<Song>> theGotOfficialChart;
 
   HomeView({Key? key}) : super(key: key) {
     theGotOfficialChart = TheGotOfficial("it").getVideosInfo();
@@ -50,24 +51,22 @@ class _HomeState extends State<HomeView> {
         children: [
           Text(AppLocalizations.of(context)!.charts, style: textStyle),
           const Divider(height: 10, color: Colors.transparent),
-          Expanded(
-              child: ListView.separated(
+          SingleChildScrollView(
             padding: const EdgeInsets.all(8),
             scrollDirection: Axis.horizontal,
-            itemCount: chartsWidgets.length,
-            itemBuilder: (BuildContext context, int index) {
-              return chartsWidgets.elementAt(index);
-            },
-            separatorBuilder: (BuildContext context, int index) =>
-                const SizedBox(
-              width: 15,
+            child: Row(
+              children: chartsWidgets.map((e) {
+                return Row(children: [e, const SizedBox(width: 15)]);
+              }).toList(),
             ),
-            //controller: MyScrollController(),
-          )),
+          ),
+          Text(AppLocalizations.of(context)!.offlineContent, style: textStyle),
+          const Divider(height: 10, color: Colors.transparent),
+          PlayListWidget(playlist: OfflinePlaylist(), onClick: onClicked)
         ],
       );
     } else {
-      return PlaylistView(_playListToView!,onBackPressed);
+      return PlaylistView(_playListToView!, onBackPressed);
     }
   }
 }

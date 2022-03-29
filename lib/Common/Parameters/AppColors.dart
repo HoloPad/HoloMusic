@@ -20,4 +20,8 @@ class AppColors {
         colors: [color, const Color.fromRGBO(31, 31, 31, 1.0)],
         stops: const [0.01, 0.4]);
   }
+
+  static Color text = const Color.fromRGBO(255, 255, 255, 0.8);
+  static Color switchActiveColor = const Color.fromRGBO(255, 255, 255, 1);
+  static Color switchInactiveColor = const Color.fromRGBO(255, 255, 255, 0.6);
 }

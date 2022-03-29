@@ -4,16 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
-import 'VideoHandler.dart';
+import 'Song.dart';
 
 enum RepetitionState { Off, OneItem, AllItems }
 
 class PlayerEngine {
   static late AudioPlayer player;
-  static late List<VideoHandler> _mainPlaylist;
-  static late List<VideoHandler> _history;
-  static VideoHandler? _currentPlaying;
-  static final ValueNotifier<VideoHandler?> _currentVideoHandlerListenable =
+  static late List<Song> _mainPlaylist;
+  static late List<Song> _history;
+  static Song? _currentPlaying;
+  static final ValueNotifier<Song?> _currentVideoHandlerListenable =
       ValueNotifier(null);
   static final ValueNotifier<bool> _hasNextStream = ValueNotifier(true);
   static bool _isPlaylistLooping = false;
@@ -45,14 +45,15 @@ class PlayerEngine {
     }
   }
 
-  static Future play(VideoHandler source, {bool play = true}) async {
-    final futureAudioSource = await source.getAudioSource();
+  static Future play(Song source, {bool play = true}) async {
+    final futureAudioSource = await source.getAudioUri();
     final audioSource = AudioSource.uri(futureAudioSource,
         tag: MediaItem(
-            id: source.video.id.value,
-            title: source.video.title,
-            artUri: Uri.parse(source.video.thumbnails.lowResUrl),
-            duration: source.video.duration));
+            id: source.id,
+            title: source.title,
+            artUri: Uri.parse(source.getThumbnail()),
+            duration: source.getDuration()));
+
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
     _currentVideoHandlerListenable.value = source;
@@ -60,6 +61,9 @@ class PlayerEngine {
     _currentPlaying = source;
     if (play) await PlayerEngine.player.play();
     _hasNextStream.value = await hasNext();
+
+    //Pre-load next
+    _currentPlaying?.getNext();
   }
 
   static Future playNextSong() async {
@@ -71,7 +75,7 @@ class PlayerEngine {
 
     //if belong to a playlist
     if (_currentPlaying != null && _currentPlaying!.isAPlaylist()) {
-      VideoHandler? nextSong;
+      Song? nextSong;
 
       if (await _currentPlaying!.hasNext()) {
         //Get the next song
@@ -95,21 +99,39 @@ class PlayerEngine {
     }
   }
 
-  static void playPreviousSong() {
-    if (_history.isEmpty) {
-      return;
+  static Future playPreviousSong() async {
+    Song? previousSong;
+    if (_history.isNotEmpty) {
+      //Search in history the previous different from the current
+      final currentIndex =
+          _history.indexWhere((element) => element.id == _currentPlaying?.id);
+      if (currentIndex - 1 >= 0) {
+        previousSong = _history.elementAt(currentIndex - 1);
+      }
     }
-    final previousSong =
-        _history.lastWhere((element) => element != _currentPlaying);
+    if (previousSong == null) {
+      //Search on playlist
+      final songs = await _currentPlaying?.playlist?.getVideosInfo();
+      if (songs == null) {
+        return;
+      }
+      final currentIndex =
+          songs.indexWhere((element) => element.id == _currentPlaying?.id);
+      if (currentIndex - 1 < 0) {
+        return;
+      }
+      previousSong = songs.elementAt(currentIndex - 1);
+    }
     PlayerEngine.play(previousSong);
   }
 
-  static ValueNotifier<VideoHandler?> getCurrentVideoHandlerPlaying() {
+  static ValueNotifier<Song?> getCurrentVideoHandlerPlaying() {
     return _currentVideoHandlerListenable;
   }
 
-  static void addSongToQueue(VideoHandler source) async {
+  static void addSongToQueue(Song source) async {
     _mainPlaylist.add(source);
+    source.downloadStream();
     _hasNextStream.value = await hasNext();
   }
 

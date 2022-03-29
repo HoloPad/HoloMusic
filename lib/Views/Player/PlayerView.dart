@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:marquee_text/marquee_text.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 import '../../Common/Player/PlayerStateController.dart';
-import '../../Common/Player/VideoHandler.dart';
+import '../../Common/Player/Song.dart';
 
 class PlayerView extends StatefulWidget {
   final ValueNotifier<int> playerStateStream;
@@ -121,13 +122,15 @@ class _PlayerViewState extends State<PlayerView> {
                         const Icon(Icons.arrow_drop_down, color: Colors.white))
               ]),
               const SizedBox(height: 15),
-              ValueListenableBuilder<VideoHandler?>(
+              ValueListenableBuilder<Song?>(
                   valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
                   builder: (context, value, _) {
                     if (value != null) {
-                      final img = ExtendedImage.network(
-                          value.video.thumbnails.highResUrl,
-                          height: 250);
+                      final img = value.isOnline()
+                          ? ExtendedImage.network(value.getThumbnail(),
+                              height: 250)
+                          : ExtendedImage.file(File(value.getThumbnail()),
+                              height: 250);
                       _updateBackground(img.image);
                       return img;
                     } else {
@@ -138,14 +141,14 @@ class _PlayerViewState extends State<PlayerView> {
                     }
                   }),
               const SizedBox(height: 20),
-              ValueListenableBuilder<VideoHandler?>(
+              ValueListenableBuilder<Song?>(
                   valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
                   builder: (context, value, _) {
                     return Padding(
                         padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                         child: MarqueeText(
                           text: TextSpan(
-                              text: value == null ? "..." : value.video.title,
+                              text: value == null ? "..." : value.title,
                               style: _titleStyle),
                           textAlign: TextAlign.center,
                           speed: 25,

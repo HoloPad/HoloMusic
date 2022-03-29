@@ -1,15 +1,17 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:html/parser.dart' show parse, parseFragment;
+import 'package:holomusic/Common/Player/OnlineSong.dart';
+import 'package:html/parser.dart' show  parseFragment;
 import 'package:http/http.dart' as http;
+import 'package:youtube_parser/youtube_parser.dart';
 
-import '../VideoInfo.dart';
+import '../../Player/Song.dart';
 import 'Playlist.dart';
 
 class TheGotOfficial extends Playlist {
   late Uri url;
-  Future<List<VideoInfo>>? _listVideoCache;
+  Future<List<Song>>? _listVideoCache;
 
   TheGotOfficial(String countryCode)
       : super(
@@ -22,33 +24,35 @@ class TheGotOfficial extends Playlist {
   }
 
   @override
-  String? getReferenceUrl(){
+  String? getReferenceUrl() {
     return "https://www.thegotofficial.com/";
   }
 
   @override
-  Future<List<VideoInfo>> getVideosInfo() async {
-
+  Future<List<Song>> getVideosInfo() async {
     _listVideoCache ??= _getVideosInfo();
     return _listVideoCache!;
   }
 
-  Future<List<VideoInfo>> _getVideosInfo() async {
+  Future<List<Song>> _getVideosInfo() async {
     const maxAttempts = 5;
     var numberOfAttempt = 0;
     http.Response response;
     do {
       response = await http.get(url).timeout(const Duration(seconds: 5));
       numberOfAttempt++;
-      print("Attemp "+numberOfAttempt.toString()+" "+response.statusCode.toString());
-    }
-    while (response.statusCode!=200 && numberOfAttempt<maxAttempts);
+      print("Attemp " +
+          numberOfAttempt.toString() +
+          " " +
+          response.statusCode.toString());
+    } while (response.statusCode != 200 && numberOfAttempt < maxAttempts);
 
-    final elements = const Utf8Decoder().convert(response.bodyBytes)
+    final elements = const Utf8Decoder()
+        .convert(response.bodyBytes)
         .split("<tr")
         .where((element) => element.contains("</tr>"))
         .map((e) => "<tr" + e)
-        .map((e) => parseFragment(e, container: "tr",encoding: "UTF-8"))
+        .map((e) => parseFragment(e, container: "tr", encoding: "UTF-8"))
         .where((element) => element.querySelectorAll(".rank").isEmpty)
         .map((e) {
           final name = e
@@ -65,12 +69,15 @@ class TheGotOfficial extends Playlist {
           if (name == null || url == null) {
             return null;
           } else {
-            final info = VideoInfo(name, url);
-            info.thumbnail = thumbnail;
+            final id = getIdFromUrl(url);
+            if (id == null) {
+              return null;
+            }
+            final info = OnlineSong.lazy(id, name, thumbnail, playlist: this);
             return info;
           }
         })
-        .whereType<VideoInfo>()
+        .whereType<OnlineSong>()
         .toList();
     return elements;
   }

@@ -3,11 +3,13 @@ import 'dart:math';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:holomusic/Common/Offline/OfflineStorage.dart';
+import 'package:holomusic/Common/Parameters/AppColors.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../Common/Player/Song.dart';
 import '../../Common/Playlist/Providers/Playlist.dart';
-import '../../Common/Playlist/VideoInfo.dart';
 
 class PlaylistView extends StatefulWidget {
   Playlist playlist;
@@ -21,11 +23,62 @@ class PlaylistView extends StatefulWidget {
 
 class _PlaylistViewState extends State<PlaylistView> {
   double _imageSize = 150;
+  bool _saveOfflineChecked = false;
+
+  @override
+  void initState() {
+    OfflineStorage.isAllSaved(widget.playlist).then((value) {
+      setState(() {
+        _saveOfflineChecked = value;
+      });
+    });
+    super.initState();
+  }
 
   void _onLinkClicked() async {
     if (!await launch(widget.playlist.getReferenceUrl()!)) {
       print("Cannot launch url");
     }
+  }
+
+  void _onSaveOnlineChecked(bool? state) {
+    if (state != null) {
+      setState(() {
+        _saveOfflineChecked = state;
+      });
+      if (state) {
+        OfflineStorage.savePlaylist(widget.playlist);
+      }
+      else {
+        OfflineStorage.stopDownload();
+      }
+    }
+  }
+
+  void _onDeletePressed() {
+    final textStyle = TextStyle(color: AppColors.text);
+    final dialog = AlertDialog(
+      title: Text(AppLocalizations.of(context)!.areYouSure, style: textStyle),
+      content: Text(AppLocalizations.of(context)!.deletePlaylistConfirm,
+          style: textStyle),
+      actions: [
+        TextButton(
+            onPressed: () {
+              setState(() {
+                _saveOfflineChecked = false;
+              });
+              OfflineStorage.deletePlaylist(widget.playlist);
+              Navigator.pop(context);
+            },
+            child: Text(AppLocalizations.of(context)!.yes, style: textStyle)),
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.no, style: textStyle))
+      ],
+      elevation: 24,
+      backgroundColor: Colors.black,
+    );
+    showDialog(context: context, builder: (_) => dialog);
   }
 
   @override
@@ -66,37 +119,68 @@ class _PlaylistViewState extends State<PlaylistView> {
                       Text(widget.playlist.name, style: _nameTextStyle),
                       const SizedBox(height: 15),
                       Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            OutlinedButton(
-                              onPressed: () {},
-                              child: Text(AppLocalizations.of(context)!.follow),
-                              style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(
-                                      width: 0.5, color: Colors.white),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(50))),
-                            ),
-                            widget.playlist.getReferenceUrl() != null
-                                ? TextButton(
-                                    onPressed: _onLinkClicked,
-                                    child: const Icon(Icons.link_rounded))
-                                : const SizedBox()
-                          ]),
+                        children: [
+                          const Expanded(child: SizedBox()),
+                          Expanded(
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                OutlinedButton(
+                                  onPressed: () {},
+                                  child: Text(
+                                      AppLocalizations.of(context)!.follow),
+                                  style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(
+                                          width: 0.5, color: Colors.white),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(50))),
+                                ),
+                                widget.playlist.getReferenceUrl() != null
+                                    ? TextButton(
+                                        onPressed: _onLinkClicked,
+                                        child: const Icon(Icons.link_rounded))
+                                    : const SizedBox()
+                              ])),
+                          Expanded(
+                              child: widget.playlist.isOnline
+                                  ? Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                          Checkbox(
+                                              value: _saveOfflineChecked,
+                                              onChanged: _onSaveOnlineChecked,
+                                              checkColor: AppColors.text,
+                                              side: MaterialStateBorderSide
+                                                  .resolveWith((states) =>
+                                                      BorderSide(
+                                                          width: 1,
+                                                          color:
+                                                              AppColors.text))),
+                                          Text(
+                                              AppLocalizations.of(context)!
+                                                  .saveOffline,
+                                              style: TextStyle(
+                                                  color: AppColors.text)),
+                                          TextButton(
+                                              onPressed: _onDeletePressed,
+                                              child: Icon(
+                                                Icons.delete_outline_rounded,
+                                                color: AppColors.text,
+                                              ))
+                                        ])
+                                  : const SizedBox())
+                        ],
+                      ),
                       const SizedBox(height: 15),
-                      FutureBuilder<List<VideoInfo>>(
+                      FutureBuilder<List<Song>>(
                         future: widget.playlist.getVideosInfo(),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             return ListBody(
-                              children: snapshot.data!
-                                  .map((e) => SongItem(
-                                        e.title,
-                                        e.thumbnail,
-                                        url: e.url,
-                                        playlist: widget.playlist,
-                                      ))
-                                  .toList(),
+                              children: snapshot.data!.map((e) {
+                                return SongItem(e);
+                              }).toList(),
                             );
                           } else {
                             return const CircularProgressIndicator();
