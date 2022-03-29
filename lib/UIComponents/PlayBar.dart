@@ -5,7 +5,7 @@ import 'package:marquee_text/marquee_text.dart';
 
 import '../Common/Notifications/LoadingNotification.dart';
 import '../Common/Player/PlayerStateController.dart';
-import '../Common/Player/VideoHandler.dart';
+import '../Common/Player/Song.dart';
 
 class PlayBar extends StatefulWidget {
   static bool isVisible = false;
@@ -72,14 +72,14 @@ class _PlayBarState extends State<PlayBar> {
                         color: Colors.white,
                       )),
                   Expanded(
-                      child: ValueListenableBuilder<VideoHandler?>(
+                      child: ValueListenableBuilder<Song?>(
                           valueListenable:
                               PlayerEngine.getCurrentVideoHandlerPlaying(),
                           builder: (context, value, _) {
                             return MarqueeText(
                               text: TextSpan(
                                   text:
-                                      value == null ? "..." : value.video.title,
+                                      value == null ? "..." : value.title,
                                   style: _titleStyle),
                               textAlign: TextAlign.center,
                               speed: 25,

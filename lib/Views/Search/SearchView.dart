@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -113,11 +114,7 @@ class _SearchViewState extends State<SearchView> {
                           child: ListView(
                             clipBehavior: Clip.antiAlias,
                             children: list
-                                .map((p0) => SongItem(
-                                      p0.title,
-                                      p0.thumbnails.lowResUrl,
-                                      video: p0,
-                                    ))
+                                .map((p0) => SongItem(OnlineSong(p0)))
                                 .toList(),
                           )));
                 } else {

@@ -11,6 +11,10 @@
   "charts": "Charts",
   "follow": "Follow",
   "cannotLoadSong": "Cannot load the song",
-  "noRecentSearch": "There aren't recent searches"
+  "noRecentSearch": "There aren't recent searches",
+  "saveOffline": "Save offline",
+  "deleteSong": "Delete song",
+  "offlineContent": "Offline content"
+
 
 }

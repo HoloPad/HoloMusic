@@ -11,6 +11,9 @@
   "charts": "Classifiche",
   "follow": "Segui",
   "cannotLoadSong": "Impossibile caricare il brano",
-  "noRecentSearch": "Non ci sono ricerche recenti"
+  "noRecentSearch": "Non ci sono ricerche recenti",
+  "saveOffline": "Salva offline",
+  "deleteSong": "Elimina brano",
+  "offlineContent": "Contenuto offline"
 
 }

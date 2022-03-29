@@ -6,8 +6,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../Common/Player/Song.dart';
 import '../../Common/Playlist/Providers/Playlist.dart';
-import '../../Common/Playlist/VideoInfo.dart';
 
 class PlaylistView extends StatefulWidget {
   Playlist playlist;
@@ -84,19 +84,14 @@ class _PlaylistViewState extends State<PlaylistView> {
                                 : const SizedBox()
                           ]),
                       const SizedBox(height: 15),
-                      FutureBuilder<List<VideoInfo>>(
+                      FutureBuilder<List<Song>>(
                         future: widget.playlist.getVideosInfo(),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             return ListBody(
-                              children: snapshot.data!
-                                  .map((e) => SongItem(
-                                        e.title,
-                                        e.thumbnail,
-                                        url: e.url,
-                                        playlist: widget.playlist,
-                                      ))
-                                  .toList(),
+                              children: snapshot.data!.map((e) {
+                                return SongItem(e);
+                              }).toList(),
                             );
                           } else {
                             return const CircularProgressIndicator();
