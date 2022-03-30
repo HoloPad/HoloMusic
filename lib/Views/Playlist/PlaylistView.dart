@@ -191,10 +191,14 @@ class _PlaylistViewState extends State<PlaylistView> {
                             }).toList(),
                           );
                         } else {
-                          return const SizedBox(
-                              width: 150,
-                              height: 150,
-                              child: CircularProgressIndicator());
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                            SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: CircularProgressIndicator())
+                          ]);
                         }
                       },
                     ),

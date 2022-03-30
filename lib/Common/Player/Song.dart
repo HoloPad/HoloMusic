@@ -43,7 +43,12 @@ abstract class Song {
 
   Uri? getThumbnailUri() {
     if (thumbnail != null) {
-      return Uri.tryParse(thumbnail!);
+      if (thumbnail?.contains("http") ?? false) {
+        return Uri.tryParse(thumbnail!);
+      } else {
+        File file = File(thumbnail!);
+        return file.uri;
+      }
     }
     return null;
   }
