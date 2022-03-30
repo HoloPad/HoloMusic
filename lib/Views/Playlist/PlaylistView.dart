@@ -48,8 +48,7 @@ class _PlaylistViewState extends State<PlaylistView> {
       });
       if (state) {
         OfflineStorage.savePlaylist(widget.playlist);
-      }
-      else {
+      } else {
         OfflineStorage.stopDownload();
       }
     }
@@ -110,87 +109,98 @@ class _PlaylistViewState extends State<PlaylistView> {
                               color: widget.playlist.backgroundColor ??
                                   Colors.transparent,
                               borderRadius: BorderRadius.circular(10)),
-                          child: ExtendedImage.network(
-                            widget.playlist.imageUrl,
+                          child: ExtendedImage(
+                            image: widget.playlist.imageUrl,
                             width: _imageSize,
                             height: _imageSize,
                           )),
                       const SizedBox(height: 15),
                       Text(widget.playlist.name, style: _nameTextStyle),
                       const SizedBox(height: 15),
-                      Row(
+                      Flex(
+                        direction: Axis.horizontal,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        clipBehavior: Clip.antiAlias,
                         children: [
-                          const Expanded(child: SizedBox()),
-                          Expanded(
+                          Flexible(
                               child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.max,
                                   children: [
-                                OutlinedButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                      AppLocalizations.of(context)!.follow),
-                                  style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(
-                                          width: 0.5, color: Colors.white),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(50))),
-                                ),
+                                widget.playlist.isOnline
+                                    ? OutlinedButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                            AppLocalizations.of(context)!
+                                                .follow),
+                                        style: OutlinedButton.styleFrom(
+                                            side: const BorderSide(
+                                                width: 0.5,
+                                                color: Colors.white),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(50))),
+                                      )
+                                    : const SizedBox(),
                                 widget.playlist.getReferenceUrl() != null
                                     ? TextButton(
                                         onPressed: _onLinkClicked,
-                                        child: const Icon(Icons.link_rounded))
+                                        child: const Icon(Icons.link_rounded),
+                                        style: TextButton.styleFrom(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                4, 0, 4, 0),
+                                            minimumSize: Size.zero))
                                     : const SizedBox()
                               ])),
                           Expanded(
-                              child: widget.playlist.isOnline
-                                  ? Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                          Checkbox(
-                                              value: _saveOfflineChecked,
-                                              onChanged: _onSaveOnlineChecked,
-                                              checkColor: AppColors.text,
-                                              side: MaterialStateBorderSide
-                                                  .resolveWith((states) =>
-                                                      BorderSide(
-                                                          width: 1,
-                                                          color:
-                                                              AppColors.text))),
-                                          Text(
-                                              AppLocalizations.of(context)!
-                                                  .saveOffline,
-                                              style: TextStyle(
-                                                  color: AppColors.text)),
-                                          TextButton(
-                                              onPressed: _onDeletePressed,
-                                              child: Icon(
-                                                Icons.delete_outline_rounded,
-                                                color: AppColors.text,
-                                              ))
-                                        ])
-                                  : const SizedBox())
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                Checkbox(
+                                    value: _saveOfflineChecked,
+                                    onChanged: _onSaveOnlineChecked,
+                                    checkColor: AppColors.text,
+                                    side: MaterialStateBorderSide.resolveWith(
+                                        (states) => BorderSide(
+                                            width: 1, color: AppColors.text))),
+                                Text(AppLocalizations.of(context)!.saveOffline,
+                                    style: TextStyle(color: AppColors.text)),
+                                TextButton(
+                                    onPressed: _onDeletePressed,
+                                    child: Icon(
+                                      Icons.delete_outline_rounded,
+                                      color: AppColors.text,
+                                    ),
+                                    style: TextButton.styleFrom(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            4, 0, 4, 0),
+                                        minimumSize: Size.zero))
+                              ]))
                         ],
-                      ),
-                      const SizedBox(height: 15),
-                      FutureBuilder<List<Song>>(
-                        future: widget.playlist.getVideosInfo(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return ListBody(
-                              children: snapshot.data!.map((e) {
-                                return SongItem(e);
-                              }).toList(),
-                            );
-                          } else {
-                            return const CircularProgressIndicator();
-                          }
-                        },
-                      ),
-                      const SizedBox(
-                        height: 50,
                       )
-                    ])
+                    ]),
+                    const SizedBox(height: 15),
+                    FutureBuilder<List<Song>>(
+                      future: widget.playlist.getVideosInfo(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return ListBody(
+                            children: snapshot.data!.map((e) {
+                              return SongItem(e);
+                            }).toList(),
+                          );
+                        } else {
+                          return const SizedBox(
+                              width: 150,
+                              height: 150,
+                              child: CircularProgressIndicator());
+                        }
+                      },
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    )
                   ])))
         ]));
   }

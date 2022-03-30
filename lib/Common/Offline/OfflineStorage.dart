@@ -27,7 +27,7 @@ class OfflineStorage {
   }
 
   static Future saveSong(OnlineSong video) async {
-    if(await OfflineStorage.isSongStoredById(video.id)){
+    if (await OfflineStorage.isSongStoredById(video.id)) {
       return;
     }
     OfflineStorage.updateState(video.id, DownloadState.downloading);
@@ -100,7 +100,6 @@ class OfflineStorage {
       final thumbnail = key.value['thumbnail'];
       final path = key.value['path'];
       final video = OfflineSong(id, title, thumbnail, path);
-      video.thumbnail = thumbnail;
       list.add(video);
     }
     return list;
@@ -144,15 +143,15 @@ class OfflineStorage {
     final songs = await playlist.getVideosInfo();
 
     for (var e in songs) {
-      if(!(await OfflineStorage.isSongStoredById(e.id))) {
+      if (!(await OfflineStorage.isSongStoredById(e.id))) {
         OfflineStorage.updateState(e.id, DownloadState.waiting);
       }
     }
 
     for (var e in songs) {
-      if(!(await OfflineStorage.isSongStoredById(e.id))) {
+      if (!(await OfflineStorage.isSongStoredById(e.id))) {
         final onlineSong =
-        await OnlineSong.createFromId(e.id, playlist: playlist);
+            await OnlineSong.createFromId(e.id, playlist: playlist);
         await OfflineStorage.saveSong(onlineSong);
       }
       if (!OfflineStorage._canDownload) {

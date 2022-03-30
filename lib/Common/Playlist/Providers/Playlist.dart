@@ -1,10 +1,12 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 import '../../Player/Song.dart';
 
 
 abstract class Playlist {
-  late String imageUrl;
+  late ImageProvider imageUrl;
   late String name;
   late Color? backgroundColor;
   bool isOnline=true;

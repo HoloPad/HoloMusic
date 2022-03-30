@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:holomusic/Common/Playlist/Providers/Playlist.dart';
 
 abstract class Song {
@@ -34,15 +37,28 @@ abstract class Song {
   }
 
   //If you want to load lazy staff, call this method
-  Future preloadStream() async {
+  Future preloadStream() async {}
 
+  Future downloadStream() async {}
+
+  Uri? getThumbnailUri() {
+    if (thumbnail != null) {
+      return Uri.tryParse(thumbnail!);
+    }
+    return null;
   }
-  Future downloadStream() async {
 
-  }
-
-  String getThumbnail() {
-    return thumbnail ??
-        "https://27mi124bz6zg1hqy6n192jkb-wpengine.netdna-ssl.com/wp-content/uploads/2019/10/Our-Top-10-Songs-About-School-768x569.png";
+  ImageProvider getThumbnailImageAsset() {
+    if (thumbnail != null) {
+      bool isUrl = Uri.tryParse(thumbnail!)?.host.isNotEmpty ?? false;
+      if (isUrl) {
+        return NetworkImage(thumbnail!);
+      } else {
+        final file = File(thumbnail!);
+        return FileImage(file);
+      }
+    } else {
+      return const AssetImage("resources/png/fake_thumbnail.png");
+    }
   }
 }

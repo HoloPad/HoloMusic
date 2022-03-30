@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
-import 'dart:io';
 import '../../Common/Offline/OfflineStorage.dart';
 import '../../Common/Parameters/AppColors.dart';
 import '../../Common/Player/Song.dart';
@@ -12,11 +11,7 @@ class SongOptions extends StatelessWidget {
   late Image _image;
 
   SongOptions(this.song, {Key? key}) : super(key: key) {
-    if (song.isOnline()) {
-      _image = Image(image: NetworkImage(song.getThumbnail()), height: 200);
-    } else {
-      _image = Image(image: FileImage(File(song.getThumbnail())), height: 200);
-    }
+      _image = Image(image:song.getThumbnailImageAsset(), height: 200);
   }
 
   final _titleStyle = const TextStyle(

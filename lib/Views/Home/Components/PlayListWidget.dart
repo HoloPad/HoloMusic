@@ -53,8 +53,8 @@ class _PlayListWidgetState extends State<PlayListWidget> {
                         color: widget.playlist.backgroundColor ??
                             Colors.transparent,
                         borderRadius: BorderRadius.circular(10)),
-                    child: ExtendedImage.network(
-                      widget.playlist.imageUrl,
+                    child: ExtendedImage(
+                      image: widget.playlist.imageUrl,
                       width: 150,
                       height: 150,
                       fit: BoxFit.contain,
