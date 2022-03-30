@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.53543895"
+     inkscape:cx="296.95262"
+     inkscape:cy="649.00023"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <linearGradient
+       id="linearGradient5038"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#ff0100;stop-opacity:1;"
+         offset="0"
+         id="stop5036" />
+    </linearGradient>
+  </defs>
+  <g
+     inkscape:label="Livello 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:#a00f0e;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 69.646846,208.14345 c -0.653646,-0.17343 -1.913224,-3.41015 -2.913441,-7.48667 -2.605697,-10.61987 -2.677914,-27.54848 -0.152104,-35.65565 0.450635,-1.44642 0.745423,-2.70378 0.655085,-2.79412 -0.316073,-0.31607 -5.447145,1.28859 -8.834872,2.76297 -4.184982,1.82135 -3.899989,1.8428 -3.624498,-0.27277 2.358354,-18.11033 13.887386,-39.28777 25.455024,-46.75778 2.162392,-1.3964 -0.729418,-1.99182 -6.998674,-1.44101 -4.518452,0.39698 -4.39709,0.60954 -1.665347,-2.91677 21.156755,-27.310485 56.728591,-33.152987 72.340501,-11.88158 2.31895,3.1596 2.06149,3.1749 -3.88335,0.23066 -8.52553,-4.222326 -17.44807,-6.874546 -23.55394,-7.001386 l -2.68229,-0.0558 -0.0871,15.868236 -0.0871,15.86824 -1.08638,-0.27739 c -10.91767,-2.78755 -21.783881,5.35443 -22.298714,16.70827 -0.761321,16.78965 19.434944,25.49988 30.913284,13.33225 5.13592,-5.44435 5.38287,-6.8761 5.09953,-29.5635 -0.17616,-14.10464 -0.13547,-17.68525 0.20091,-17.68069 0.69988,0.009 3.43168,1.74615 6.29733,4.00335 19.01325,14.97618 19.66965,45.08595 1.44896,66.46323 -1.79727,2.1086 -2.3101,2.38765 -1.98144,1.07812 0.2478,-0.98728 -0.12856,-6.50467 -0.44371,-6.50467 -0.11291,0 -0.50587,0.94028 -0.87307,2.08952 -3.17142,9.9255 -18.80558,23.60735 -29.5919,25.89663 l -1.0897,0.23126 v -2.91269 -2.9127 l -1.945684,1.79637 c -6.636952,6.12761 -22.264039,11.47145 -28.617263,9.78597 z"
+       id="path1448" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="fireball" />
+</svg>

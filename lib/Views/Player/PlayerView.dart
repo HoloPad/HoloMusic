@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -126,18 +125,15 @@ class _PlayerViewState extends State<PlayerView> {
                   valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
                   builder: (context, value, _) {
                     if (value != null) {
-                      final img = value.isOnline()
-                          ? ExtendedImage.network(value.getThumbnail(),
-                              height: 250)
-                          : ExtendedImage.file(File(value.getThumbnail()),
-                              height: 250);
+                      final img = ExtendedImage(
+                          image: value.getThumbnailImageAsset(), height: 250);
                       _updateBackground(img.image);
                       return img;
                     } else {
                       return const Image(
                           height: 250,
-                          image: NetworkImage(
-                              "https://27mi124bz6zg1hqy6n192jkb-wpengine.netdna-ssl.com/wp-content/uploads/2019/10/Our-Top-10-Songs-About-School-768x569.png"));
+                          image:
+                              AssetImage("resources/png/fake_thumbnail.png"));
                     }
                   }),
               const SizedBox(height: 20),

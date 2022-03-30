@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:holomusic/Common/Offline/OfflineStorage.dart';
 import 'package:holomusic/Common/Playlist/Providers/Playlist.dart';
 
@@ -7,7 +8,7 @@ class OfflinePlaylist extends Playlist {
   OfflinePlaylist()
       : super(
             "I tuoi salvataggi",
-            "https://27mi124bz6zg1hqy6n192jkb-wpengine.netdna-ssl.com/wp-content/uploads/2019/10/Our-Top-10-Songs-About-School-768x569.png",
+            const AssetImage("resources/png/fake_thumbnail.png"),
             null){
     isOnline=false;
   }

@@ -6,7 +6,6 @@ import 'package:holomusic/Common/Parameters/AppColors.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'dart:io';
 import '../Common/Player/OnlineSong.dart';
 import '../Common/Player/Song.dart';
 import '../Views/Playlist/SongOptions.dart';
@@ -91,17 +90,8 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                                 const Color.fromRGBO(100, 103, 115, 1),
                             enabled: _imageIsLoading,
                             child: ClipRRect(
-                              child: widget.song.isOnline()
-                                  ? ExtendedImage.network(
-                                      widget.song.getThumbnail(),
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.fill,
-                                      enableLoadState: true,
-                                      loadStateChanged: _onImageLoaded,
-                                    )
-                                  : ExtendedImage.file(
-                                      File(widget.song.getThumbnail()),
+                              child: ExtendedImage(
+                                     image: widget.song.getThumbnailImageAsset(),
                                       width: 60,
                                       height: 60,
                                       fit: BoxFit.fill,

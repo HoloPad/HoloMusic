@@ -51,7 +51,7 @@ class PlayerEngine {
         tag: MediaItem(
             id: source.id,
             title: source.title,
-            artUri: Uri.parse(source.getThumbnail()),
+            artUri: source.getThumbnailUri(),
             duration: source.getDuration()));
 
     await PlayerEngine.player.pause();

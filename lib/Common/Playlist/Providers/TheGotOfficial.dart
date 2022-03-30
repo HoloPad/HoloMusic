@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:html/parser.dart' show  parseFragment;
 import 'package:http/http.dart' as http;
@@ -16,7 +17,7 @@ class TheGotOfficial extends Playlist {
   TheGotOfficial(String countryCode)
       : super(
             "The Got Official",
-            "https://www.thegotofficial.com/res/images/thegottino.png",
+            const NetworkImage("https://www.thegotofficial.com/res/images/thegottino.png"),
             const Color.fromRGBO(178, 178, 107, 1)) {
     String url =
         "https://www.thegotofficial.com/youtube-" + countryCode.toLowerCase();
