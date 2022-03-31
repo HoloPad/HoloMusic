@@ -4,8 +4,7 @@ import 'dart:io';
 import 'package:holomusic/Common/Notifications/DownloadNotification.dart';
 import 'package:holomusic/Common/Player/OfflineSong.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
-import 'package:holomusic/Common/Playlist/PlaylistBase.dart'
-    as MyPlaylist;
+import 'package:holomusic/Common/Playlist/PlaylistBase.dart' as MyPlaylist;
 import 'package:holomusic/Common/Storage/PlaylistStorage.dart';
 import 'package:http/http.dart' as http;
 import 'package:localstore/localstore.dart';
@@ -27,11 +26,11 @@ class SongsStorage {
     _stateStream = StreamController.broadcast();
   }
 
-  static Future saveSong(OnlineSong video) async {
-    if (await SongsStorage.isSongStoredById(video.id)) {
-      return;
+  static Future<OfflineSong?> saveSong(OnlineSong song) async {
+    if (await SongsStorage.isSongStoredById(song.id)) {
+      return SongsStorage.getSongById(song.id);
     }
-    SongsStorage.updateState(video.id, DownloadState.downloading);
+    SongsStorage.updateState(song.id, DownloadState.downloading);
     try {
       print("downloading");
       final docDirectory = await getApplicationDocumentsDirectory();
@@ -43,7 +42,7 @@ class SongsStorage {
       final offlineDirectory = Directory(path);
       offlineDirectory.createSync(recursive: true);
 
-      final _video = await video.getVideo();
+      final _video = await song.getVideo();
 
       final imageResponse =
           await http.get(Uri.parse(_video.thumbnails.highResUrl));
@@ -58,7 +57,7 @@ class SongsStorage {
           Platform.pathSeparator +
           _video.id.value +
           ".webm");
-      final manifest = await _yt.videos.streamsClient.getManifest(video.id);
+      final manifest = await _yt.videos.streamsClient.getManifest(song.id);
       final streamInfo = manifest.audioOnly.withHighestBitrate();
       final stream = _yt.videos.streamsClient.get(streamInfo);
       var fileStream = songFile.openWrite();
@@ -68,13 +67,19 @@ class SongsStorage {
       await fileStream.close();
 
       await _db.collection(_collectionName).doc(_video.id.value).set({
-        "title": video.title,
+        "title": song.title,
         "thumbnail": imageFile.path,
         "path": songFile.path
       });
-      SongsStorage.updateState(video.id, DownloadState.downloaded);
+      SongsStorage.updateState(song.id, DownloadState.downloaded);
+      final offline = await SongsStorage.getSongById(song.id);
+      if (offline != null) {
+        PlaylistStorage.convertOnlineSongToOffline(song, offline);
+      }
+      return offline;
     } catch (_) {
-      SongsStorage.updateState(video.id, DownloadState.error);
+      SongsStorage.updateState(song.id, DownloadState.error);
+      return null;
     }
   }
 
@@ -122,7 +127,7 @@ class SongsStorage {
     }
     await _db.collection(_collectionName).doc(offlineSong.id).delete();
     SongsStorage.updateState(offlineSong.id, DownloadState.nope);
-    await PlaylistStorage.convertSongToOffline(offlineSong);
+    await PlaylistStorage.convertSongToOnline(offlineSong);
   }
 
   static Future<OfflineSong?> getSongById(String id) async {
@@ -161,7 +166,8 @@ class SongsStorage {
     }
   }
 
-  static Future<bool> isAtLeastOneSaved(MyPlaylist.PlaylistBase playlist) async {
+  static Future<bool> isAtLeastOneSaved(
+      MyPlaylist.PlaylistBase playlist) async {
     final list = await playlist.getVideosInfo();
     final saved = await SongsStorage.getOfflineSongs();
     return list.any((e0) => saved.any((e1) => e1.id == e0.id));
