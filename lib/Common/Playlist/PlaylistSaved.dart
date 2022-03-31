@@ -36,6 +36,7 @@ class PlaylistSaved extends PlaylistBase {
       id = _db.collection(_collectionName).doc().id;
       _db.collection(_collectionName).doc(id).set(toJson());
     }
+    //check songs
     _db.collection(_collectionName).doc(id).set(toJson());
   }
 

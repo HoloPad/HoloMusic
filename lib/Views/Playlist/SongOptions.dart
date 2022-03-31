@@ -10,8 +10,6 @@ import '../../Common/Parameters/AppStyle.dart';
 import '../../Common/Player/Song.dart';
 import '../../UIComponents/CommonComponents.dart';
 
-enum ExecutedOperation { none, delete, add }
-
 class SongOptions extends StatelessWidget {
   Song song;
   late Image _image;
@@ -23,6 +21,16 @@ class SongOptions extends StatelessWidget {
 
   final _titleStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white);
+
+  void onDownloadDeleteClick(BuildContext context, bool isOnline)async {
+    if (isOnline) {
+      SongsStorage.saveSong(song as OnlineSong);
+      Navigator.pop(context, false);
+    } else {
+      await SongsStorage.deleteSongById(song.id);
+      Navigator.pop(context, true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,35 +55,26 @@ class SongOptions extends StatelessWidget {
                               style: _titleStyle,
                             )),
                             const SizedBox(height: 20),
+                            //Save or delete offline
                             FutureBuilder<bool>(
                                 initialData: null,
                                 future: SongsStorage.isSongStoredById(song.id),
                                 builder: (_, snapshot) {
-                                  bool foundBetweenSaved =
+                                  final isInsideSave =
                                       snapshot.hasData && snapshot.data!;
                                   return CommonComponents.generateButton(
                                       text:
-                                          song.isOnline() && !foundBetweenSaved
+                                          song.isOnline() && !isInsideSave
                                               ? AppLocalizations.of(context)!
                                                   .saveOffline
                                               : AppLocalizations.of(context)!
                                                   .deleteDownloadedSong,
                                       icon:
-                                          song.isOnline() && !foundBetweenSaved
+                                          song.isOnline() && !isInsideSave
                                               ? Icons.add
                                               : Icons.delete_outline_rounded,
                                       onClick: () {
-                                        if (song.isOnline() &&
-                                            !foundBetweenSaved) {
-                                          SongsStorage.saveSong(
-                                              song as OnlineSong);
-                                          Navigator.pop(
-                                              context, ExecutedOperation.none);
-                                        } else {
-                                          SongsStorage.deleteSongById(song.id);
-                                          Navigator.pop(
-                                              context, ExecutedOperation.none);
-                                        }
+                                        onDownloadDeleteClick(context,song.isOnline() && !isInsideSave);
                                       });
                                 }),
                             CommonComponents.generateButton(
@@ -83,8 +82,7 @@ class SongOptions extends StatelessWidget {
                                     AppLocalizations.of(context)!.addToPlaylist,
                                 icon: Icons.add,
                                 onClick: () {
-                                  Navigator.pop(
-                                      context, ExecutedOperation.none);
+                                  Navigator.pop(context, false);
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -102,8 +100,7 @@ class SongOptions extends StatelessWidget {
                                         (playlist as PlaylistSaved)
                                             .deleteSong(song, save: true);
                                       }
-                                      Navigator.pop(
-                                          context, ExecutedOperation.delete);
+                                      Navigator.pop(context, true);
                                     })
                                 : const SizedBox(),
                             CommonComponents.generateButton(
@@ -111,14 +108,12 @@ class SongOptions extends StatelessWidget {
                                 icon: Icons.add,
                                 onClick: () {
                                   PlayerEngine.addSongToQueue(song);
-                                  Navigator.pop(
-                                      context, ExecutedOperation.none);
+                                  Navigator.pop(context, false);
                                 }),
                             const SizedBox(height: 15),
                             CommonComponents.generateButton(
                                 text: AppLocalizations.of(context)!.cancel,
-                                onClick: () => Navigator.pop(
-                                    context, ExecutedOperation.none),
+                                onClick: () => Navigator.pop(context, false),
                                 opacity: 0.5),
                           ]))),
             ])));

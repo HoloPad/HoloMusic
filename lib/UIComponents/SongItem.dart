@@ -1,15 +1,16 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/Notifications/DownloadNotification.dart';
-import 'package:holomusic/Common/Storage/SongsStorage.dart';
+import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
-import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
+import 'package:holomusic/Common/Storage/SongsStorage.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+
 import '../Common/Player/OnlineSong.dart';
 import '../Common/Player/Song.dart';
-import '../Views/Playlist/SongOptions.dart';
 import '../Common/Playlist/PlaylistBase.dart';
+import '../Views/Playlist/SongOptions.dart';
 import 'Shimmer.dart';
 
 class SongItem extends StatefulWidget {
@@ -41,7 +42,7 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                 builder: (context) =>
                     SongOptions(widget.song, playlist: widget.playlist)))
         .then((value) {
-      if ((value as ExecutedOperation) == ExecutedOperation.delete &&
+      if ((value as bool) &&
           widget.reloadList != null) widget.reloadList!();
     });
   }

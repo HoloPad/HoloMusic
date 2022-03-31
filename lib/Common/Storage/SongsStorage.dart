@@ -6,6 +6,7 @@ import 'package:holomusic/Common/Player/OfflineSong.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart'
     as MyPlaylist;
+import 'package:holomusic/Common/Storage/PlaylistStorage.dart';
 import 'package:http/http.dart' as http;
 import 'package:localstore/localstore.dart';
 import 'package:path_provider/path_provider.dart';
@@ -121,7 +122,7 @@ class SongsStorage {
     }
     await _db.collection(_collectionName).doc(offlineSong.id).delete();
     SongsStorage.updateState(offlineSong.id, DownloadState.nope);
-    //_storedSongIds.value = await OfflineStorage._updateStoredSongStream();
+    await PlaylistStorage.convertSongToOffline(offlineSong);
   }
 
   static Future<OfflineSong?> getSongById(String id) async {
