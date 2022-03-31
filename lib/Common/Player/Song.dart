@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:holomusic/Common/Playlist/Providers/Playlist.dart';
+import 'package:holomusic/Common/Player/OfflineSong.dart';
+import 'package:holomusic/Common/Player/OnlineSong.dart';
+import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 
 abstract class Song {
-  Playlist? playlist;
+  PlaylistBase? playlist;
   String id;
   String title;
   String? thumbnail;
@@ -18,6 +20,17 @@ abstract class Song {
   Future<Song?> getFirstOfThePlaylist();
 
   bool isOnline();
+
+  factory Song.fromJson(Map<String, dynamic> json) {
+    if(json['online']==true){
+      return OnlineSong.fromJson(json);
+    }
+    else {
+      return OfflineSong.fromJson(json);
+    }
+  }
+
+  Map<String, dynamic> toJson();
 
   bool isAPlaylist() {
     return playlist != null;
@@ -55,7 +68,10 @@ abstract class Song {
 
   ImageProvider getThumbnailImageAsset() {
     if (thumbnail != null) {
-      bool isUrl = Uri.tryParse(thumbnail!)?.host.isNotEmpty ?? false;
+      bool isUrl = Uri
+          .tryParse(thumbnail!)
+          ?.host
+          .isNotEmpty ?? false;
       if (isUrl) {
         return NetworkImage(thumbnail!);
       } else {

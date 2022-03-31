@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class AppColors {
+class AppStyle {
   static LinearGradient backgroundGradient = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -22,6 +22,16 @@ class AppColors {
   }
 
   static Color text = const Color.fromRGBO(255, 255, 255, 0.8);
+  static Color primaryBackground = const Color.fromRGBO(56, 56, 56, 0.8);
   static Color switchActiveColor = const Color.fromRGBO(255, 255, 255, 1);
   static Color switchInactiveColor = const Color.fromRGBO(255, 255, 255, 0.6);
+  static TextStyle textStyle = const TextStyle(color: Colors.white);
+  static TextStyle titleStyle =
+      const TextStyle(color: Colors.white, fontSize: 15);
+  static Color scaffoldBackgroundColor = Colors.blue;
+  static BoxDecoration scaffoldDecoration = BoxDecoration(
+      gradient: AppStyle.getStandardPaletteWithAnotherMainColor(
+          AppStyle.scaffoldBackgroundColor));
+
+  
 }

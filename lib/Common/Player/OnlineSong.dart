@@ -5,7 +5,7 @@ import 'package:holomusic/Common/Player/Song.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as YtExplode;
 
-import '../Playlist/Providers/Playlist.dart';
+import '../Playlist/PlaylistBase.dart';
 
 enum LoadingState { initialized, loading, loaded }
 
@@ -19,7 +19,8 @@ class OnlineSong extends Song {
   bool _offlineCompleted = false;
   Future<OnlineSong?>? _nextSongFuture;
 
-  OnlineSong(YtExplode.Video video, {bool preload = false, Playlist? playlist})
+  OnlineSong(YtExplode.Video video,
+      {bool preload = false, PlaylistBase? playlist})
       : super(video.id.value, video.title, video.thumbnails.highResUrl) {
     _yt = YtExplode.YoutubeExplode();
 
@@ -33,7 +34,7 @@ class OnlineSong extends Song {
   }
 
   OnlineSong.lazy(String id, String title, String? thumbnail,
-      {bool preload = false, Playlist? playlist})
+      {bool preload = false, PlaylistBase? playlist})
       : super(id, title, thumbnail) {
     _yt = YtExplode.YoutubeExplode();
     this.playlist = playlist;
@@ -43,15 +44,25 @@ class OnlineSong extends Song {
     }
   }
 
+  @override
+  factory OnlineSong.fromJson(Map<String, dynamic> json) {
+    return OnlineSong.lazy(json['id'], json['title'], json['thumbnail']);
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {"id": id, "title": title, "thumbnail": thumbnail, "online": true};
+  }
+
   static Future<OnlineSong> createFromId(String id,
-      {Playlist? playlist}) async {
+      {PlaylistBase? playlist}) async {
     final instance = YtExplode.YoutubeExplode();
     final video = await instance.videos.get(YtExplode.VideoId(id));
     return OnlineSong(video, playlist: playlist);
   }
 
   static Future<OnlineSong> createFromUrl(String url,
-      {Playlist? playlist}) async {
+      {PlaylistBase? playlist}) async {
     final instance = YtExplode.YoutubeExplode();
     final video = await instance.videos.get(url);
     return OnlineSong(video, playlist: playlist);
@@ -62,9 +73,9 @@ class OnlineSong extends Song {
     return video!;
   }
 
-  //Call this method when you really need the track.
-  //If the track was download, it returns the offline Uri, otherwise the online Uri
-  //Obviously the behaviours of this function depends by the preload parameter of the constructor.
+//Call this method when you really need the track.
+//If the track was download, it returns the offline Uri, otherwise the online Uri
+//Obviously the behaviours of this function depends by the preload parameter of the constructor.
   @override
   Future<Uri> getAudioUri() {
     if (_offlineCompleted && _offlineStream != null) {
@@ -109,7 +120,7 @@ class OnlineSong extends Song {
     return file.uri;
   }
 
-  //Returns -1 if not found
+//Returns -1 if not found
   Future<int> getCurrentIndexInsideAPlaylist() async {
     final _video = await getVideo();
     final listVideos = await playlist?.getVideosInfo();

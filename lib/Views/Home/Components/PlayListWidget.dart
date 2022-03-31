@@ -2,13 +2,13 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
-import '../../../Common/Playlist/Providers/Playlist.dart';
+import '../../../Common/Playlist/PlaylistBase.dart';
 import '../../../UIComponents/Shimmer.dart';
 
 class PlayListWidget extends StatefulWidget {
   Color? backgroundColor;
-  Playlist playlist;
-  Function(Playlist)? onClick;
+  PlaylistBase playlist;
+  Function(PlaylistBase)? onClick;
 
   PlayListWidget({Key? key, required this.playlist, this.onClick})
       : super(key: key);
@@ -43,6 +43,7 @@ class _PlayListWidgetState extends State<PlayListWidget> {
           }
         },
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Shimmer.fromColors(
                 baseColor: const Color.fromRGBO(34, 35, 39, 1),
@@ -53,14 +54,29 @@ class _PlayListWidgetState extends State<PlayListWidget> {
                         color: widget.playlist.backgroundColor ??
                             Colors.transparent,
                         borderRadius: BorderRadius.circular(10)),
-                    child: ExtendedImage(
-                      image: widget.playlist.imageUrl,
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.contain,
-                      loadStateChanged: _onImageLoaded,
-                    ))),
-            Text(widget.playlist.name, style: _nameTextStyle)
+                    child: FutureBuilder<ImageProvider<Object>>(
+                        future: widget.playlist.getImageProvider(),
+                        builder: (_, snapshot) {
+                          return ExtendedImage(
+                            image: snapshot.data ??
+                                const AssetImage(
+                                    "resources/png/fake_thumbnail.png"),
+                            width: 150,
+                            height: 150,
+                            fit: BoxFit.fill,
+                            loadStateChanged: _onImageLoaded,
+                          );
+                        }))),
+            SizedBox(
+                width: 150,
+                height: 30,
+                child: Text(
+                  widget.playlist.name,
+                  style: _nameTextStyle,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                ))
           ],
         ));
   }

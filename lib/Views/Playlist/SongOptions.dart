@@ -2,16 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
-import '../../Common/Offline/OfflineStorage.dart';
-import '../../Common/Parameters/AppColors.dart';
+import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
+import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
+import 'package:holomusic/Views/Playlist/PlaylistListView.dart';
+import '../../Common/Storage/SongsStorage.dart';
+import '../../Common/Parameters/AppStyle.dart';
 import '../../Common/Player/Song.dart';
+import '../../UIComponents/CommonComponents.dart';
+
+enum ExecutedOperation { none, delete, add }
 
 class SongOptions extends StatelessWidget {
   Song song;
   late Image _image;
+  PlaylistBase? playlist;
 
-  SongOptions(this.song, {Key? key}) : super(key: key) {
-      _image = Image(image:song.getThumbnailImageAsset(), height: 200);
+  SongOptions(this.song, {this.playlist, Key? key}) : super(key: key) {
+    _image = Image(image: song.getThumbnailImageAsset(), height: 200);
   }
 
   final _titleStyle = const TextStyle(
@@ -21,7 +28,7 @@ class SongOptions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-            decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
+            decoration: BoxDecoration(gradient: AppStyle.backgroundGradient),
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               Expanded(
                   child: Padding(
@@ -42,62 +49,77 @@ class SongOptions extends StatelessWidget {
                             const SizedBox(height: 20),
                             FutureBuilder<bool>(
                                 initialData: null,
-                                future: OfflineStorage.isSongStoredById(song.id),
+                                future: SongsStorage.isSongStoredById(song.id),
                                 builder: (_, snapshot) {
-                                  bool foundBetweenSaved = snapshot.hasData && snapshot.data!;
-                                  return TextButton(
-                                      onPressed: () {
+                                  bool foundBetweenSaved =
+                                      snapshot.hasData && snapshot.data!;
+                                  return CommonComponents.generateButton(
+                                      text:
+                                          song.isOnline() && !foundBetweenSaved
+                                              ? AppLocalizations.of(context)!
+                                                  .saveOffline
+                                              : AppLocalizations.of(context)!
+                                                  .deleteDownloadedSong,
+                                      icon:
+                                          song.isOnline() && !foundBetweenSaved
+                                              ? Icons.add
+                                              : Icons.delete_outline_rounded,
+                                      onClick: () {
                                         if (song.isOnline() &&
                                             !foundBetweenSaved) {
-                                          OfflineStorage.saveSong(
+                                          SongsStorage.saveSong(
                                               song as OnlineSong);
+                                          Navigator.pop(
+                                              context, ExecutedOperation.none);
                                         } else {
-                                          OfflineStorage.deleteSongById(song.id);
+                                          SongsStorage.deleteSongById(song.id);
+                                          Navigator.pop(
+                                              context, ExecutedOperation.none);
                                         }
-                                        Navigator.pop(context);
-                                      },
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(song.isOnline() &&
-                                                    !foundBetweenSaved
-                                                ? AppLocalizations.of(context)!
-                                                    .saveOffline
-                                                : AppLocalizations.of(context)!
-                                                    .deleteSong),
-                                            const SizedBox(width: 5),
-                                            const Icon(Icons.add)
-                                          ]));
+                                      });
                                 }),
-                            const SizedBox(height: 20),
-                            TextButton(
-                                onPressed: () {
+                            CommonComponents.generateButton(
+                                text:
+                                    AppLocalizations.of(context)!.addToPlaylist,
+                                icon: Icons.add,
+                                onClick: () {
+                                  Navigator.pop(
+                                      context, ExecutedOperation.none);
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              PlaylistListView(song)));
+                                }),
+                            (playlist != null && playlist is PlaylistSaved)
+                                ? CommonComponents.generateButton(
+                                    text: AppLocalizations.of(context)!
+                                        .deleteSongFromPlaylist,
+                                    icon: Icons.delete_outline_rounded,
+                                    onClick: () {
+                                      if (playlist != null &&
+                                          playlist is PlaylistSaved) {
+                                        (playlist as PlaylistSaved)
+                                            .deleteSong(song, save: true);
+                                      }
+                                      Navigator.pop(
+                                          context, ExecutedOperation.delete);
+                                    })
+                                : const SizedBox(),
+                            CommonComponents.generateButton(
+                                text: AppLocalizations.of(context)!.addToQueue,
+                                icon: Icons.add,
+                                onClick: () {
                                   PlayerEngine.addSongToQueue(song);
-                                  Navigator.pop(context);
-                                },
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(AppLocalizations.of(context)!
-                                          .addToQueue),
-                                      const SizedBox(width: 5),
-                                      const Icon(Icons.add)
-                                    ])),
-                            const SizedBox(height: 20),
-                            TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                          AppLocalizations.of(context)!.cancel),
-                                      const SizedBox(width: 5),
-                                      const Icon(Icons.cancel)
-                                    ])),
-                            const SizedBox(height: 20)
+                                  Navigator.pop(
+                                      context, ExecutedOperation.none);
+                                }),
+                            const SizedBox(height: 15),
+                            CommonComponents.generateButton(
+                                text: AppLocalizations.of(context)!.cancel,
+                                onClick: () => Navigator.pop(
+                                    context, ExecutedOperation.none),
+                                opacity: 0.5),
                           ]))),
             ])));
   }

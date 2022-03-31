@@ -7,6 +7,7 @@
   "library": "Library",
   "searchASong": "Search a song",
   "addToQueue": "Add to queue",
+  "addToPlaylist": "Add to a playlist",
   "cancel": "Cancel",
   "millions": "Millions",
   "billions": "Billions",
@@ -16,7 +17,17 @@
   "noRecentSearch": "There aren't recent searches",
   "saveOffline": "Save offline",
   "deleteSong": "Delete song",
+  "deleteDownloadedSong": "Download offline song",
+  "deleteDownloadedSongs": "Delete all downloaded songs",
+  "deleteSongFromPlaylist": "Delete from the playlist",
+  "deletePlaylist": "Delete playlist",
   "offlineContent": "Offline content",
   "areYouSure": "Are you sure?",
-  "deletePlaylistConfirm": "Do you want to delete the playlist?"
+  "deletePlaylistConfirm": "Do you want to delete the playlist?",
+  "savedSongs": "Saved songs",
+  "newPlaylist": "New playlist",
+  "selectWhereToSavePlaylist": "Select the destination playlist",
+  "save": "Save",
+  "insertPlaylistName": "Enter playlist name",
+  "yourPlaylist": "Your playlists"
 }

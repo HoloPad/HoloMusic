@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:holomusic/Common/Notifications/DownloadNotification.dart';
 import 'package:holomusic/Common/Player/OfflineSong.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
-import 'package:holomusic/Common/Playlist/Providers/Playlist.dart'
+import 'package:holomusic/Common/Playlist/PlaylistBase.dart'
     as MyPlaylist;
 import 'package:http/http.dart' as http;
 import 'package:localstore/localstore.dart';
@@ -14,7 +14,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 //Library used
 //https://pub.dev/packages/localstore
 
-class OfflineStorage {
+class SongsStorage {
   static final _db = Localstore.instance;
   static const _collectionName = "holomusic";
   static late List<DownloadNotification> _currentElementsState;
@@ -22,15 +22,15 @@ class OfflineStorage {
   static bool _canDownload = true;
 
   static void init() async {
-    _currentElementsState = await OfflineStorage.getCurrentState();
+    _currentElementsState = await SongsStorage.getCurrentState();
     _stateStream = StreamController.broadcast();
   }
 
   static Future saveSong(OnlineSong video) async {
-    if (await OfflineStorage.isSongStoredById(video.id)) {
+    if (await SongsStorage.isSongStoredById(video.id)) {
       return;
     }
-    OfflineStorage.updateState(video.id, DownloadState.downloading);
+    SongsStorage.updateState(video.id, DownloadState.downloading);
     try {
       print("downloading");
       final docDirectory = await getApplicationDocumentsDirectory();
@@ -71,14 +71,14 @@ class OfflineStorage {
         "thumbnail": imageFile.path,
         "path": songFile.path
       });
-      OfflineStorage.updateState(video.id, DownloadState.downloaded);
+      SongsStorage.updateState(video.id, DownloadState.downloaded);
     } catch (_) {
-      OfflineStorage.updateState(video.id, DownloadState.error);
+      SongsStorage.updateState(video.id, DownloadState.error);
     }
   }
 
   static void stopDownload() {
-    OfflineStorage._canDownload = false;
+    SongsStorage._canDownload = false;
   }
 
   static Future<List<OfflineSong>> getOfflineSongs() async {
@@ -108,7 +108,7 @@ class OfflineStorage {
   static Future deleteSongById(String id) async {
     final song = await getSongById(id);
     if (song != null) {
-      OfflineStorage.deleteSong(song);
+      SongsStorage.deleteSong(song);
     }
   }
 
@@ -120,7 +120,7 @@ class OfflineStorage {
       imgPath.deleteSync(recursive: true);
     }
     await _db.collection(_collectionName).doc(offlineSong.id).delete();
-    OfflineStorage.updateState(offlineSong.id, DownloadState.nope);
+    SongsStorage.updateState(offlineSong.id, DownloadState.nope);
     //_storedSongIds.value = await OfflineStorage._updateStoredSongStream();
   }
 
@@ -138,45 +138,45 @@ class OfflineStorage {
     return element != null;
   }
 
-  static Future savePlaylist(MyPlaylist.Playlist playlist) async {
-    OfflineStorage._canDownload = true;
+  static Future savePlaylist(MyPlaylist.PlaylistBase playlist) async {
+    SongsStorage._canDownload = true;
     final songs = await playlist.getVideosInfo();
 
     for (var e in songs) {
-      if (!(await OfflineStorage.isSongStoredById(e.id))) {
-        OfflineStorage.updateState(e.id, DownloadState.waiting);
+      if (!(await SongsStorage.isSongStoredById(e.id))) {
+        SongsStorage.updateState(e.id, DownloadState.waiting);
       }
     }
 
     for (var e in songs) {
-      if (!(await OfflineStorage.isSongStoredById(e.id))) {
+      if (!(await SongsStorage.isSongStoredById(e.id))) {
         final onlineSong =
             await OnlineSong.createFromId(e.id, playlist: playlist);
-        await OfflineStorage.saveSong(onlineSong);
+        await SongsStorage.saveSong(onlineSong);
       }
-      if (!OfflineStorage._canDownload) {
+      if (!SongsStorage._canDownload) {
         break;
       }
     }
   }
 
-  static Future<bool> isAtLeastOneSaved(MyPlaylist.Playlist playlist) async {
+  static Future<bool> isAtLeastOneSaved(MyPlaylist.PlaylistBase playlist) async {
     final list = await playlist.getVideosInfo();
-    final saved = await OfflineStorage.getOfflineSongs();
+    final saved = await SongsStorage.getOfflineSongs();
     return list.any((e0) => saved.any((e1) => e1.id == e0.id));
   }
 
-  static Future<bool> isAllSaved(MyPlaylist.Playlist playlist) async {
+  static Future<bool> isAllSaved(MyPlaylist.PlaylistBase playlist) async {
     final list = await playlist.getVideosInfo();
-    final saved = await OfflineStorage.getOfflineSongs();
+    final saved = await SongsStorage.getOfflineSongs();
     return list.every((e0) => saved.any((e1) => e1.id == e0.id));
   }
 
-  static Future deletePlaylist(MyPlaylist.Playlist playlist) async {
+  static Future deletePlaylist(MyPlaylist.PlaylistBase playlist) async {
     final songs = await playlist.getVideosInfo();
     for (var e in songs) {
-      final offlineSong = await OfflineStorage.getSongById(e.id);
-      if (offlineSong != null) await OfflineStorage.deleteSong(offlineSong);
+      final offlineSong = await SongsStorage.getSongById(e.id);
+      if (offlineSong != null) await SongsStorage.deleteSong(offlineSong);
     }
   }
 
@@ -197,7 +197,7 @@ class OfflineStorage {
   }
 
   static Future<List<DownloadNotification>> getCurrentState() async {
-    return (await OfflineStorage.getOfflineSongs())
+    return (await SongsStorage.getOfflineSongs())
         .map((e) => DownloadNotification(e.id, DownloadState.downloaded))
         .toList(growable: true);
   }

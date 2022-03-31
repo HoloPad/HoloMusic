@@ -1,4 +1,4 @@
-import 'package:holomusic/Common/Offline/OfflineStorage.dart';
+import 'package:holomusic/Common/Storage/SongsStorage.dart';
 import 'package:holomusic/Common/Player/Song.dart';
 
 class OfflineSong extends Song {
@@ -22,9 +22,26 @@ class OfflineSong extends Song {
     if (firstVideo == null) {
       return null;
     }
-    final song = await OfflineStorage.getSongById(firstVideo.id);
+    final song = await SongsStorage.getSongById(firstVideo.id);
     song?.playlist = playlist;
     return song;
+  }
+
+  @override
+  factory OfflineSong.fromJson(Map<String, dynamic> json) {
+    return OfflineSong(
+        json['id'], json['title'], json['thumbnail'], json['filePath']);
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "title": title,
+      "thumbnail": thumbnail,
+      "online":false,
+      "filePath": filePath
+    };
   }
 
   @override
@@ -49,7 +66,7 @@ class OfflineSong extends Song {
     } else {
       //Return next
       final next = videoList[currentSongIndex + 1];
-      next.playlist=playlist;
+      next.playlist = playlist;
       return next;
     }
   }

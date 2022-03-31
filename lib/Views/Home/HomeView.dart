@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/Playlist/Providers/OfflinePlaylist.dart';
-import 'package:holomusic/Views/Home/Components/PlayListWidget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:holomusic/Common/Playlist/PlaylistOffline.dart';
+import 'package:holomusic/Views/Home/Components/PlayListWidget.dart';
 import 'package:holomusic/Views/Playlist/PlaylistView.dart';
 
 import '../../Common/Player/Song.dart';
-import '../../Common/Playlist/Providers/Playlist.dart';
+import '../../Common/Playlist/PlaylistBase.dart';
 import '../../Common/Playlist/Providers/TheGotOfficial.dart';
 
 class HomeView extends StatefulWidget {
@@ -22,7 +22,7 @@ class HomeView extends StatefulWidget {
 class _HomeState extends State<HomeView> {
   final textStyle = const TextStyle(color: Colors.white, fontSize: 20);
   late List<Widget> chartsWidgets;
-  Playlist? _playListToView;
+  PlaylistBase? _playListToView;
 
   _HomeState() {
     chartsWidgets = <Widget>[
@@ -32,7 +32,7 @@ class _HomeState extends State<HomeView> {
     ];
   }
 
-  void onClicked(Playlist playlist) {
+  void onClicked(PlaylistBase playlist) {
     setState(() {
       _playListToView = playlist;
     });
@@ -62,7 +62,7 @@ class _HomeState extends State<HomeView> {
           ),
           Text(AppLocalizations.of(context)!.offlineContent, style: textStyle),
           const Divider(height: 10, color: Colors.transparent),
-          PlayListWidget(playlist: OfflinePlaylist(), onClick: onClicked)
+          PlayListWidget(playlist: PlaylistOffline(context), onClick: onClicked)
         ],
       );
     } else {

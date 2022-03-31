@@ -1,23 +1,25 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/Notifications/DownloadNotification.dart';
-import 'package:holomusic/Common/Offline/OfflineStorage.dart';
-import 'package:holomusic/Common/Parameters/AppColors.dart';
+import 'package:holomusic/Common/Storage/SongsStorage.dart';
+import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../Common/Player/OnlineSong.dart';
 import '../Common/Player/Song.dart';
 import '../Views/Playlist/SongOptions.dart';
-import '../Common/Playlist/Providers/Playlist.dart' as MyPlaylist;
+import '../Common/Playlist/PlaylistBase.dart';
 import 'Shimmer.dart';
 
 class SongItem extends StatefulWidget {
   Song song;
-  MyPlaylist.Playlist? playlist;
+  PlaylistBase? playlist;
   var yt = YoutubeExplode();
+  Function()? reloadList;
 
-  SongItem(this.song, {Key? key}) : super(key: key);
+  SongItem(this.song, {this.playlist, this.reloadList, Key? key})
+      : super(key: key);
 
   @override
   State<SongItem> createState() => _SongItemState();
@@ -33,8 +35,15 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
   }
 
   void _onOptionClick(BuildContext context) async {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => SongOptions(widget.song)));
+    Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    SongOptions(widget.song, playlist: widget.playlist)))
+        .then((value) {
+      if ((value as ExecutedOperation) == ExecutedOperation.delete &&
+          widget.reloadList != null) widget.reloadList!();
+    });
   }
 
   void _onPlayClicked() async {
@@ -44,7 +53,7 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
       PlayerEngine.play(widget.song);
     } else {
       //Check first on the offline storage
-      final offlineSong = await OfflineStorage.getSongById(widget.song.id);
+      final offlineSong = await SongsStorage.getSongById(widget.song.id);
       if (offlineSong != null) {
         PlayerEngine.play(offlineSong);
       } else {
@@ -70,7 +79,7 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
     const itemRadius = 10.0;
 
     return Card(
-        color: const Color.fromRGBO(56, 56, 56, 0.8),
+        color: AppStyle.primaryBackground,
         elevation: 1,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(itemRadius)),
@@ -91,13 +100,13 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                             enabled: _imageIsLoading,
                             child: ClipRRect(
                               child: ExtendedImage(
-                                     image: widget.song.getThumbnailImageAsset(),
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.fill,
-                                      enableLoadState: true,
-                                      loadStateChanged: _onImageLoaded,
-                                    ),
+                                image: widget.song.getThumbnailImageAsset(),
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.fill,
+                                enableLoadState: true,
+                                loadStateChanged: _onImageLoaded,
+                              ),
                               borderRadius: const BorderRadius.horizontal(
                                   left: Radius.circular(itemRadius)),
                             )),
@@ -118,11 +127,11 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                       ]))),
           Row(children: [
             FutureBuilder<List<DownloadNotification>>(
-                future: OfflineStorage.getCurrentState(),
+                future: SongsStorage.getCurrentState(),
                 builder: (_, s0) {
                   if (s0.hasData) {
                     return StreamBuilder<List<DownloadNotification>>(
-                        stream: OfflineStorage.getDownloadStream(),
+                        stream: SongsStorage.getDownloadStream(),
                         initialData: s0.data!,
                         builder: (_, s1) {
                           if (s1.hasData) {
@@ -137,9 +146,10 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                                         color: Colors.grey);
                                   case DownloadState.downloaded:
                                     return Icon(Icons.download_done,
-                                        color: AppColors.text);
+                                        color: AppStyle.text);
                                   case DownloadState.error:
-                                    return Icon(Icons.clear,color: AppColors.text);
+                                    return Icon(Icons.clear,
+                                        color: AppStyle.text);
                                 }
                               }
                             }
