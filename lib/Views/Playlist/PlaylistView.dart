@@ -147,7 +147,6 @@ class _PlaylistViewState extends State<PlaylistView> {
                                         });
                                       });
                                     }
-                                    print(loadedElements);
                                     return true;
                                   },
                                   child: ListBody(
