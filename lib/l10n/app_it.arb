@@ -7,6 +7,7 @@
   "library": "Raccolta",
   "searchASong": "Cerca una canzone",
   "addToQueue": "Aggiungi in coda",
+  "addToPlaylist": "Aggiungi ad una playlist",
   "cancel": "Annulla",
   "millions": "Milioni",
   "billions": "Miliardi",
@@ -15,8 +16,18 @@
   "cannotLoadSong": "Impossibile caricare il brano",
   "noRecentSearch": "Non ci sono ricerche recenti",
   "saveOffline": "Salva offline",
-  "deleteSong": "Elimina brano",
+  "saveOfflineAllSongs": "Salva offline tutti i brani",
+  "deleteDownloadedSong": "Elimina brano scaricato",
+  "deleteDownloadedSongs": "Elimina i brani scaricati",
+  "deleteSongFromPlaylist": "Elimina dalla playlist",
+  "deletePlaylist": "Elimina playlist",
   "offlineContent": "Contenuto offline",
   "areYouSure": "Sei sicuro?",
-  "deletePlaylistConfirm": "Vuoi eliminare la playlist?"
+  "deletePlaylistConfirm": "Vuoi eliminare la playlist?",
+  "savedSongs": "Brani salvati",
+  "newPlaylist": "Nuova playlist",
+  "selectWhereToSavePlaylist": "In quale playlist vuoi aggiungere il brano?",
+  "save": "Salva",
+  "insertPlaylistName": "Inserisci il nome della playlist",
+  "yourPlaylist": "Le tue playlist"
 }

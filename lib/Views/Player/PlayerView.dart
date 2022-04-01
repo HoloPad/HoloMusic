@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/Parameters/AppColors.dart';
+import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Views/Player/Components/TimeSlider.dart';
 import 'package:marquee_text/marquee_text.dart';
@@ -27,7 +27,7 @@ class PlayerView extends StatefulWidget {
 
 class _PlayerViewState extends State<PlayerView> {
   bool updatePosition = false;
-  Color _mainColor = Colors.blue;
+  Color _mainColor = AppStyle.scaffoldBackgroundColor;
   ImageProvider? _lastProvider;
   bool _hasNextEnabled = true;
 
@@ -111,8 +111,9 @@ class _PlayerViewState extends State<PlayerView> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
               gradient:
-                  AppColors.getStandardPaletteWithAnotherMainColor(_mainColor)),
-          child: Column(
+                  AppStyle.getStandardPaletteWithAnotherMainColor(_mainColor)),
+          child: SafeArea(
+              child: Column(
             children: [
               Row(children: [
                 TextButton(
@@ -213,7 +214,7 @@ class _PlayerViewState extends State<PlayerView> {
                 ],
               ),
             ],
-          )),
+          ))),
       bottomSheet: ValueListenableBuilder<int>(
           valueListenable: widget.playerStateStream,
           builder: (_, value, __) {

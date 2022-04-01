@@ -2,17 +2,20 @@ import 'dart:math';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:holomusic/Common/Offline/OfflineStorage.dart';
-import 'package:holomusic/Common/Parameters/AppColors.dart';
+import 'package:holomusic/Common/Notifications/ShimmerLoadingNotification.dart';
+import 'package:holomusic/Common/Parameters/AppStyle.dart';
+import 'package:holomusic/UIComponents/Shimmer.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
+import 'package:holomusic/Views/Playlist/PlaylistOption.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../Common/Player/Song.dart';
-import '../../Common/Playlist/Providers/Playlist.dart';
+import '../../Common/Playlist/PlaylistBase.dart';
 
 class PlaylistView extends StatefulWidget {
-  Playlist playlist;
+  PlaylistBase playlist;
   Function()? onBackPressed;
 
   PlaylistView(this.playlist, this.onBackPressed, {Key? key}) : super(key: key);
@@ -23,17 +26,8 @@ class PlaylistView extends StatefulWidget {
 
 class _PlaylistViewState extends State<PlaylistView> {
   double _imageSize = 150;
-  bool _saveOfflineChecked = false;
-
-  @override
-  void initState() {
-    OfflineStorage.isAllSaved(widget.playlist).then((value) {
-      setState(() {
-        _saveOfflineChecked = value;
-      });
-    });
-    super.initState();
-  }
+  bool _loadingComplete = false;
+  var loadedElements = 0;
 
   void _onLinkClicked() async {
     if (!await launch(widget.playlist.getReferenceUrl()!)) {
@@ -41,49 +35,8 @@ class _PlaylistViewState extends State<PlaylistView> {
     }
   }
 
-  void _onSaveOnlineChecked(bool? state) {
-    if (state != null) {
-      setState(() {
-        _saveOfflineChecked = state;
-      });
-      if (state) {
-        OfflineStorage.savePlaylist(widget.playlist);
-      } else {
-        OfflineStorage.stopDownload();
-      }
-    }
-  }
-
-  void _onDeletePressed() {
-    final textStyle = TextStyle(color: AppColors.text);
-    final dialog = AlertDialog(
-      title: Text(AppLocalizations.of(context)!.areYouSure, style: textStyle),
-      content: Text(AppLocalizations.of(context)!.deletePlaylistConfirm,
-          style: textStyle),
-      actions: [
-        TextButton(
-            onPressed: () {
-              setState(() {
-                _saveOfflineChecked = false;
-              });
-              OfflineStorage.deletePlaylist(widget.playlist);
-              Navigator.pop(context);
-            },
-            child: Text(AppLocalizations.of(context)!.yes, style: textStyle)),
-        TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.no, style: textStyle))
-      ],
-      elevation: 24,
-      backgroundColor: Colors.black,
-    );
-    showDialog(context: context, builder: (_) => dialog);
-  }
-
   @override
   Widget build(BuildContext context) {
-    const _nameTextStyle = TextStyle(color: Colors.white, fontSize: 15);
-
     return Padding(
         padding: const EdgeInsets.all(10),
         child: Column(children: [
@@ -109,96 +62,109 @@ class _PlaylistViewState extends State<PlaylistView> {
                               color: widget.playlist.backgroundColor ??
                                   Colors.transparent,
                               borderRadius: BorderRadius.circular(10)),
-                          child: ExtendedImage(
-                            image: widget.playlist.imageUrl,
-                            width: _imageSize,
-                            height: _imageSize,
-                          )),
+                          child: FutureBuilder<ImageProvider<Object>>(
+                              future: widget.playlist.getImageProvider(),
+                              builder: (_, snapshot) {
+                                return ExtendedImage(
+                                  image: snapshot.data ??
+                                      const AssetImage(
+                                          "resources/png/fake_thumbnail.png"),
+                                  width: _imageSize,
+                                  height: _imageSize,
+                                );
+                              })),
                       const SizedBox(height: 15),
-                      Text(widget.playlist.name, style: _nameTextStyle),
+                      Text(widget.playlist.name, style: AppStyle.titleStyle),
                       const SizedBox(height: 15),
-                      Flex(
-                        direction: Axis.horizontal,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        clipBehavior: Clip.antiAlias,
-                        children: [
-                          Flexible(
-                              child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                widget.playlist.isOnline
-                                    ? OutlinedButton(
-                                        onPressed: () {},
-                                        child: Text(
-                                            AppLocalizations.of(context)!
-                                                .follow),
-                                        style: OutlinedButton.styleFrom(
-                                            side: const BorderSide(
-                                                width: 0.5,
-                                                color: Colors.white),
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(50))),
-                                      )
-                                    : const SizedBox(),
-                                widget.playlist.getReferenceUrl() != null
-                                    ? TextButton(
-                                        onPressed: _onLinkClicked,
-                                        child: const Icon(Icons.link_rounded),
-                                        style: TextButton.styleFrom(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                4, 0, 4, 0),
-                                            minimumSize: Size.zero))
-                                    : const SizedBox()
-                              ])),
-                          Expanded(
-                              child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                Checkbox(
-                                    value: _saveOfflineChecked,
-                                    onChanged: _onSaveOnlineChecked,
-                                    checkColor: AppColors.text,
-                                    side: MaterialStateBorderSide.resolveWith(
-                                        (states) => BorderSide(
-                                            width: 1, color: AppColors.text))),
-                                Text(AppLocalizations.of(context)!.saveOffline,
-                                    style: TextStyle(color: AppColors.text)),
-                                TextButton(
-                                    onPressed: _onDeletePressed,
-                                    child: Icon(
-                                      Icons.delete_outline_rounded,
-                                      color: AppColors.text,
-                                    ),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            widget.playlist.isOnline
+                                ? OutlinedButton(
+                                    onPressed: () {},
+                                    child: Text(
+                                        AppLocalizations.of(context)!.follow),
+                                    style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(
+                                            width: 0.5, color: Colors.white),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(50))),
+                                  )
+                                : const SizedBox(),
+                            widget.playlist.getReferenceUrl() != null
+                                ? TextButton(
+                                    onPressed: _onLinkClicked,
+                                    child: const Icon(Icons.link_rounded),
                                     style: TextButton.styleFrom(
                                         padding: const EdgeInsets.fromLTRB(
                                             4, 0, 4, 0),
                                         minimumSize: Size.zero))
-                              ]))
+                                : const SizedBox()
+                          ]),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          TextButton(
+                              onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          PlaylistOptions(widget.playlist))),
+                              child: Icon(
+                                Icons.more_vert,
+                                color: AppStyle.text,
+                              ),
+                              style: TextButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 0, 4, 0),
+                                  minimumSize: Size.zero))
                         ],
                       )
                     ]),
                     const SizedBox(height: 15),
                     FutureBuilder<List<Song>>(
-                      future: widget.playlist.getVideosInfo(),
+                      future: widget.playlist.getSongs(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
-                          return ListBody(
-                            children: snapshot.data!.map((e) {
-                              return SongItem(e);
-                            }).toList(),
-                          );
+                          return Shimmer.fromColors(
+                              baseColor: AppStyle.ShimmerColorBase,
+                              highlightColor: AppStyle.ShimmerColorBackground,
+                              enabled: !_loadingComplete,
+                              child: NotificationListener<
+                                      ShimmerLoadingNotification>(
+                                  onNotification: (not) {
+                                    if (not.id != "songitem") return false;
+                                    loadedElements++;
+                                    if (loadedElements ==
+                                        snapshot.data!.length) {
+                                      SchedulerBinding.instance
+                                          ?.addPostFrameCallback((timeStamp) {
+                                        setState(() {
+                                          _loadingComplete = true;
+                                        });
+                                      });
+                                    }
+                                    return true;
+                                  },
+                                  child: ListBody(
+                                    children: snapshot.data!.map((e) {
+                                      return SongItem(e,
+                                          playlist: widget.playlist,
+                                          reloadList: () => setState(() {}));
+                                    }).toList(),
+                                  )));
                         } else {
                           return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                            SizedBox(
-                                width: 50,
-                                height: 50,
-                                child: CircularProgressIndicator())
-                          ]);
+                                SizedBox(
+                                    width: 50,
+                                    height: 50,
+                                    child: CircularProgressIndicator())
+                              ]);
                         }
                       },
                     ),

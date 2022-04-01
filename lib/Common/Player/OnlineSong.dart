@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:holomusic/Common/Player/OfflineSong.dart';
 import 'package:holomusic/Common/Player/Song.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as YtExplode;
 
-import '../Playlist/Providers/Playlist.dart';
+import '../Playlist/PlaylistBase.dart';
+import '../Storage/PlaylistStorage.dart';
 
 enum LoadingState { initialized, loading, loaded }
 
@@ -19,7 +22,8 @@ class OnlineSong extends Song {
   bool _offlineCompleted = false;
   Future<OnlineSong?>? _nextSongFuture;
 
-  OnlineSong(YtExplode.Video video, {bool preload = false, Playlist? playlist})
+  OnlineSong(YtExplode.Video video,
+      {bool preload = false, PlaylistBase? playlist})
       : super(video.id.value, video.title, video.thumbnails.highResUrl) {
     _yt = YtExplode.YoutubeExplode();
 
@@ -33,7 +37,7 @@ class OnlineSong extends Song {
   }
 
   OnlineSong.lazy(String id, String title, String? thumbnail,
-      {bool preload = false, Playlist? playlist})
+      {bool preload = false, PlaylistBase? playlist})
       : super(id, title, thumbnail) {
     _yt = YtExplode.YoutubeExplode();
     this.playlist = playlist;
@@ -43,15 +47,25 @@ class OnlineSong extends Song {
     }
   }
 
+  @override
+  factory OnlineSong.fromJson(Map<String, dynamic> json) {
+    return OnlineSong.lazy(json['id'], json['title'], json['thumbnail']);
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {"id": id, "title": title, "thumbnail": thumbnail, "online": true};
+  }
+
   static Future<OnlineSong> createFromId(String id,
-      {Playlist? playlist}) async {
+      {PlaylistBase? playlist}) async {
     final instance = YtExplode.YoutubeExplode();
     final video = await instance.videos.get(YtExplode.VideoId(id));
     return OnlineSong(video, playlist: playlist);
   }
 
   static Future<OnlineSong> createFromUrl(String url,
-      {Playlist? playlist}) async {
+      {PlaylistBase? playlist}) async {
     final instance = YtExplode.YoutubeExplode();
     final video = await instance.videos.get(url);
     return OnlineSong(video, playlist: playlist);
@@ -62,9 +76,9 @@ class OnlineSong extends Song {
     return video!;
   }
 
-  //Call this method when you really need the track.
-  //If the track was download, it returns the offline Uri, otherwise the online Uri
-  //Obviously the behaviours of this function depends by the preload parameter of the constructor.
+//Call this method when you really need the track.
+//If the track was download, it returns the offline Uri, otherwise the online Uri
+//Obviously the behaviours of this function depends by the preload parameter of the constructor.
   @override
   Future<Uri> getAudioUri() {
     if (_offlineCompleted && _offlineStream != null) {
@@ -109,10 +123,10 @@ class OnlineSong extends Song {
     return file.uri;
   }
 
-  //Returns -1 if not found
+//Returns -1 if not found
   Future<int> getCurrentIndexInsideAPlaylist() async {
     final _video = await getVideo();
-    final listVideos = await playlist?.getVideosInfo();
+    final listVideos = await playlist?.getSongs();
     return listVideos?.indexWhere((element) => element.id == _video.id.value) ??
         -1;
   }
@@ -137,7 +151,7 @@ class OnlineSong extends Song {
       return _nextSongFuture!;
     }
     final currentIndex = await getCurrentIndexInsideAPlaylist();
-    final listVideos = await playlist?.getVideosInfo();
+    final listVideos = await playlist?.getSongs();
     if (listVideos != null && currentIndex + 1 < listVideos.length) {
       //there is a next element
       final nextVideo = listVideos.elementAt(currentIndex + 1);
@@ -151,7 +165,7 @@ class OnlineSong extends Song {
   @override
   Future<OnlineSong?> getFirstOfThePlaylist() async {
     if (isAPlaylist()) {
-      final videoList = await playlist?.getVideosInfo();
+      final videoList = await playlist?.getSongs();
       final firstVideo = videoList?.first;
       if (firstVideo != null) {
         return await OnlineSong.createFromId(firstVideo.id, playlist: playlist);
@@ -161,7 +175,64 @@ class OnlineSong extends Song {
   }
 
   @override
-  bool isOnline() {
-    return true;
+  Future saveSong() async {
+    if (!await isOnline()) {
+      return;
+    }
+    try {
+      stateNotifier.value = SongState.downloading;
+      final docDirectory = await getApplicationDocumentsDirectory();
+      final path = docDirectory.path +
+          Platform.pathSeparator +
+          "holomusic" +
+          Platform.pathSeparator +
+          "offline";
+      final offlineDirectory = Directory(path);
+      offlineDirectory.createSync(recursive: true);
+
+      final _video = await getVideo();
+
+      final imageResponse =
+          await http.get(Uri.parse(_video.thumbnails.highResUrl));
+      final imageFile = File(offlineDirectory.path +
+          Platform.pathSeparator +
+          _video.id.value +
+          ".jpg");
+      imageFile.writeAsBytes(imageResponse.bodyBytes, flush: true);
+
+      var songFile = File(offlineDirectory.path +
+          Platform.pathSeparator +
+          _video.id.value +
+          ".webm");
+      final manifest = await _yt.videos.streamsClient.getManifest(id);
+      final streamInfo = manifest.audioOnly.withHighestBitrate();
+      final stream = _yt.videos.streamsClient.get(streamInfo);
+      var fileStream = songFile.openWrite();
+      await stream.pipe(fileStream);
+      // Close the file.
+      await fileStream.flush();
+      await fileStream.close();
+
+      await db.collection(collectionName).doc(_video.id.value).set(
+          {"title": title, "thumbnail": imageFile.path, "path": songFile.path});
+
+      final offline = await OfflineSong.getById(id);
+      if (offline != null) {
+        PlaylistStorage.convertOnlineSongToOffline(this, offline);
+      }
+      stateNotifier.value = SongState.offline;
+    } catch (_) {
+      stateNotifier.value = SongState.errorOnDownloading;
+    }
+  }
+
+  @override
+  Future deleteSong() async {
+    if (await isOnline()) {
+      return;
+    }
+    final offlineSong = await OfflineSong.getById(id);
+    await offlineSong?.deleteSong();
+    stateNotifier.value = SongState.online;
   }
 }

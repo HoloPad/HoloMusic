@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
-import 'package:holomusic/Common/Offline/OfflineStorage.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Home/HomeView.dart';
+import 'package:holomusic/Views/Library/LibraryView.dart';
 import 'package:holomusic/Views/Search/SearchView.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
-import 'Common/Parameters/AppColors.dart';
+import 'Common/Parameters/AppStyle.dart';
 import 'Common/Player/PlayerStateController.dart';
 
 Future<void> main() async {
@@ -22,7 +22,6 @@ Future<void> main() async {
     androidNotificationOngoing: true,
   );
   PlayerEngine.initialize();
-  OfflineStorage.init();
   runApp(const MyApp());
 }
 
@@ -83,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
     pageList = [
       HomeView(),
       const SearchView(),
-      Text("To implement"),
+      const LibraryView(),
     ];
 
     PlayerEngine.getCurrentVideoHandlerPlaying().addListener(() {
@@ -114,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Container(
-            decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
+            decoration: BoxDecoration(gradient: AppStyle.backgroundGradient),
             child: Scaffold(
               backgroundColor: Colors.transparent,
               body: NotificationListener<LoadingNotification>(

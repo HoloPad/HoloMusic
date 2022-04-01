@@ -111,7 +111,7 @@ class PlayerEngine {
     }
     if (previousSong == null) {
       //Search on playlist
-      final songs = await _currentPlaying?.playlist?.getVideosInfo();
+      final songs = await _currentPlaying?.playlist?.getSongs();
       if (songs == null) {
         return;
       }

@@ -8,9 +8,9 @@ import 'package:http/http.dart' as http;
 import 'package:youtube_parser/youtube_parser.dart';
 
 import '../../Player/Song.dart';
-import 'Playlist.dart';
+import '../PlaylistBase.dart';
 
-class TheGotOfficial extends Playlist {
+class TheGotOfficial extends PlaylistBase {
   late Uri url;
   Future<List<Song>>? _listVideoCache;
 
@@ -30,7 +30,7 @@ class TheGotOfficial extends Playlist {
   }
 
   @override
-  Future<List<Song>> getVideosInfo() async {
+  Future<List<Song>> getSongs() async {
     _listVideoCache ??= _getVideosInfo();
     return _listVideoCache!;
   }

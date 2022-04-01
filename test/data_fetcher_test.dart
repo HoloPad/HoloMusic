@@ -5,7 +5,7 @@ void main() {
   group('Fetcher:', () {
     test('The Got Official', () async {
       final got = TheGotOfficial("it");
-      final list = await got.getVideosInfo();
+      final list = await got.getSongs();
       expect(list.length, 20);
     });
   });
