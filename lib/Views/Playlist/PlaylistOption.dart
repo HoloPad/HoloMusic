@@ -33,7 +33,6 @@ class PlaylistOptions extends StatelessWidget {
                         width: 150,
                         height: 150,
                         fit: BoxFit.fill,
-                        //loadStateChanged: _onImageLoaded,
                       );
                     }),
                 const SizedBox(height: 15),
