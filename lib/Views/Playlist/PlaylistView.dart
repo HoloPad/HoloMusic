@@ -2,11 +2,9 @@ import 'dart:math';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:holomusic/Common/Notifications/ShimmerLoadingNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
-import 'package:holomusic/UIComponents/Shimmer.dart';
+import 'package:holomusic/UIComponents/NotificationShimmer.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
 import 'package:holomusic/Views/Playlist/PlaylistOption.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,7 +24,6 @@ class PlaylistView extends StatefulWidget {
 
 class _PlaylistViewState extends State<PlaylistView> {
   double _imageSize = 150;
-  bool _loadingComplete = false;
   var loadedElements = 0;
 
   void _onLinkClicked() async {
@@ -129,33 +126,16 @@ class _PlaylistViewState extends State<PlaylistView> {
                       future: widget.playlist.getSongs(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
-                          return Shimmer.fromColors(
-                              baseColor: AppStyle.ShimmerColorBase,
-                              highlightColor: AppStyle.ShimmerColorBackground,
-                              enabled: !_loadingComplete,
-                              child: NotificationListener<
-                                      ShimmerLoadingNotification>(
-                                  onNotification: (not) {
-                                    if (not.id != "songitem") return false;
-                                    loadedElements++;
-                                    if (loadedElements ==
-                                        snapshot.data!.length) {
-                                      SchedulerBinding.instance
-                                          ?.addPostFrameCallback((timeStamp) {
-                                        setState(() {
-                                          _loadingComplete = true;
-                                        });
-                                      });
-                                    }
-                                    return true;
-                                  },
-                                  child: ListBody(
-                                    children: snapshot.data!.map((e) {
-                                      return SongItem(e,
-                                          playlist: widget.playlist,
-                                          reloadList: () => setState(() {}));
-                                    }).toList(),
-                                  )));
+                          return NotificationShimmer(
+                              elementsToLoad: snapshot.data!.length,
+                              notificationId: 'songitem',
+                              child: ListBody(
+                                children: snapshot.data!.map((e) {
+                                  return SongItem(e,
+                                      playlist: widget.playlist,
+                                      reloadList: () => setState(() {}));
+                                }).toList(),
+                              ));
                         } else {
                           return Row(
                               mainAxisAlignment: MainAxisAlignment.center,

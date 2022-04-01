@@ -85,6 +85,7 @@ class SongItem extends StatelessWidget {
                           height: 60,
                           fit: BoxFit.fill,
                           enableLoadState: true,
+                          handleLoadingProgress: true,
                           loadStateChanged: (state) =>
                               _onImageLoaded(state, context),
                         ),
@@ -107,7 +108,6 @@ class SongItem extends StatelessWidget {
             ValueListenableBuilder<SongState>(
               valueListenable: song.getStateNotifier(),
               builder: (_, state, __) {
-                //print(state.name + " " + song.title+" "+song.runtimeType.toString());
                 switch (state) {
                   case SongState.online:
                     return const SizedBox();
@@ -120,41 +120,6 @@ class SongItem extends StatelessWidget {
                 }
               },
             ),
-            /*
-            FutureBuilder<List<DownloadNotification>>(
-                future: SongsStorage.getCurrentState(),
-                builder: (_, s0) {
-                  if (s0.hasData) {
-                    return StreamBuilder<List<DownloadNotification>>(
-                        stream: SongsStorage.getDownloadStream(),
-                        initialData: s0.data!,
-                        builder: (_, s1) {
-                          if (s1.hasData) {
-                            for (var e in s1.data!) {
-                              if (e.id == widget.song.id) {
-                                switch (e.state) {
-                                  case DownloadState.nope:
-                                  case DownloadState.waiting:
-                                    return const SizedBox();
-                                  case DownloadState.downloading:
-                                    return const CircularProgressIndicator(
-                                        color: Colors.grey);
-                                  case DownloadState.downloaded:
-                                    return Icon(Icons.download_done,
-                                        color: AppStyle.text);
-                                  case DownloadState.error:
-                                    return Icon(Icons.clear,
-                                        color: AppStyle.text);
-                                }
-                              }
-                            }
-                          }
-                          return const SizedBox();
-                        });
-                  } else {
-                    return const SizedBox();
-                  }
-                })*/
             TextButton(
                 onPressed: () => _onOptionClick(context),
                 child: const Icon(Icons.more_vert))

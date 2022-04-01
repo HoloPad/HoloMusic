@@ -104,7 +104,7 @@ class Shimmer extends StatefulWidget {
         1.0
       ]),
         super(key: key);
-
+  
   @override
   _ShimmerState createState() => _ShimmerState();
 

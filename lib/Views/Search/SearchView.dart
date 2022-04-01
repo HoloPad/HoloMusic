@@ -9,6 +9,7 @@ import 'package:holomusic/UIComponents/SongItem.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../../Common/Player/Song.dart';
+import '../../UIComponents/NotificationShimmer.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({Key? key}) : super(key: key);
@@ -152,14 +153,17 @@ class _SearchViewState extends State<SearchView> {
                         return Expanded(
                             child: Padding(
                                 padding: const EdgeInsets.all(8),
-                                child: ListView(children: [
-                                  Text(
-                                      AppLocalizations.of(context)!
-                                          .recentSearch,
-                                      style: AppStyle.textStyle),
-                                  const SizedBox(height: 10),
-                                  ...items
-                                ])));
+                                child: NotificationShimmer(
+                                    elementsToLoad: items.length,
+                                    notificationId: 'songitem',
+                                    child: ListView(children: [
+                                      Text(
+                                          AppLocalizations.of(context)!
+                                              .recentSearch,
+                                          style: AppStyle.textStyle),
+                                      const SizedBox(height: 10),
+                                      ...items
+                                    ]))));
                       } else {
                         return Text(
                           AppLocalizations.of(context)!.noRecentSearch,

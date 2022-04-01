@@ -22,6 +22,7 @@ class _PlayListWidgetState extends State<PlayListWidget> {
 
   Widget? _onImageLoaded(ExtendedImageState state) {
     if (state.extendedImageLoadState == LoadState.failed) {
+      ShimmerLoadingNotification("playlistwidget").dispatch(context);
       return Image.asset("resources/png/fake_thumbnail.png");
     } else if (state.extendedImageLoadState == LoadState.completed) {
       ShimmerLoadingNotification("playlistwidget").dispatch(context);
@@ -57,7 +58,10 @@ class _PlayListWidgetState extends State<PlayListWidget> {
                           fit: widget.playlist.backgroundColor == null
                               ? BoxFit.fill
                               : BoxFit.contain,
+                          enableLoadState: true,
+                          handleLoadingProgress: true,
                           loadStateChanged: _onImageLoaded,
+
                         );
                       }
                       else {
