@@ -14,6 +14,10 @@ class TimeSlider extends StatelessWidget {
   Widget build(BuildContext context) {
     current ??= const Duration(seconds: 0);
     end ??= const Duration(seconds: 0);
+    if (current == null || end == null) {
+      current = const Duration(seconds: 0);
+      end = const Duration(seconds: 0);
+    }
     const double thumbRadius = 10;
 
     return Column(children: [
