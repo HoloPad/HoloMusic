@@ -1,6 +1,5 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/Notifications/DownloadNotification.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
@@ -10,9 +9,8 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../Common/Player/Song.dart';
 import '../Common/Playlist/PlaylistBase.dart';
 import '../Views/Playlist/SongOptions.dart';
-import 'Shimmer.dart';
 
-class SongItem extends StatefulWidget {
+class SongItem extends StatelessWidget {
   Song song;
   PlaylistBase? playlist;
   var yt = YoutubeExplode();
@@ -21,54 +19,38 @@ class SongItem extends StatefulWidget {
   SongItem(this.song, {this.playlist, this.reloadList, Key? key})
       : super(key: key);
 
-  @override
-  State<SongItem> createState() => _SongItemState();
-}
-
-class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
-  bool _isLoading = false;
-  bool _imageIsLoading = false;
-
-  @override
-  initState() {
-    super.initState();
-  }
-
   void _onOptionClick(BuildContext context) async {
     Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    SongOptions(widget.song, playlist: widget.playlist)))
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                SongOptions(song, playlist: playlist)))
         .then((value) {
-      if ((value as bool) && widget.reloadList != null) widget.reloadList!();
+      if ((value as bool) && reloadList != null) reloadList!();
     });
   }
 
-  void _onPlayClicked() async {
+
+  void _onPlayClicked(BuildContext context) async {
     LoadingNotification(true).dispatch(context);
-    if (!widget.song.isOnline()) {
+    if (!await song.isOnline()) {
       //If offline play directly
-      PlayerEngine.play(widget.song);
+      PlayerEngine.play(song);
     } else {
       //Check first on the offline storage
-      final offlineSong = await SongsStorage.getSongById(widget.song.id);
+      final offlineSong = await SongsStorage.getSongById(song.id);
       if (offlineSong != null) {
         PlayerEngine.play(offlineSong);
       } else {
-        PlayerEngine.play(widget.song);
+        PlayerEngine.play(song);
       }
     }
   }
 
+
+
   Widget? _onImageLoaded(ExtendedImageState state) {
-    if (state.extendedImageLoadState == LoadState.completed) {
-      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-        setState(() {
-          _imageIsLoading = false;
-        });
-      });
-    } else if (state.extendedImageLoadState==LoadState.failed) {
+    if (state.extendedImageLoadState == LoadState.failed) {
       return Image.asset("resources/png/fake_thumbnail.png");
     }
     return null;
@@ -85,41 +67,32 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(itemRadius)),
         child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Expanded(
               child: InkWell(
-                  onTap: _onPlayClicked,
+                  onTap: ()=>_onPlayClicked(context),
                   child: Row(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Shimmer.fromColors(
-                            baseColor: const Color.fromRGBO(34, 35, 39, 1),
-                            highlightColor:
-                                const Color.fromRGBO(100, 103, 115, 1),
-                            enabled: _imageIsLoading,
-                            child: ClipRRect(
-                              child: ExtendedImage(
-                                image: widget.song.getThumbnailImageAsset(),
+                        ExtendedImage(
+                                image: song.getThumbnailImageAsset(),
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.fill,
                                 enableLoadState: true,
                                 loadStateChanged: _onImageLoaded,
                               ),
-                              borderRadius: const BorderRadius.horizontal(
-                                  left: Radius.circular(itemRadius)),
-                            )),
                         Expanded(
                             child: Padding(
                                 padding: const EdgeInsets.all(4),
                                 child: Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        widget.song.title,
+                                        song.title,
                                         maxLines: 1,
                                         style: _titleStyle,
                                         overflow: TextOverflow.ellipsis,
@@ -127,6 +100,25 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                                     ]))),
                       ]))),
           Row(children: [
+            ValueListenableBuilder<SongState>(
+              valueListenable: song.getStateNotifier(),
+              builder: (_, state, __) {
+                switch (state) {
+                  case SongState.online:
+                    return const SizedBox();
+                  case SongState.offline:
+                    return Icon(Icons.download_done,
+                        color: AppStyle.text);
+                  case SongState.downloading:
+                    return const CircularProgressIndicator(
+                        color: Colors.grey);
+                  case SongState.errorOnDownloading:
+                    return Icon(Icons.clear,
+                        color: AppStyle.text);
+                }
+              },
+            ),
+            /*
             FutureBuilder<List<DownloadNotification>>(
                 future: SongsStorage.getCurrentState(),
                 builder: (_, s0) {
@@ -157,14 +149,13 @@ class _SongItemState extends State<SongItem> with TickerProviderStateMixin {
                           }
                           return const SizedBox();
                         });
-                  } else
+                  } else {
                     return const SizedBox();
-                }),
+                  }
+                })*/
             TextButton(
                 onPressed: () => _onOptionClick(context),
-                child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : const Icon(Icons.more_vert))
+                child: const Icon(Icons.more_vert))
           ])
         ]));
   }
