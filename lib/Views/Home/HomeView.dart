@@ -68,7 +68,6 @@ class _HomeState extends State<HomeView> {
                     });
                   });
                 }
-                print("HERE"+ elementsToLoad.toString() + not.id);
                 return true;
               },
               child: Column(
