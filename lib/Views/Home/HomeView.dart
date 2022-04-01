@@ -27,7 +27,7 @@ class _HomeState extends State<HomeView> {
   final textStyle = const TextStyle(color: Colors.white, fontSize: 20);
   late List<Widget> chartsWidgets;
   PlaylistBase? _playListToView;
-  int elementsToLoad = 4;
+  int elementsToLoad = 0;
   bool loadingComplete = false;
 
   _HomeState() {
@@ -59,6 +59,8 @@ class _HomeState extends State<HomeView> {
           enabled: !loadingComplete,
           child: NotificationListener<ShimmerLoadingNotification>(
               onNotification: (not) {
+                if (not.id != "playlistwidget") return true;
+                elementsToLoad++;
                 if (elementsToLoad == 4) {
                   SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
                     setState(() {
@@ -66,7 +68,7 @@ class _HomeState extends State<HomeView> {
                     });
                   });
                 }
-                elementsToLoad++;
+                print("HERE"+ elementsToLoad.toString() + not.id);
                 return true;
               },
               child: Column(

@@ -24,7 +24,7 @@ class _PlayListWidgetState extends State<PlayListWidget> {
     if (state.extendedImageLoadState == LoadState.failed) {
       return Image.asset("resources/png/fake_thumbnail.png");
     } else if (state.extendedImageLoadState == LoadState.completed) {
-      ShimmerLoadingNotification(true).dispatch(context);
+      ShimmerLoadingNotification("playlistwidget").dispatch(context);
     }
     return null;
   }

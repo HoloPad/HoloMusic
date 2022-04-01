@@ -1,6 +1,7 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
+import 'package:holomusic/Common/Notifications/ShimmerLoadingNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -45,9 +46,13 @@ class SongItem extends StatelessWidget {
     }
   }
 
-  Widget? _onImageLoaded(ExtendedImageState state) {
+  Widget? _onImageLoaded(ExtendedImageState state, BuildContext context) {
     if (state.extendedImageLoadState == LoadState.failed) {
+      ShimmerLoadingNotification("songitem").dispatch(context);
       return Image.asset("resources/png/fake_thumbnail.png");
+    }
+    else if(state.extendedImageLoadState == LoadState.completed){
+      ShimmerLoadingNotification("songitem").dispatch(context);
     }
     return null;
   }
@@ -78,7 +83,7 @@ class SongItem extends StatelessWidget {
                           height: 60,
                           fit: BoxFit.fill,
                           enableLoadState: true,
-                          loadStateChanged: _onImageLoaded,
+                          loadStateChanged: (state)=> _onImageLoaded(state,context),
                         ),
                         Expanded(
                             child: Padding(
