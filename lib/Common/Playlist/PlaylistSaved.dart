@@ -6,13 +6,16 @@ import 'package:localstore/localstore.dart';
 import '../Player/Song.dart';
 
 class PlaylistSaved extends PlaylistBase {
-  static final _db = Localstore.instance;
-  static final _collectionName =
-      "holomusic" + Platform.pathSeparator + "playlists";
+  final _db = Localstore.instance;
+  String _collectionName = "holomusic" + Platform.pathSeparator + "playlists";
   late List<Song> songs;
   String? id;
 
-  PlaylistSaved(name, {this.id, List<Song>? list}) : super(name, null, null) {
+  PlaylistSaved(name, {this.id, List<Song>? list, String? customCollectionName})
+      : super(name, null, null) {
+    if (customCollectionName != null) {
+      _collectionName = customCollectionName;
+    }
     songs = list ?? List.empty(growable: true);
   }
 

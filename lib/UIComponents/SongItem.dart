@@ -16,8 +16,10 @@ class SongItem extends StatelessWidget {
   PlaylistBase? playlist;
   var yt = YoutubeExplode();
   Function()? reloadList;
+  Function(Song song)? onClickCallback;
 
-  SongItem(this.song, {this.playlist, this.reloadList, Key? key})
+  SongItem(this.song,
+      {this.playlist, this.reloadList, this.onClickCallback, Key? key})
       : super(key: key);
 
   void _onOptionClick(BuildContext context) async {
@@ -44,14 +46,14 @@ class SongItem extends StatelessWidget {
         PlayerEngine.play(song);
       }
     }
+    if (onClickCallback != null) onClickCallback!(song);
   }
 
   Widget? _onImageLoaded(ExtendedImageState state, BuildContext context) {
     if (state.extendedImageLoadState == LoadState.failed) {
       ShimmerLoadingNotification("songitem").dispatch(context);
       return Image.asset("resources/png/fake_thumbnail.png");
-    }
-    else if(state.extendedImageLoadState == LoadState.completed){
+    } else if (state.extendedImageLoadState == LoadState.completed) {
       ShimmerLoadingNotification("songitem").dispatch(context);
     }
     return null;
@@ -83,7 +85,8 @@ class SongItem extends StatelessWidget {
                           height: 60,
                           fit: BoxFit.fill,
                           enableLoadState: true,
-                          loadStateChanged: (state)=> _onImageLoaded(state,context),
+                          loadStateChanged: (state) =>
+                              _onImageLoaded(state, context),
                         ),
                         Expanded(
                             child: Padding(
