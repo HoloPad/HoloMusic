@@ -30,7 +30,7 @@ class TheGotOfficial extends PlaylistBase {
   }
 
   @override
-  Future<List<Song>> getVideosInfo() async {
+  Future<List<Song>> getSongs() async {
     _listVideoCache ??= _getVideosInfo();
     return _listVideoCache!;
   }

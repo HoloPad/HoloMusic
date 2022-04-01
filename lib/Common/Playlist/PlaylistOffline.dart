@@ -6,15 +6,12 @@ import '../Player/Song.dart';
 
 class PlaylistOffline extends PlaylistBase {
   PlaylistOffline(BuildContext context)
-      : super(
-            AppLocalizations.of(context)!.savedSongs,
-            const AssetImage("resources/png/fake_thumbnail.png"),
-            null){
-    isOnline=false;
+      : super(AppLocalizations.of(context)!.savedSongs, null , null) {
+    isOnline = false;
   }
 
   @override
-  Future<List<Song>> getVideosInfo() async {
+  Future<List<Song>> getSongs() async {
     final list = await SongsStorage.getOfflineSongs();
     for (var element in list) {
       element.playlist = this;

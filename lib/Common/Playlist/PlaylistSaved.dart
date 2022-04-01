@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 import 'package:localstore/localstore.dart';
 
@@ -13,9 +12,7 @@ class PlaylistSaved extends PlaylistBase {
   late List<Song> songs;
   String? id;
 
-  PlaylistSaved(name, {this.id, List<Song>? list})
-      : super(
-            name, const AssetImage("resources/png/fake_thumbnail.png"), null) {
+  PlaylistSaved(name, {this.id, List<Song>? list}) : super(name, null, null) {
     songs = list ?? List.empty(growable: true);
   }
 
@@ -58,18 +55,8 @@ class PlaylistSaved extends PlaylistBase {
   }
 
   @override
-  Future<List<Song>> getVideosInfo() {
+  Future<List<Song>> getSongs() {
     return Future.value(songs);
-  }
-
-  @override
-  Future<ImageProvider> getImageProvider() async {
-    final videos = await getVideosInfo();
-    if (videos.isNotEmpty) {
-      return videos.first.getThumbnailImageAsset();
-    } else {
-      return const AssetImage("resources/png/fake_thumbnail.png");
-    }
   }
 
   @override

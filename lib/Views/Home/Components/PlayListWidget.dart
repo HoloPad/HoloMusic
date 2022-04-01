@@ -28,6 +28,8 @@ class _PlayListWidgetState extends State<PlayListWidget> {
           _imageIsLoading = false;
         });
       });
+    } else if (state.extendedImageLoadState == LoadState.failed) {
+      return Image.asset("resources/png/fake_thumbnail.png");
     }
     return null;
   }
@@ -63,7 +65,9 @@ class _PlayListWidgetState extends State<PlayListWidget> {
                                     "resources/png/fake_thumbnail.png"),
                             width: 150,
                             height: 150,
-                            fit: BoxFit.fill,
+                            fit: widget.playlist.backgroundColor == null
+                                ? BoxFit.fill
+                                : BoxFit.contain,
                             loadStateChanged: _onImageLoaded,
                           );
                         }))),

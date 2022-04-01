@@ -32,7 +32,7 @@ class OfflineSong extends Song {
     if (!isAPlaylist()) {
       return null;
     }
-    final videoList = await playlist?.getVideosInfo();
+    final videoList = await playlist?.getSongs();
     final firstVideo = videoList?.first;
     if (firstVideo == null) {
       return null;
@@ -64,7 +64,7 @@ class OfflineSong extends Song {
     if (!isAPlaylist()) {
       return null;
     }
-    final videoList = await playlist?.getVideosInfo();
+    final videoList = await playlist?.getSongs();
     if (videoList == null) {
       return null;
     }

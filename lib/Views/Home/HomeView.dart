@@ -12,7 +12,7 @@ class HomeView extends StatefulWidget {
   late Future<List<Song>> theGotOfficialChart;
 
   HomeView({Key? key}) : super(key: key) {
-    theGotOfficialChart = TheGotOfficial("it").getVideosInfo();
+    theGotOfficialChart = TheGotOfficial("it").getSongs();
   }
 
   @override

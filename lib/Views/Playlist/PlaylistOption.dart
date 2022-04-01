@@ -11,7 +11,6 @@ class PlaylistOptions extends StatelessWidget {
 
   PlaylistOptions(this.playlistInterface, {Key? key}) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,13 +40,19 @@ class PlaylistOptions extends StatelessWidget {
                 Text(playlistInterface.name, style: AppStyle.titleStyle),
                 const SizedBox(height: 20),
                 CommonComponents.generateButton(
-                    text: AppLocalizations.of(context)!.saveOffline,
+                    text: AppLocalizations.of(context)!.saveOfflineAllSongs,
                     icon: Icons.download_outlined,
-                    onClick: () {}),
+                    onClick: () {
+                      playlistInterface.downloadAllSongs();
+                      Navigator.pop(context);
+                    }),
                 CommonComponents.generateButton(
                     text: AppLocalizations.of(context)!.deleteDownloadedSongs,
                     icon: Icons.delete_outline_rounded,
-                    onClick: () {}),
+                    onClick: () {
+                      playlistInterface.deleteAllSongs();
+                      Navigator.pop(context);
+                    }),
                 CommonComponents.generateButton(
                     text: AppLocalizations.of(context)!.deletePlaylist,
                     icon: Icons.delete_sweep_outlined,

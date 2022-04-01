@@ -16,6 +16,7 @@
   "cannotLoadSong": "Impossibile caricare il brano",
   "noRecentSearch": "Non ci sono ricerche recenti",
   "saveOffline": "Salva offline",
+  "saveOfflineAllSongs": "Salva offline tutti i brani",
   "deleteDownloadedSong": "Elimina brano scaricato",
   "deleteDownloadedSongs": "Elimina i brani scaricati",
   "deleteSongFromPlaylist": "Elimina dalla playlist",

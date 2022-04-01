@@ -16,6 +16,7 @@
   "cannotLoadSong": "Cannot load the song",
   "noRecentSearch": "There aren't recent searches",
   "saveOffline": "Save offline",
+  "saveOfflineAllSongs": "Download all tracks",
   "deleteSong": "Delete song",
   "deleteDownloadedSong": "Download offline song",
   "deleteDownloadedSongs": "Delete all downloaded songs",

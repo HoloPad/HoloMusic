@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
-import 'package:holomusic/Common/Storage/SongsStorage.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Home/HomeView.dart';
@@ -23,7 +22,6 @@ Future<void> main() async {
     androidNotificationOngoing: true,
   );
   PlayerEngine.initialize();
-  SongsStorage.init();
   runApp(const MyApp());
 }
 

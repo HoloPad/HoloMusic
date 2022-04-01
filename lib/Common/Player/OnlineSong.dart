@@ -126,7 +126,7 @@ class OnlineSong extends Song {
 //Returns -1 if not found
   Future<int> getCurrentIndexInsideAPlaylist() async {
     final _video = await getVideo();
-    final listVideos = await playlist?.getVideosInfo();
+    final listVideos = await playlist?.getSongs();
     return listVideos?.indexWhere((element) => element.id == _video.id.value) ??
         -1;
   }
@@ -151,7 +151,7 @@ class OnlineSong extends Song {
       return _nextSongFuture!;
     }
     final currentIndex = await getCurrentIndexInsideAPlaylist();
-    final listVideos = await playlist?.getVideosInfo();
+    final listVideos = await playlist?.getSongs();
     if (listVideos != null && currentIndex + 1 < listVideos.length) {
       //there is a next element
       final nextVideo = listVideos.elementAt(currentIndex + 1);
@@ -165,7 +165,7 @@ class OnlineSong extends Song {
   @override
   Future<OnlineSong?> getFirstOfThePlaylist() async {
     if (isAPlaylist()) {
-      final videoList = await playlist?.getVideosInfo();
+      final videoList = await playlist?.getSongs();
       final firstVideo = videoList?.first;
       if (firstVideo != null) {
         return await OnlineSong.createFromId(firstVideo.id, playlist: playlist);
