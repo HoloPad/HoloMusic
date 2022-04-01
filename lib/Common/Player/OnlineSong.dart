@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:holomusic/Common/Player/OfflineSong.dart';
 import 'package:holomusic/Common/Player/Song.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as YtExplode;
 
 import '../Playlist/PlaylistBase.dart';
+import '../Storage/PlaylistStorage.dart';
 
 enum LoadingState { initialized, loading, loaded }
 
@@ -172,7 +175,64 @@ class OnlineSong extends Song {
   }
 
   @override
-  bool isOnline() {
-    return true;
+  Future saveSong() async {
+    if (!await isOnline()) {
+      return;
+    }
+    try {
+      stateNotifier.value = SongState.downloading;
+      final docDirectory = await getApplicationDocumentsDirectory();
+      final path = docDirectory.path +
+          Platform.pathSeparator +
+          "holomusic" +
+          Platform.pathSeparator +
+          "offline";
+      final offlineDirectory = Directory(path);
+      offlineDirectory.createSync(recursive: true);
+
+      final _video = await getVideo();
+
+      final imageResponse =
+          await http.get(Uri.parse(_video.thumbnails.highResUrl));
+      final imageFile = File(offlineDirectory.path +
+          Platform.pathSeparator +
+          _video.id.value +
+          ".jpg");
+      imageFile.writeAsBytes(imageResponse.bodyBytes, flush: true);
+
+      var songFile = File(offlineDirectory.path +
+          Platform.pathSeparator +
+          _video.id.value +
+          ".webm");
+      final manifest = await _yt.videos.streamsClient.getManifest(id);
+      final streamInfo = manifest.audioOnly.withHighestBitrate();
+      final stream = _yt.videos.streamsClient.get(streamInfo);
+      var fileStream = songFile.openWrite();
+      await stream.pipe(fileStream);
+      // Close the file.
+      await fileStream.flush();
+      await fileStream.close();
+
+      await db.collection(collectionName).doc(_video.id.value).set(
+          {"title": title, "thumbnail": imageFile.path, "path": songFile.path});
+
+      final offline = await OfflineSong.getById(id);
+      if (offline != null) {
+        PlaylistStorage.convertOnlineSongToOffline(this, offline);
+      }
+      stateNotifier.value = SongState.offline;
+    } catch (_) {
+      stateNotifier.value = SongState.errorOnDownloading;
+    }
+  }
+
+  @override
+  Future deleteSong() async {
+    if (await isOnline()) {
+      return;
+    }
+    final offlineSong = await OfflineSong.getById(id);
+    await offlineSong?.deleteSong();
+    stateNotifier.value = SongState.online;
   }
 }

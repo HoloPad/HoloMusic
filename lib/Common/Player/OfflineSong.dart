@@ -1,11 +1,26 @@
-import 'package:holomusic/Common/Storage/SongsStorage.dart';
+import 'dart:io';
+
 import 'package:holomusic/Common/Player/Song.dart';
+import 'package:localstore/localstore.dart';
+
+import '../Storage/PlaylistStorage.dart';
 
 class OfflineSong extends Song {
   String filePath;
 
   OfflineSong(String id, String title, String thumbnail, this.filePath)
       : super(id, title, thumbnail);
+
+  static Future<OfflineSong?> getById(String id) async {
+    final db = Localstore.instance;
+    const collectionName = "holomusic";
+    final element = await db.collection(collectionName).doc(id).get();
+    if (element == null) {
+      return null;
+    }
+    return OfflineSong(
+        id, element['title'], element['thumbnail'], element['path']);
+  }
 
   @override
   Future<Uri> getAudioUri() async {
@@ -22,7 +37,7 @@ class OfflineSong extends Song {
     if (firstVideo == null) {
       return null;
     }
-    final song = await SongsStorage.getSongById(firstVideo.id);
+    final song = await OfflineSong.getById(firstVideo.id);
     song?.playlist = playlist;
     return song;
   }
@@ -39,7 +54,7 @@ class OfflineSong extends Song {
       "id": id,
       "title": title,
       "thumbnail": thumbnail,
-      "online":false,
+      "online": false,
       "filePath": filePath
     };
   }
@@ -72,7 +87,20 @@ class OfflineSong extends Song {
   }
 
   @override
-  bool isOnline() {
-    return false;
+  Future deleteSong() async {
+    File songPath = File(filePath);
+    songPath.deleteSync(recursive: true);
+    if (thumbnail != null) {
+      File imgPath = File(thumbnail!);
+      imgPath.deleteSync(recursive: true);
+    }
+    await db.collection(collectionName).doc(id).delete();
+    await PlaylistStorage.convertSongToOnline(this);
+    stateNotifier.value = SongState.online;
+  }
+
+  @override
+  Future saveSong() async {
+    return;
   }
 }

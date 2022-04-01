@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 import 'package:holomusic/Views/Playlist/PlaylistListView.dart';
-import '../../Common/Storage/SongsStorage.dart';
+
 import '../../Common/Parameters/AppStyle.dart';
 import '../../Common/Player/Song.dart';
 import '../../UIComponents/CommonComponents.dart';
@@ -22,14 +21,13 @@ class SongOptions extends StatelessWidget {
   final _titleStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white);
 
-  void onDownloadDeleteClick(BuildContext context, bool isOnline)async {
+  void onDownloadDeleteClick(BuildContext context, bool isOnline) async {
     if (isOnline) {
-      SongsStorage.saveSong(song as OnlineSong);
-      Navigator.pop(context, false);
+      song.saveSong();
     } else {
-      await SongsStorage.deleteSongById(song.id);
-      Navigator.pop(context, true);
+      song.deleteSong();
     }
+    Navigator.pop(context,false);
   }
 
   @override
@@ -57,24 +55,21 @@ class SongOptions extends StatelessWidget {
                             const SizedBox(height: 20),
                             //Save or delete offline
                             FutureBuilder<bool>(
-                                initialData: null,
-                                future: SongsStorage.isSongStoredById(song.id),
+                                initialData: true,
+                                future: song.isOnline(),
                                 builder: (_, snapshot) {
-                                  final isInsideSave =
-                                      snapshot.hasData && snapshot.data!;
+                                  final isOnline = snapshot.data ?? true;
                                   return CommonComponents.generateButton(
-                                      text:
-                                          song.isOnline() && !isInsideSave
-                                              ? AppLocalizations.of(context)!
-                                                  .saveOffline
-                                              : AppLocalizations.of(context)!
-                                                  .deleteDownloadedSong,
-                                      icon:
-                                          song.isOnline() && !isInsideSave
-                                              ? Icons.add
-                                              : Icons.delete_outline_rounded,
+                                      text: isOnline
+                                          ? AppLocalizations.of(context)!
+                                              .saveOffline
+                                          : AppLocalizations.of(context)!
+                                              .deleteDownloadedSong,
+                                      icon: isOnline
+                                          ? Icons.add
+                                          : Icons.delete_outline_rounded,
                                       onClick: () {
-                                        onDownloadDeleteClick(context,song.isOnline() && !isInsideSave);
+                                        onDownloadDeleteClick(context,isOnline);
                                       });
                                 }),
                             CommonComponents.generateButton(

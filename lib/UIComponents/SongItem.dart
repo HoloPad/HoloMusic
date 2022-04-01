@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
-import 'package:holomusic/Common/Storage/SongsStorage.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
+import '../Common/Player/OfflineSong.dart';
 import '../Common/Player/Song.dart';
 import '../Common/Playlist/PlaylistBase.dart';
 import '../Views/Playlist/SongOptions.dart';
@@ -21,24 +21,22 @@ class SongItem extends StatelessWidget {
 
   void _onOptionClick(BuildContext context) async {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                SongOptions(song, playlist: playlist)))
+            context,
+            MaterialPageRoute(
+                builder: (context) => SongOptions(song, playlist: playlist)))
         .then((value) {
       if ((value as bool) && reloadList != null) reloadList!();
     });
   }
 
-
   void _onPlayClicked(BuildContext context) async {
     LoadingNotification(true).dispatch(context);
-    if (!await song.isOnline()) {
-      //If offline play directly
+    if (await song.isOnline()) {
+      //If online play directly
       PlayerEngine.play(song);
     } else {
       //Check first on the offline storage
-      final offlineSong = await SongsStorage.getSongById(song.id);
+      final offlineSong = await OfflineSong.getById(song.id);
       if (offlineSong != null) {
         PlayerEngine.play(offlineSong);
       } else {
@@ -46,8 +44,6 @@ class SongItem extends StatelessWidget {
       }
     }
   }
-
-
 
   Widget? _onImageLoaded(ExtendedImageState state) {
     if (state.extendedImageLoadState == LoadState.failed) {
@@ -67,29 +63,29 @@ class SongItem extends StatelessWidget {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(itemRadius)),
         child:
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Expanded(
               child: InkWell(
-                  onTap: ()=>_onPlayClicked(context),
+                  onTap: () => _onPlayClicked(context),
                   child: Row(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ExtendedImage(
-                                image: song.getThumbnailImageAsset(),
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.fill,
-                                enableLoadState: true,
-                                loadStateChanged: _onImageLoaded,
-                              ),
+                          image: song.getThumbnailImageAsset(),
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.fill,
+                          enableLoadState: true,
+                          loadStateChanged: _onImageLoaded,
+                        ),
                         Expanded(
                             child: Padding(
                                 padding: const EdgeInsets.all(4),
                                 child: Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         song.title,
@@ -103,18 +99,16 @@ class SongItem extends StatelessWidget {
             ValueListenableBuilder<SongState>(
               valueListenable: song.getStateNotifier(),
               builder: (_, state, __) {
+                //print(state.name + " " + song.title+" "+song.runtimeType.toString());
                 switch (state) {
                   case SongState.online:
                     return const SizedBox();
                   case SongState.offline:
-                    return Icon(Icons.download_done,
-                        color: AppStyle.text);
+                    return Icon(Icons.download_done, color: AppStyle.text);
                   case SongState.downloading:
-                    return const CircularProgressIndicator(
-                        color: Colors.grey);
+                    return const CircularProgressIndicator(color: Colors.grey);
                   case SongState.errorOnDownloading:
-                    return Icon(Icons.clear,
-                        color: AppStyle.text);
+                    return Icon(Icons.clear, color: AppStyle.text);
                 }
               },
             ),

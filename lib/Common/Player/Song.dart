@@ -4,14 +4,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:holomusic/Common/Player/OfflineSong.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
+import 'package:localstore/localstore.dart';
+
+enum SongState { online, offline, downloading, errorOnDownloading }
 
 abstract class Song {
   PlaylistBase? playlist;
   String id;
   String title;
   String? thumbnail;
+  final db = Localstore.instance;
+  final collectionName = "holomusic";
 
-  Song(this.id, this.title, this.thumbnail, {this.playlist});
+  ValueNotifier<SongState> stateNotifier=ValueNotifier(SongState.offline);
+
+  Song(this.id, this.title, this.thumbnail, {this.playlist}) {
+    isOnline().then((res) {
+      stateNotifier = ValueNotifier(res ? SongState.online : SongState.offline);
+    });
+
+  }
 
   Future<Uri> getAudioUri();
 
@@ -19,13 +31,14 @@ abstract class Song {
 
   Future<Song?> getFirstOfThePlaylist();
 
-  bool isOnline();
+  Future saveSong();
+
+  Future deleteSong();
 
   factory Song.fromJson(Map<String, dynamic> json) {
-    if(json['online']==true){
+    if (json['online'] == true) {
       return OnlineSong.fromJson(json);
-    }
-    else {
+    } else {
       return OfflineSong.fromJson(json);
     }
   }
@@ -68,10 +81,7 @@ abstract class Song {
 
   ImageProvider getThumbnailImageAsset() {
     if (thumbnail != null) {
-      bool isUrl = Uri
-          .tryParse(thumbnail!)
-          ?.host
-          .isNotEmpty ?? false;
+      bool isUrl = Uri.tryParse(thumbnail!)?.host.isNotEmpty ?? false;
       if (isUrl) {
         return NetworkImage(thumbnail!);
       } else {
@@ -81,5 +91,14 @@ abstract class Song {
     } else {
       return const AssetImage("resources/png/fake_thumbnail.png");
     }
+  }
+
+  Future<bool> isOnline() async {
+    final element = await db.collection(collectionName).doc(id).get();
+    return element == null;
+  }
+
+  ValueNotifier<SongState> getStateNotifier() {
+    return stateNotifier;
   }
 }
