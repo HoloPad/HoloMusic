@@ -42,10 +42,6 @@ class TheGotOfficial extends PlaylistBase {
     do {
       response = await http.get(url).timeout(const Duration(seconds: 5));
       numberOfAttempt++;
-      print("Attemp " +
-          numberOfAttempt.toString() +
-          " " +
-          response.statusCode.toString());
     } while (response.statusCode != 200 && numberOfAttempt < maxAttempts);
 
     final elements = const Utf8Decoder()

@@ -25,8 +25,7 @@ class PlaylistStorage {
       final playlist = PlaylistSaved.fromJson(plt);
       bool found = false;
       for (var index = 0; index < playlist.songs.length; index++) {
-        if (!await playlist.songs[index].isOnline() &&
-            playlist.songs[index].id == song.id) {
+        if (playlist.songs[index].id == song.id) {
           playlist.songs[index] = await OnlineSong.createFromId(song.id);
           found = true;
         }
@@ -45,8 +44,7 @@ class PlaylistStorage {
       final playlist = PlaylistSaved.fromJson(plt);
       bool found = false;
       for (var index = 0; index < playlist.songs.length; index++) {
-        if (await playlist.songs[index].isOnline() &&
-            playlist.songs[index].id == onlineSong.id) {
+        if (playlist.songs[index].id == onlineSong.id) {
           playlist.songs[index] = offlineSong;
           found = true;
         }

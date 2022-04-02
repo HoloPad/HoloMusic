@@ -16,11 +16,11 @@ abstract class Song {
   final db = Localstore.instance;
   final collectionName = "holomusic";
 
-  ValueNotifier<SongState> stateNotifier=ValueNotifier(SongState.offline);
+  ValueNotifier<SongState> stateNotifier=ValueNotifier(SongState.online);
 
   Song(this.id, this.title, this.thumbnail, {this.playlist}) {
     isOnline().then((res) {
-      stateNotifier = ValueNotifier(res ? SongState.online : SongState.offline);
+      stateNotifier.value = res ? SongState.online : SongState.offline;
     });
 
   }
@@ -35,11 +35,11 @@ abstract class Song {
 
   Future deleteSong();
 
-  factory Song.fromJson(Map<String, dynamic> json) {
+  factory Song.fromJson(Map<String, dynamic> json, {PlaylistBase? playlistBase}) {
     if (json['online'] == true) {
-      return OnlineSong.fromJson(json);
+      return OnlineSong.fromJson(json,playlist: playlistBase);
     } else {
-      return OfflineSong.fromJson(json);
+      return OfflineSong.fromJson(json,playlistBase: playlistBase);
     }
   }
 
@@ -49,9 +49,6 @@ abstract class Song {
     return playlist != null;
   }
 
-  Duration? getDuration() {
-    return null;
-  }
 
   Future<bool> hasNext() async {
     if (isAPlaylist()) {

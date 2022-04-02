@@ -16,8 +16,10 @@ class SongItem extends StatelessWidget {
   PlaylistBase? playlist;
   var yt = YoutubeExplode();
   Function()? reloadList;
+  Function(Song song)? onClickCallback;
 
-  SongItem(this.song, {this.playlist, this.reloadList, Key? key})
+  SongItem(this.song,
+      {this.playlist, this.reloadList, this.onClickCallback, Key? key})
       : super(key: key);
 
   void _onOptionClick(BuildContext context) async {
@@ -37,21 +39,21 @@ class SongItem extends StatelessWidget {
       PlayerEngine.play(song);
     } else {
       //Check first on the offline storage
-      final offlineSong = await OfflineSong.getById(song.id);
+      final offlineSong = await OfflineSong.getById(song.id, playlistBase: playlist);
       if (offlineSong != null) {
         PlayerEngine.play(offlineSong);
       } else {
         PlayerEngine.play(song);
       }
     }
+    if (onClickCallback != null) onClickCallback!(song);
   }
 
   Widget? _onImageLoaded(ExtendedImageState state, BuildContext context) {
     if (state.extendedImageLoadState == LoadState.failed) {
       ShimmerLoadingNotification("songitem").dispatch(context);
       return Image.asset("resources/png/fake_thumbnail.png");
-    }
-    else if(state.extendedImageLoadState == LoadState.completed){
+    } else if (state.extendedImageLoadState == LoadState.completed) {
       ShimmerLoadingNotification("songitem").dispatch(context);
     }
     return null;
@@ -83,7 +85,9 @@ class SongItem extends StatelessWidget {
                           height: 60,
                           fit: BoxFit.fill,
                           enableLoadState: true,
-                          loadStateChanged: (state)=> _onImageLoaded(state,context),
+                          handleLoadingProgress: true,
+                          loadStateChanged: (state) =>
+                              _onImageLoaded(state, context),
                         ),
                         Expanded(
                             child: Padding(
@@ -104,7 +108,6 @@ class SongItem extends StatelessWidget {
             ValueListenableBuilder<SongState>(
               valueListenable: song.getStateNotifier(),
               builder: (_, state, __) {
-                //print(state.name + " " + song.title+" "+song.runtimeType.toString());
                 switch (state) {
                   case SongState.online:
                     return const SizedBox();
@@ -117,41 +120,6 @@ class SongItem extends StatelessWidget {
                 }
               },
             ),
-            /*
-            FutureBuilder<List<DownloadNotification>>(
-                future: SongsStorage.getCurrentState(),
-                builder: (_, s0) {
-                  if (s0.hasData) {
-                    return StreamBuilder<List<DownloadNotification>>(
-                        stream: SongsStorage.getDownloadStream(),
-                        initialData: s0.data!,
-                        builder: (_, s1) {
-                          if (s1.hasData) {
-                            for (var e in s1.data!) {
-                              if (e.id == widget.song.id) {
-                                switch (e.state) {
-                                  case DownloadState.nope:
-                                  case DownloadState.waiting:
-                                    return const SizedBox();
-                                  case DownloadState.downloading:
-                                    return const CircularProgressIndicator(
-                                        color: Colors.grey);
-                                  case DownloadState.downloaded:
-                                    return Icon(Icons.download_done,
-                                        color: AppStyle.text);
-                                  case DownloadState.error:
-                                    return Icon(Icons.clear,
-                                        color: AppStyle.text);
-                                }
-                              }
-                            }
-                          }
-                          return const SizedBox();
-                        });
-                  } else {
-                    return const SizedBox();
-                  }
-                })*/
             TextButton(
                 onPressed: () => _onOptionClick(context),
                 child: const Icon(Icons.more_vert))
