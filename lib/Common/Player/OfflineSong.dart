@@ -8,13 +8,15 @@ import '../Storage/PlaylistStorage.dart';
 
 class OfflineSong extends Song {
   String filePath;
-  PlaylistBase? playlist;
 
   OfflineSong(String id, String title, String thumbnail, this.filePath,
-      {this.playlist})
-      : super(id, title, thumbnail, playlist:playlist);
+      {PlaylistBase? playlist})
+      : super(id, title, thumbnail) {
+    this.playlist = playlist;
+  }
 
-  static Future<OfflineSong?> getById(String id, {PlaylistBase? playlistBase}) async {
+  static Future<OfflineSong?> getById(String id,
+      {PlaylistBase? playlistBase}) async {
     final db = Localstore.instance;
     const collectionName = "holomusic";
     final element = await db.collection(collectionName).doc(id).get();
@@ -22,7 +24,8 @@ class OfflineSong extends Song {
       return null;
     }
     return OfflineSong(
-        id, element['title'], element['thumbnail'], element['path'], playlist: playlistBase);
+        id, element['title'], element['thumbnail'], element['path'],
+        playlist: playlistBase);
   }
 
   @override
@@ -46,9 +49,11 @@ class OfflineSong extends Song {
   }
 
   @override
-  factory OfflineSong.fromJson(Map<String, dynamic> json) {
+  factory OfflineSong.fromJson(Map<String, dynamic> json,
+      {PlaylistBase? playlistBase}) {
     return OfflineSong(
-        json['id'], json['title'], json['thumbnail'], json['filePath']);
+        json['id'], json['title'], json['thumbnail'], json['filePath'],
+        playlist: playlistBase);
   }
 
   @override

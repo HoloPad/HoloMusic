@@ -145,7 +145,7 @@ class _SearchViewState extends State<SearchView> {
                     builder: (BuildContext context, snapshot) {
                       if (snapshot.hasData) {
                         List<Widget> items =
-                            snapshot.data!.map((e) => SongItem(e)).toList();
+                            snapshot.data!.map((e) => SongItem(e,playlist: historyPlaylist)).toList();
 
                         if (items.isEmpty) {
                           return Padding(

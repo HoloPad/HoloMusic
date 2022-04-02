@@ -35,11 +35,11 @@ abstract class Song {
 
   Future deleteSong();
 
-  factory Song.fromJson(Map<String, dynamic> json) {
+  factory Song.fromJson(Map<String, dynamic> json, {PlaylistBase? playlistBase}) {
     if (json['online'] == true) {
-      return OnlineSong.fromJson(json);
+      return OnlineSong.fromJson(json,playlist: playlistBase);
     } else {
-      return OfflineSong.fromJson(json);
+      return OfflineSong.fromJson(json,playlistBase: playlistBase);
     }
   }
 

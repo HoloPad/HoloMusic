@@ -31,15 +31,12 @@ class PlaylistSearchHistory extends PlaylistSaved {
     final map = await Localstore.instance.collection(collection).doc(id).get();
     if (map != null) {
       if (map['songs'].runtimeType == List<dynamic>) {
-        songs = List.from(map['songs']).map((e) => Song.fromJson(e)).toList();
+        songs = List.from(map['songs']).map((e) => Song.fromJson(e,playlistBase: this)).toList();
       } else {
         songs = List.from(map['songs']);
       }
     } else {
       songs = List.empty(growable: true);
-    }
-    for (var i = 0; i < songs.length; i++) {
-      songs[i].playlist = this;
     }
     return songs;
   }
@@ -57,6 +54,7 @@ class PlaylistSearchHistory extends PlaylistSaved {
       songs.removeAt(index);
     }
 
+    song.playlist=this;
     super.addInTop(song);
     super.save();
   }
