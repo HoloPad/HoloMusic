@@ -17,11 +17,20 @@ class PlaylistSaved extends PlaylistBase {
       _collectionName = customCollectionName;
     }
     songs = list ?? List.empty(growable: true);
+    for (var i = 0; i < songs.length; i++) {
+      songs[i].playlist = this;
+    }
   }
 
   void addSong(Song song) {
     if (!songs.any((element) => element.id == song.id)) {
       songs.add(song);
+    }
+  }
+
+  void addInTop(Song song) {
+    if (!songs.any((element) => element.id == song.id)) {
+      songs.insert(0,song);
     }
   }
 

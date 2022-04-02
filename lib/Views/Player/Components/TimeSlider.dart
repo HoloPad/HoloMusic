@@ -14,7 +14,7 @@ class TimeSlider extends StatelessWidget {
   Widget build(BuildContext context) {
     current ??= const Duration(seconds: 0);
     end ??= const Duration(seconds: 0);
-    if (current == null || end == null) {
+    if (current == null || end == null || current!>end! ) {
       current = const Duration(seconds: 0);
       end = const Duration(seconds: 0);
     }

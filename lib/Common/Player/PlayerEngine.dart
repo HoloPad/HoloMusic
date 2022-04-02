@@ -19,6 +19,7 @@ class PlayerEngine {
   static bool _isPlaylistLooping = false;
   static final ValueNotifier<RepetitionState> _repetitionState =
       ValueNotifier(RepetitionState.Off);
+  static bool canSkip = true;
 
   static void initialize() {
     PlayerEngine.player = AudioPlayer();
@@ -28,6 +29,9 @@ class PlayerEngine {
       switch (event.processingState) {
         case ProcessingState.completed:
           onTrackEnd();
+          break;
+        case ProcessingState.ready:
+          canSkip=true;
           break;
         default:
           break;
@@ -46,27 +50,31 @@ class PlayerEngine {
   }
 
   static Future play(Song source, {bool play = true}) async {
-    final futureAudioSource = await source.getAudioUri();
-    final audioSource = AudioSource.uri(futureAudioSource,
+    final audioSource = AudioSource.uri(await source.getAudioUri(),
         tag: MediaItem(
-            id: source.id,
-            title: source.title,
-            artUri: source.getThumbnailUri(),
-            duration: source.getDuration()));
+          id: source.id,
+          title: source.title,
+          artUri: source.getThumbnailUri(),
+        ));
 
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
+    await PlayerEngine.player.seek(Duration.zero);
     _currentVideoHandlerListenable.value = source;
     _history.add(source);
     _currentPlaying = source;
     if (play) await PlayerEngine.player.play();
     _hasNextStream.value = await hasNext();
 
-    //Pre-load next
+    //Pre-load the next-song
     _currentPlaying?.getNext();
   }
 
   static Future playNextSong() async {
+    if(!PlayerEngine.canSkip){
+      return;
+    }
+    PlayerEngine.canSkip=false;
     //Check in the queue
     if (_mainPlaylist.isNotEmpty) {
       await play(_mainPlaylist.removeAt(0));

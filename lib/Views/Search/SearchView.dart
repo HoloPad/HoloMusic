@@ -144,26 +144,31 @@ class _SearchViewState extends State<SearchView> {
                     future: historyPlaylist.getSongs(),
                     builder: (BuildContext context, snapshot) {
                       if (snapshot.hasData) {
-                        List<Widget> items = snapshot.data!
-                            .map((e) => SongItem(e))
-                            .toList()
-                            .reversed
-                            .toList();
+                        List<Widget> items =
+                            snapshot.data!.map((e) => SongItem(e)).toList();
 
-                        return Expanded(
-                            child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: NotificationShimmer(
-                                    elementsToLoad: items.length,
-                                    notificationId: 'songitem',
-                                    child: ListView(children: [
-                                      Text(
-                                          AppLocalizations.of(context)!
-                                              .recentSearch,
-                                          style: AppStyle.textStyle),
-                                      const SizedBox(height: 10),
-                                      ...items
-                                    ]))));
+                        if (items.isEmpty) {
+                          return Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                  AppLocalizations.of(context)!.noRecentSearch,
+                                  style: AppStyle.textStyle));
+                        } else {
+                          return Expanded(
+                              child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: NotificationShimmer(
+                                      elementsToLoad: items.length,
+                                      notificationId: 'songitem',
+                                      child: ListView(children: [
+                                        Text(
+                                            AppLocalizations.of(context)!
+                                                .recentSearch,
+                                            style: AppStyle.textStyle),
+                                        const SizedBox(height: 10),
+                                        ...items
+                                      ]))));
+                        }
                       } else {
                         return Text(
                           AppLocalizations.of(context)!.noRecentSearch,

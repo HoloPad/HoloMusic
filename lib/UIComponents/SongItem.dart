@@ -39,7 +39,7 @@ class SongItem extends StatelessWidget {
       PlayerEngine.play(song);
     } else {
       //Check first on the offline storage
-      final offlineSong = await OfflineSong.getById(song.id);
+      final offlineSong = await OfflineSong.getById(song.id, playlistBase: playlist);
       if (offlineSong != null) {
         PlayerEngine.play(offlineSong);
       } else {

@@ -38,6 +38,9 @@ class PlaylistSearchHistory extends PlaylistSaved {
     } else {
       songs = List.empty(growable: true);
     }
+    for (var i = 0; i < songs.length; i++) {
+      songs[i].playlist = this;
+    }
     return songs;
   }
 
@@ -45,7 +48,7 @@ class PlaylistSearchHistory extends PlaylistSaved {
   Future addSong(Song song) async {
     final songs = await getSongs();
     if (songs.length >= maxHistoryLength) {
-      deleteSong(songs.first);
+      deleteSong(songs.last);
     }
 
     // If already inserted, remove and re-insert to show the song on the top
@@ -54,7 +57,7 @@ class PlaylistSearchHistory extends PlaylistSaved {
       songs.removeAt(index);
     }
 
-    super.addSong(song);
+    super.addInTop(song);
     super.save();
   }
 }
