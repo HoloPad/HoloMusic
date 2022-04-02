@@ -20,7 +20,7 @@ class OnlineSong extends Song {
   Future<Uri>? _onlineStream;
   Future<Uri>? _offlineStream;
   bool _offlineCompleted = false;
-  Future<OnlineSong?>? _nextSongFuture;
+  OnlineSong? _nextSong;
 
   OnlineSong(YtExplode.Video video,
       {bool preload = false, PlaylistBase? playlist})
@@ -146,17 +146,18 @@ class OnlineSong extends Song {
 
   @override
   Future<OnlineSong?> getNext() async {
-    if (_nextSongFuture != null) {
-      return _nextSongFuture!;
+    if (_nextSong != null) {
+      return _nextSong!;
     }
     final currentIndex = await getCurrentIndexInsideAPlaylist();
     final listVideos = await playlist?.getSongs();
     if (listVideos != null && currentIndex + 1 < listVideos.length) {
       //there is a next element
       final nextVideo = listVideos.elementAt(currentIndex + 1);
-      _nextSongFuture =
+      _nextSong = await
           OnlineSong.createFromId(nextVideo.id, playlist: playlist);
-      return _nextSongFuture;
+      _nextSong?.preloadStream();
+      return _nextSong;
     }
     return null;
   }

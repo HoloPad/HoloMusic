@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../Common/Parameters/AppStyle.dart';
+import '../Common/Parameters/PlatformSize.dart';
 
 class CommonComponents {
   static TextButton generateButton({
@@ -9,9 +10,14 @@ class CommonComponents {
     required Function() onClick,
     double opacity = 0.8,
   }) {
+    double distance = PlatformSize.isMobile ? 0 :12;
     return TextButton(
+        style: TextButton.styleFrom(
+            padding: EdgeInsets.only(bottom: distance,top:distance),
+            alignment: Alignment.centerLeft),
         onPressed: onClick,
         child: Card(
+            margin: EdgeInsets.zero,
             color: AppStyle.primaryBackground.withOpacity(opacity),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
