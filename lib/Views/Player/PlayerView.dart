@@ -77,6 +77,19 @@ class _PlayerViewState extends State<PlayerView> {
     },
   );
 
+  final shuffleIcon = ValueListenableBuilder<bool>(
+      valueListenable: PlayerEngine.isShuffleEnabled(),
+      builder: (_, value, __) {
+        const _size = 30.0;
+        const _color = Colors.white;
+        if (value) {
+          return const Icon(Icons.shuffle_on_rounded,
+              size: _size, color: _color);
+        } else {
+          return const Icon(Icons.shuffle_rounded, size: _size, color: _color);
+        }
+      });
+
   void _onRepetitionClick() {
     final next = _getNextRepetitionState();
     PlayerEngine.setRepetitionState(next);
@@ -173,13 +186,7 @@ class _PlayerViewState extends State<PlayerView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(
-                      onPressed: () => {},
-                      child: const Icon(
-                        Icons.monitor_heart_outlined,
-                        size: 30,
-                        color: Colors.white,
-                      )),
+                  TextButton(onPressed: () => PlayerEngine.toggleShuffle(), child: shuffleIcon),
                   TextButton(
                       onPressed: () => PlayerEngine.playPreviousSong(),
                       child: const Icon(

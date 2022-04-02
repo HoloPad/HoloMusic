@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
@@ -16,6 +17,7 @@ class PlayerEngine {
   static final ValueNotifier<Song?> _currentVideoHandlerListenable =
       ValueNotifier(null);
   static final ValueNotifier<bool> _hasNextStream = ValueNotifier(true);
+  static final ValueNotifier<bool> _isShuffleEnable = ValueNotifier(false);
   static bool _isPlaylistLooping = false;
   static final ValueNotifier<RepetitionState> _repetitionState =
       ValueNotifier(RepetitionState.Off);
@@ -31,7 +33,7 @@ class PlayerEngine {
           onTrackEnd();
           break;
         case ProcessingState.ready:
-          canSkip=true;
+          canSkip = true;
           break;
         default:
           break;
@@ -71,10 +73,10 @@ class PlayerEngine {
   }
 
   static Future playNextSong() async {
-    if(!PlayerEngine.canSkip){
+    if (!PlayerEngine.canSkip) {
       return;
     }
-    PlayerEngine.canSkip=false;
+    PlayerEngine.canSkip = false;
     //Check in the queue
     if (_mainPlaylist.isNotEmpty) {
       await play(_mainPlaylist.removeAt(0));
@@ -85,7 +87,13 @@ class PlayerEngine {
     if (_currentPlaying != null && _currentPlaying!.isAPlaylist()) {
       Song? nextSong;
 
-      if (await _currentPlaying!.hasNext()) {
+      if (_isShuffleEnable.value) {
+        final songs = await _currentPlaying!.playlist!.getSongs();
+        final rnd = Random();
+        do {
+          nextSong = songs.elementAt(rnd.nextInt(songs.length));
+        } while (nextSong.id == _currentPlaying?.id);
+      } else if (await _currentPlaying!.hasNext()) {
         //Get the next song
         nextSong = await _currentPlaying?.getNext();
       } else if (_isPlaylistLooping) {
@@ -95,6 +103,7 @@ class PlayerEngine {
       //Play the song
       if (nextSong != null) {
         await PlayerEngine.play(nextSong);
+        await PlayerEngine.player.play();
       }
     }
   }
@@ -143,6 +152,10 @@ class PlayerEngine {
     _hasNextStream.value = await hasNext();
   }
 
+  static void toggleShuffle() {
+    _isShuffleEnable.value = !_isShuffleEnable.value;
+  }
+
   static Future<bool> hasNext() async {
     return _mainPlaylist.isNotEmpty ||
         (_currentPlaying != null && await _currentPlaying!.hasNext());
@@ -150,6 +163,10 @@ class PlayerEngine {
 
   static ValueNotifier<bool> hasNextStream() {
     return _hasNextStream;
+  }
+
+  static ValueNotifier<bool> isShuffleEnabled() {
+    return _isShuffleEnable;
   }
 
   static void setPlaylistLoop(bool isLoop) {
