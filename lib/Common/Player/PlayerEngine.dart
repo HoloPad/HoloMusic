@@ -44,7 +44,7 @@ class PlayerEngine {
   static void onTrackEnd() async {
     if (_mainPlaylist.isNotEmpty ||
         (_currentPlaying != null && _currentPlaying!.isAPlaylist())) {
-      PlayerEngine.playNextSong();
+      PlayerEngine.playNextSong(nextOnQueue: true);
     } else {
       await PlayerEngine.player.pause();
       await PlayerEngine.player.load();
@@ -72,7 +72,7 @@ class PlayerEngine {
     _currentPlaying?.getNext();
   }
 
-  static Future playNextSong() async {
+  static Future playNextSong({bool nextOnQueue = false}) async {
     if (!PlayerEngine.canSkip) {
       return;
     }
@@ -87,7 +87,7 @@ class PlayerEngine {
     if (_currentPlaying != null && _currentPlaying!.isAPlaylist()) {
       Song? nextSong;
 
-      if (_isShuffleEnable.value) {
+      if (_isShuffleEnable.value && nextOnQueue) {
         final songs = await _currentPlaying!.playlist!.getSongs();
         final rnd = Random();
         do {
