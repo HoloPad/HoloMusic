@@ -6,6 +6,7 @@ import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 import 'package:holomusic/Views/Playlist/PlaylistListView.dart';
 
 import '../../Common/Parameters/AppStyle.dart';
+import '../../Common/Parameters/PlatformSize.dart';
 import '../../Common/Player/Song.dart';
 import '../../UIComponents/CommonComponents.dart';
 
@@ -44,7 +45,7 @@ class SongOptions extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             _image,
-                            const SizedBox(height: 20),
+                            SizedBox(height: PlatformSize.sizedBoxSpaceL),
                             Flexible(
                                 child: Text(
                               song.title,
@@ -52,7 +53,7 @@ class SongOptions extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: _titleStyle,
                             )),
-                            const SizedBox(height: 20),
+                            SizedBox(height: PlatformSize.sizedBoxSpaceL),
                             //Save or delete offline
                             FutureBuilder<bool>(
                                 initialData: true,
@@ -105,7 +106,7 @@ class SongOptions extends StatelessWidget {
                                   PlayerEngine.addSongToQueue(song);
                                   Navigator.pop(context, false);
                                 }),
-                            const SizedBox(height: 15),
+                            SizedBox(height: PlatformSize.sizedBoxSpaceL),
                             CommonComponents.generateButton(
                                 text: AppLocalizations.of(context)!.cancel,
                                 onClick: () => Navigator.pop(context, false),
