@@ -19,7 +19,7 @@
   "saveOffline": "Save offline",
   "saveOfflineAllSongs": "Download all tracks",
   "deleteSong": "Delete song",
-  "deleteDownloadedSong": "Download offline song",
+  "deleteDownloadedSong": "Delete downloaded song",
   "deleteDownloadedSongs": "Delete all downloaded songs",
   "deleteSongFromPlaylist": "Delete from the playlist",
   "deletePlaylist": "Delete playlist",
