@@ -10,6 +10,7 @@ import 'package:palette_generator/palette_generator.dart';
 
 import '../../Common/Player/PlayerStateController.dart';
 import '../../Common/Player/Song.dart';
+import '../Playlist/SongOptions.dart';
 
 class PlayerView extends StatefulWidget {
   final ValueNotifier<int> playerStateStream;
@@ -117,6 +118,13 @@ class _PlayerViewState extends State<PlayerView> {
     });
   }
 
+  void _onMoreClick(Song song){
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => SongOptions(song)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,11 +136,27 @@ class _PlayerViewState extends State<PlayerView> {
           child: SafeArea(
               child: Column(
             children: [
-              Row(children: [
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                 TextButton(
                     onPressed: () => Navigator.pop(context),
                     child:
-                        const Icon(Icons.arrow_drop_down, color: Colors.white))
+                        const Icon(Icons.arrow_drop_down, color: Colors.white)),
+                    ValueListenableBuilder<Song?>(
+                        valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
+                        builder: (context, value, _) {
+                          if(value!=null) {
+                            return TextButton(
+                                onPressed: () => _onMoreClick(value),
+                                child:
+                                const Icon(Icons.more_vert,
+                                    color: Colors.white));
+                          }
+                          else {
+                            return const SizedBox();
+                          }
+                        })
               ]),
               const SizedBox(height: 15),
               ValueListenableBuilder<Song?>(
