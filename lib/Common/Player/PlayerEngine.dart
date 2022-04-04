@@ -43,7 +43,7 @@ class PlayerEngine {
 
   static void onTrackEnd() async {
     if (_mainPlaylist.isNotEmpty ||
-        (_currentPlaying != null && _currentPlaying!.isAPlaylist())) {
+        (_currentPlaying != null && await _currentPlaying!.hasNext())) {
       PlayerEngine.playNextSong(nextOnQueue: true);
     } else {
       await PlayerEngine.player.pause();
