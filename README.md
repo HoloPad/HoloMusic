@@ -1,6 +1,6 @@
 # holomusic
 
-A new Flutter project.
+Holomusic
 
 ## Getting Started
 
