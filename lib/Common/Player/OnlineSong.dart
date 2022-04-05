@@ -50,7 +50,6 @@ class OnlineSong extends Song {
   @override
   factory OnlineSong.fromJson(Map<String, dynamic> json,{PlaylistBase? playlist}) {
     final onlineSong = OnlineSong.lazy(json['id'], json['title'], json['thumbnail'], playlist: playlist);
-    onlineSong.setSongState(SongState.values.elementAt(json['state']));
     return onlineSong;
   }
 
@@ -60,7 +59,6 @@ class OnlineSong extends Song {
       "title": title,
       "thumbnail": thumbnail,
       "online": true,
-      "state":stateNotifier.value.index
     };
   }
 
