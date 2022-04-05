@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:holomusic/Common/Player/Song.dart';
+import 'package:holomusic/Common/Storage/SongsStorage.dart';
 import 'package:localstore/localstore.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../Playlist/PlaylistBase.dart';
 import '../Storage/PlaylistStorage.dart';
@@ -18,7 +20,7 @@ class OfflineSong extends Song {
   static Future<OfflineSong?> getById(String id,
       {PlaylistBase? playlistBase}) async {
     final db = Localstore.instance;
-    const collectionName = "holomusic";
+    String collectionName = SongsStorage.collectionName;
     final element = await db.collection(collectionName).doc(id).get();
     if (element == null) {
       return null;
@@ -51,9 +53,11 @@ class OfflineSong extends Song {
   @override
   factory OfflineSong.fromJson(Map<String, dynamic> json,
       {PlaylistBase? playlistBase}) {
-    return OfflineSong(
+    final song = OfflineSong(
         json['id'], json['title'], json['thumbnail'], json['filePath'],
         playlist: playlistBase);
+    song.setSongState(SongState.values.elementAt(json['state']));
+    return song;
   }
 
   @override
@@ -63,7 +67,8 @@ class OfflineSong extends Song {
       "title": title,
       "thumbnail": thumbnail,
       "online": false,
-      "filePath": filePath
+      "filePath": filePath,
+      "state": stateNotifier.value.index
     };
   }
 
@@ -96,15 +101,26 @@ class OfflineSong extends Song {
 
   @override
   Future deleteSong() async {
+    //Delete audio file
     File songPath = File(filePath);
     songPath.deleteSync(recursive: true);
+
+    //Delete image
     if (thumbnail != null) {
       File imgPath = File(thumbnail!);
       imgPath.deleteSync(recursive: true);
     }
-    await db.collection(collectionName).doc(id).delete();
+    //Delete noSQL content
+    final document = db.collection(collectionName).doc(id);
+
+    //Delete json file
+    final getDocumentPath = await getApplicationDocumentsDirectory();
+    File file = File(getDocumentPath.path+Platform.pathSeparator+document.path);
+
+    await document.delete();
+    if(file.existsSync())file.deleteSync();
     await PlaylistStorage.convertSongToOnline(this);
-    stateNotifier.value = SongState.online;
+    setSongState(SongState.online);
   }
 
   @override

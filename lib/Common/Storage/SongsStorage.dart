@@ -9,10 +9,10 @@ import 'package:localstore/localstore.dart';
 
 class SongsStorage {
   static final _db = Localstore.instance;
-  static const _collectionName = "holomusic";
+  static final String collectionName = "holomusic"+Platform.pathSeparator+"songs";
 
   static Future<List<OfflineSong>> getOfflineSongs() async {
-    final document = _db.collection(_collectionName);
+    final document = _db.collection(collectionName);
 
     final elements = (await document.get())?.entries;
     if (elements == null) {

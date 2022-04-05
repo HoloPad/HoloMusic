@@ -49,12 +49,19 @@ class OnlineSong extends Song {
 
   @override
   factory OnlineSong.fromJson(Map<String, dynamic> json,{PlaylistBase? playlist}) {
-    return OnlineSong.lazy(json['id'], json['title'], json['thumbnail'], playlist: playlist);
+    final onlineSong = OnlineSong.lazy(json['id'], json['title'], json['thumbnail'], playlist: playlist);
+    onlineSong.setSongState(SongState.values.elementAt(json['state']));
+    return onlineSong;
   }
 
   @override
   Map<String, dynamic> toJson() {
-    return {"id": id, "title": title, "thumbnail": thumbnail, "online": true};
+    return {"id": id,
+      "title": title,
+      "thumbnail": thumbnail,
+      "online": true,
+      "state":stateNotifier.value.index
+    };
   }
 
   static Future<OnlineSong> createFromId(String id,
@@ -180,7 +187,7 @@ class OnlineSong extends Song {
       return;
     }
     try {
-      stateNotifier.value = SongState.downloading;
+      setSongState(SongState.downloading);
       final docDirectory = await getApplicationDocumentsDirectory();
       final path = docDirectory.path +
           Platform.pathSeparator +
@@ -220,9 +227,9 @@ class OnlineSong extends Song {
       if (offline != null) {
         PlaylistStorage.convertOnlineSongToOffline(this, offline);
       }
-      stateNotifier.value = SongState.offline;
+      setSongState(SongState.offline);
     } catch (_) {
-      stateNotifier.value = SongState.errorOnDownloading;
+      setSongState(SongState.errorOnDownloading);
     }
   }
 
@@ -233,6 +240,6 @@ class OnlineSong extends Song {
     }
     final offlineSong = await OfflineSong.getById(id);
     await offlineSong?.deleteSong();
-    stateNotifier.value = SongState.online;
+    setSongState(SongState.online);
   }
 }
