@@ -12,6 +12,7 @@ abstract class PlaylistBase {
   late Color? backgroundColor;
   bool isOnline = true;
   bool _canDownload = true;
+  ValueNotifier<bool> isDownloading = ValueNotifier(false);
 
   PlaylistBase(this.name, this.imageProvider, this.backgroundColor);
 
@@ -82,5 +83,9 @@ abstract class PlaylistBase {
 
   void stopDownload() {
     _canDownload = false;
+  }
+
+  void setIsDownloading(bool isDownloading) {
+    this.isDownloading.value = isDownloading;
   }
 }

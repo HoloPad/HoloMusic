@@ -18,7 +18,8 @@ class PlaylistOptions extends StatelessWidget {
 
   PlaylistOptions(this.playlist, {Key? key}) : super(key: key);
 
-  void _startDownload(BuildContext context) async {
+  void _startDownload() async {
+    playlist.setIsDownloading(true);
     if (Platform.isAndroid) {
       //Listen for shared data updates
       AppClient.updates.listen((json) {
@@ -38,9 +39,10 @@ class PlaylistOptions extends StatelessWidget {
     if (playlist.runtimeType == PlaylistSaved) {
       (playlist as PlaylistSaved).save();
     }
+    playlist.setIsDownloading(false);
   }
 
-  void _recomputeSongStates() async {
+  Future _recomputeSongStates() async {
     final songs = await playlist.getSongs();
     for (var e in songs) {
       bool isOnline = await e.isOnline();
@@ -48,19 +50,18 @@ class PlaylistOptions extends StatelessWidget {
     }
   }
 
-  void _cancelDownload(BuildContext context) async {
+  void _cancelDownload() async {
     if (Platform.isAndroid) {
-      AppClient.stopService();
-      _recomputeSongStates();
+      await AppClient.stopService();
+      await _recomputeSongStates();
     } else {
       playlist.stopDownload();
     }
-    Navigator.pop(context);
   }
 
-  void _onDeleteDownloadedSongClicked() async {
+  void _deleteDownloadedSongs() async {
     await playlist.deleteAllSongs();
-    if(playlist.runtimeType == PlaylistSaved){
+    if (playlist.runtimeType == PlaylistSaved) {
       (playlist as PlaylistSaved).save();
     }
   }
@@ -92,31 +93,61 @@ class PlaylistOptions extends StatelessWidget {
                 const SizedBox(height: 15),
                 Text(playlist.name, style: AppStyle.titleStyle),
                 const SizedBox(height: 20),
-                CommonComponents.generateButton(
-                    text: AppLocalizations.of(context)!.saveOfflineAllSongs,
-                    icon: Icons.download_outlined,
-                    onClick: () {
-                      _startDownload(context);
-                      Navigator.pop(context);
-                    }),
-                CommonComponents.generateButton(
-                    text: "Cancel download",
-                    icon: Icons.cancel_outlined,
-                    onClick: () => _cancelDownload(context)),
-                CommonComponents.generateButton(
-                    text: AppLocalizations.of(context)!.deleteDownloadedSongs,
-                    icon: Icons.delete_outline_rounded,
-                    onClick: () {
-                      _onDeleteDownloadedSongClicked();
-                      Navigator.pop(context);
-                    }),
+                FutureBuilder<bool>(
+                  future: playlist.areAllSongsSaved(),
+                  builder: (_, snapshot) {
+                    if (snapshot.hasData && (snapshot.data!) == false) {
+                      return CommonComponents.generateButton(
+                          text:
+                              AppLocalizations.of(context)!.saveOfflineAllSongs,
+                          icon: Icons.download_outlined,
+                          onClick: () {
+                            _startDownload();
+                            Navigator.pop(context);
+                          });
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
+                ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: playlist.isDownloading,
+                  builder: (_, value, __) {
+                    if (value) {
+                      return CommonComponents.generateButton(
+                          text: "Cancel download",
+                          icon: Icons.cancel_outlined,
+                          onClick: () {
+                            _cancelDownload();
+                            Navigator.pop(context);
+                          });
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
+                ),
+                FutureBuilder<bool>(
+                  future: playlist.isAtLeastOneSaved(),
+                  builder: (_, snapshot) {
+                    if (snapshot.hasData && snapshot.data!) {
+                      return CommonComponents.generateButton(
+                          text: AppLocalizations.of(context)!
+                              .deleteDownloadedSongs,
+                          icon: Icons.delete_outline_rounded,
+                          onClick: () {
+                            _deleteDownloadedSongs();
+                            Navigator.pop(context);
+                          });
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
+                ),
                 CommonComponents.generateButton(
                     text: AppLocalizations.of(context)!.deletePlaylist,
                     icon: Icons.delete_sweep_outlined,
                     onClick: () {
-                      playlist
-                          .delete()
-                          .then((value) => Navigator.pop(context));
+                      playlist.delete().then((value) => Navigator.pop(context));
                     }),
                 const SizedBox(height: 15),
                 CommonComponents.generateButton(
