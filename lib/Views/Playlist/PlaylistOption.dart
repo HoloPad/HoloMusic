@@ -1,15 +1,69 @@
+import 'dart:io';
+
+import 'package:android_long_task/android_long_task.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:holomusic/Common/ForegroundService/SharedDownloadData.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
+import 'package:holomusic/Common/Player/Song.dart';
+import 'package:holomusic/Common/Player/SongStateManager.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
+import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 import 'package:holomusic/UIComponents/CommonComponents.dart';
 
 class PlaylistOptions extends StatelessWidget {
-  PlaylistBase playlistInterface;
+  PlaylistBase playlist;
 
-  PlaylistOptions(this.playlistInterface, {Key? key}) : super(key: key);
+  PlaylistOptions(this.playlist, {Key? key}) : super(key: key);
+
+  void _startDownload(BuildContext context) async {
+    if (Platform.isAndroid) {
+      //Listen for shared data updates
+      AppClient.updates.listen((json) {
+        var serviceDataUpdate = SharedDownloadData.fromJson(json!);
+        SongStateManager.setSongState(serviceDataUpdate.getProcessingId(),
+            serviceDataUpdate.currentProcessingState);
+      });
+
+      SharedDownloadData sharedDownloadData = SharedDownloadData();
+      sharedDownloadData.songs =
+          (await playlist.getSongs()).map((e) => e.id).toList();
+      await AppClient.execute(sharedDownloadData);
+    } else {
+      await playlist.downloadAllSongs();
+    }
+    //If it is a user playlist, it must be saved to updated the file paths
+    if (playlist.runtimeType == PlaylistSaved) {
+      (playlist as PlaylistSaved).save();
+    }
+  }
+
+  void _recomputeSongStates() async {
+    final songs = await playlist.getSongs();
+    for (var e in songs) {
+      bool isOnline = await e.isOnline();
+      e.setSongState(isOnline ? SongState.online : SongState.offline);
+    }
+  }
+
+  void _cancelDownload(BuildContext context) async {
+    if (Platform.isAndroid) {
+      AppClient.stopService();
+      _recomputeSongStates();
+    } else {
+      playlist.stopDownload();
+    }
+    Navigator.pop(context);
+  }
+
+  void _onDeleteDownloadedSongClicked() async {
+    await playlist.deleteAllSongs();
+    if(playlist.runtimeType == PlaylistSaved){
+      (playlist as PlaylistSaved).save();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +78,7 @@ class PlaylistOptions extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 FutureBuilder<ImageProvider<Object>>(
-                    future: playlistInterface.getImageProvider(),
+                    future: playlist.getImageProvider(),
                     builder: (_, snapshot) {
                       return ExtendedImage(
                         image: snapshot.data ??
@@ -36,27 +90,31 @@ class PlaylistOptions extends StatelessWidget {
                       );
                     }),
                 const SizedBox(height: 15),
-                Text(playlistInterface.name, style: AppStyle.titleStyle),
+                Text(playlist.name, style: AppStyle.titleStyle),
                 const SizedBox(height: 20),
                 CommonComponents.generateButton(
                     text: AppLocalizations.of(context)!.saveOfflineAllSongs,
                     icon: Icons.download_outlined,
                     onClick: () {
-                      playlistInterface.downloadAllSongs();
+                      _startDownload(context);
                       Navigator.pop(context);
                     }),
+                CommonComponents.generateButton(
+                    text: "Cancel download",
+                    icon: Icons.cancel_outlined,
+                    onClick: () => _cancelDownload(context)),
                 CommonComponents.generateButton(
                     text: AppLocalizations.of(context)!.deleteDownloadedSongs,
                     icon: Icons.delete_outline_rounded,
                     onClick: () {
-                      playlistInterface.deleteAllSongs();
+                      _onDeleteDownloadedSongClicked();
                       Navigator.pop(context);
                     }),
                 CommonComponents.generateButton(
                     text: AppLocalizations.of(context)!.deletePlaylist,
                     icon: Icons.delete_sweep_outlined,
                     onClick: () {
-                      playlistInterface
+                      playlist
                           .delete()
                           .then((value) => Navigator.pop(context));
                     }),

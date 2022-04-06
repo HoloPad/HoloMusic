@@ -1,16 +1,27 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:android_long_task/android_long_task.dart';
+import 'package:android_long_task/long_task/service_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:holomusic/Common/ForegroundService/SharedDownloadData.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
+import 'package:holomusic/Common/Player/Song.dart';
+import 'package:holomusic/Common/Player/SongStateManager.dart';
+import 'package:holomusic/Common/Storage/SongsStorage.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Home/HomeView.dart';
 import 'package:holomusic/Views/Library/LibraryView.dart';
 import 'package:holomusic/Views/Search/SearchView.dart';
+import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:localstore/localstore.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import 'Common/Parameters/AppStyle.dart';
 import 'Common/Player/PlayerStateController.dart';
@@ -21,6 +32,7 @@ Future<void> main() async {
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
   );
+  SongStateManager.init();
   PlayerEngine.initialize();
   runApp(const MyApp());
 }
@@ -176,4 +188,98 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
         PointerDeviceKind.mouse,
         // etc.
       };
+}
+
+//this entire function runs in your ForegroundService
+@pragma('vm:entry-point')
+serviceMain() async {
+  //make sure you add this
+  WidgetsFlutterBinding.ensureInitialized();
+  //if your use dependency injection you initialize them here
+  //what ever dart objects you created in your app main function is not  accessible here
+
+  //set a callback and define the code you want to execute when your  ForegroundService runs
+  ServiceClient.setExecutionCallback((initialData) async {
+    //you set initialData when you are calling AppClient.execute()
+    //from your flutter application code and receive it here
+    var serviceData = SharedDownloadData.fromJson(initialData);
+    final instance = YoutubeExplode();
+    //runs your code here
+    for (int i = 0; i < serviceData.songs.length; i++) {
+      serviceData.processingIndex = i;
+      serviceData.currentProcessingState = SongState.downloading;
+      await ServiceClient.update(serviceData);
+
+      final id = serviceData.songs[i];
+
+
+      //Check if already exists
+      final element = await Localstore.instance
+          .collection(SongsStorage.collectionName)
+          .doc(id)
+          .get();
+
+      if (element == null) {
+        try {
+          final video = await instance.videos.get(id);
+
+          //get streams
+          var manifest =
+          await instance.videos.streamsClient.getManifest(video.id);
+          var streamInfo = manifest.audioOnly.withHighestBitrate();
+          var stream = instance.videos.streamsClient.get(streamInfo);
+
+          //Create directories
+          final docDirectory = await getApplicationDocumentsDirectory();
+          final folderPath = docDirectory.path +
+              Platform.pathSeparator +
+              "holomusic" +
+              Platform.pathSeparator +
+              "offline";
+          final directory = await Directory(folderPath);
+          await directory.create(recursive: true);
+
+          //Create files
+          var songFile = File(
+              directory.path + Platform.pathSeparator + video.id.value +
+                  ".webm");
+          final imageFile = File(
+              directory.path + Platform.pathSeparator + video.id.value +
+                  ".jpg");
+
+          //Download song
+          var fileStream = songFile.openWrite();
+          await stream.pipe(fileStream);
+          // Close the file.
+          await fileStream.flush();
+          await fileStream.close();
+
+          //Download thumbnail
+          final imageResponse =
+          await http.get(Uri.parse(video.thumbnails.highResUrl));
+          imageFile.writeAsBytes(imageResponse.bodyBytes, flush: true);
+
+          //Store on the localstore
+          await Localstore.instance
+              .collection(SongsStorage.collectionName)
+              .doc(id)
+              .set({
+            "title": video.title,
+            "thumbnail": imageFile.path,
+            "path": songFile.path
+          });
+          serviceData.currentProcessingState = SongState.offline;
+        }
+        catch (_){
+          serviceData.currentProcessingState = SongState.errorOnDownloading;
+        }
+      } else {
+        serviceData.currentProcessingState = SongState.offline;
+      }
+      await ServiceClient.update(serviceData);
+    }
+
+    await ServiceClient.endExecution(serviceData);
+    await ServiceClient.stopService();
+  });
 }

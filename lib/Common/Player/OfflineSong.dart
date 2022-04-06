@@ -6,7 +6,6 @@ import 'package:localstore/localstore.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../Playlist/PlaylistBase.dart';
-import '../Storage/PlaylistStorage.dart';
 
 class OfflineSong extends Song {
   String filePath;
@@ -28,6 +27,11 @@ class OfflineSong extends Song {
     return OfflineSong(
         id, element['title'], element['thumbnail'], element['path'],
         playlist: playlistBase);
+  }
+
+  static Future<bool> exists(String id) async {
+    final song = await OfflineSong.getById(id);
+    return song != null;
   }
 
   @override
@@ -56,7 +60,6 @@ class OfflineSong extends Song {
     final song = OfflineSong(
         json['id'], json['title'], json['thumbnail'], json['filePath'],
         playlist: playlistBase);
-    song.setSongState(SongState.values.elementAt(json['state']));
     return song;
   }
 
@@ -68,7 +71,6 @@ class OfflineSong extends Song {
       "thumbnail": thumbnail,
       "online": false,
       "filePath": filePath,
-      "state": stateNotifier.value.index
     };
   }
 
@@ -115,16 +117,17 @@ class OfflineSong extends Song {
 
     //Delete json file
     final getDocumentPath = await getApplicationDocumentsDirectory();
-    File file = File(getDocumentPath.path+Platform.pathSeparator+document.path);
+    File file =
+        File(getDocumentPath.path + Platform.pathSeparator + document.path);
 
     await document.delete();
-    if(file.existsSync())file.deleteSync();
-    await PlaylistStorage.convertSongToOnline(this);
+    if (file.existsSync()) file.deleteSync();
+    await playlistConversion();
     setSongState(SongState.online);
   }
 
   @override
-  Future saveSong() async {
-    return;
+  Future<bool> saveSong() async {
+    return true;
   }
 }

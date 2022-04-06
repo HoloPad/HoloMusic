@@ -11,6 +11,7 @@ abstract class PlaylistBase {
   late String name;
   late Color? backgroundColor;
   bool isOnline = true;
+  bool _canDownload = true;
 
   PlaylistBase(this.name, this.imageProvider, this.backgroundColor);
 
@@ -38,10 +39,12 @@ abstract class PlaylistBase {
   Future delete() async {}
 
   Future downloadAllSongs() async {
+    _canDownload = true;
     final songs = await getSongs();
 
     for (var e in songs) {
       await e.saveSong();
+      if (!_canDownload) break;
     }
   }
 
@@ -75,5 +78,9 @@ abstract class PlaylistBase {
       }
     }
     return oneSaved;
+  }
+
+  void stopDownload() {
+    _canDownload = false;
   }
 }
