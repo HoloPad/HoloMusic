@@ -5,11 +5,10 @@ import 'package:holomusic/Common/Player/OfflineSong.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Player/SongStateManager.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
+import 'package:holomusic/Common/Storage/PlaylistStorage.dart';
 import 'package:holomusic/Common/Storage/SongsStorage.dart';
 import 'package:localstore/localstore.dart';
 import 'package:path_provider/path_provider.dart';
-
-import '../Playlist/PlaylistSaved.dart';
 
 enum SongState { online, offline, downloading, errorOnDownloading }
 
@@ -127,17 +126,19 @@ abstract class Song {
   }
 
   void setSongState(SongState state) {
-    if(useSongStateManager) {
+    if (useSongStateManager) {
       SongStateManager.setSongState(id, state);
-    }
-    else {
-      stateNotifier!.value=state;
+    } else {
+      stateNotifier!.value = state;
     }
   }
 
-  Future playlistConversion() async{
-    if(playlist!=null && playlist.runtimeType==PlaylistSaved){
-      await (playlist as PlaylistSaved).save();
+  Future playlistConversion() async {
+    final playlists = await PlaylistStorage.getAllPlaylists();
+    for (var playlist in playlists) {
+      if (await playlist.containsSong(this)) {
+        await playlist.save();
+      }
     }
   }
 }

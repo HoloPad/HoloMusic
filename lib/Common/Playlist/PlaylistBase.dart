@@ -88,4 +88,9 @@ abstract class PlaylistBase {
   void setIsDownloading(bool isDownloading) {
     this.isDownloading.value = isDownloading;
   }
+
+  Future<bool> containsSong(Song song) async {
+    final songs = await getSongs();
+    return songs.any((element) => element.id == song.id);
+  }
 }
