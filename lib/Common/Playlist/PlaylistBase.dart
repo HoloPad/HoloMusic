@@ -11,6 +11,8 @@ abstract class PlaylistBase {
   late String name;
   late Color? backgroundColor;
   bool isOnline = true;
+  bool _canDownload = true;
+  ValueNotifier<bool> isDownloading = ValueNotifier(false);
 
   PlaylistBase(this.name, this.imageProvider, this.backgroundColor);
 
@@ -38,10 +40,12 @@ abstract class PlaylistBase {
   Future delete() async {}
 
   Future downloadAllSongs() async {
+    _canDownload = true;
     final songs = await getSongs();
 
     for (var e in songs) {
       await e.saveSong();
+      if (!_canDownload) break;
     }
   }
 
@@ -75,5 +79,18 @@ abstract class PlaylistBase {
       }
     }
     return oneSaved;
+  }
+
+  void stopDownload() {
+    _canDownload = false;
+  }
+
+  void setIsDownloading(bool isDownloading) {
+    this.isDownloading.value = isDownloading;
+  }
+
+  Future<bool> containsSong(Song song) async {
+    final songs = await getSongs();
+    return songs.any((element) => element.id == song.id);
   }
 }

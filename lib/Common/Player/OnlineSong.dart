@@ -8,7 +8,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as YtExplode;
 
 import '../Playlist/PlaylistBase.dart';
-import '../Storage/PlaylistStorage.dart';
 
 enum LoadingState { initialized, loading, loaded }
 
@@ -48,14 +47,18 @@ class OnlineSong extends Song {
   }
 
   @override
-  factory OnlineSong.fromJson(Map<String, dynamic> json,{PlaylistBase? playlist}) {
-    final onlineSong = OnlineSong.lazy(json['id'], json['title'], json['thumbnail'], playlist: playlist);
+  factory OnlineSong.fromJson(Map<String, dynamic> json,
+      {PlaylistBase? playlist}) {
+    final onlineSong = OnlineSong.lazy(
+        json['id'], json['title'], json['thumbnail'],
+        playlist: playlist);
     return onlineSong;
   }
 
   @override
   Map<String, dynamic> toJson() {
-    return {"id": id,
+    return {
+      "id": id,
       "title": title,
       "thumbnail": thumbnail,
       "online": true,
@@ -65,7 +68,7 @@ class OnlineSong extends Song {
   static Future<OnlineSong> createFromId(String id,
       {PlaylistBase? playlist}) async {
     final instance = YtExplode.YoutubeExplode();
-    final video = await instance.videos.get(YtExplode.VideoId(id));
+    final video = await instance.videos.get(id);
     return OnlineSong(video, playlist: playlist);
   }
 
@@ -159,8 +162,8 @@ class OnlineSong extends Song {
     if (listVideos != null && currentIndex + 1 < listVideos.length) {
       //there is a next element
       final nextVideo = listVideos.elementAt(currentIndex + 1);
-      _nextSong = await
-          OnlineSong.createFromId(nextVideo.id, playlist: playlist);
+      _nextSong =
+          await OnlineSong.createFromId(nextVideo.id, playlist: playlist);
       _nextSong?.preloadStream();
       return _nextSong;
     }
@@ -180,9 +183,9 @@ class OnlineSong extends Song {
   }
 
   @override
-  Future saveSong() async {
+  Future<bool> saveSong() async {
     if (!await isOnline()) {
-      return;
+      return true;
     }
     try {
       setSongState(SongState.downloading);
@@ -221,13 +224,12 @@ class OnlineSong extends Song {
       await db.collection(collectionName).doc(_video.id.value).set(
           {"title": title, "thumbnail": imageFile.path, "path": songFile.path});
 
-      final offline = await OfflineSong.getById(id);
-      if (offline != null) {
-        PlaylistStorage.convertOnlineSongToOffline(this, offline);
-      }
+      await playlistConversion();
       setSongState(SongState.offline);
+      return true;
     } catch (_) {
       setSongState(SongState.errorOnDownloading);
+      return false;
     }
   }
 
@@ -238,6 +240,7 @@ class OnlineSong extends Song {
     }
     final offlineSong = await OfflineSong.getById(id);
     await offlineSong?.deleteSong();
+    await playlistConversion();
     setSongState(SongState.online);
   }
 }

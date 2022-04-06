@@ -149,7 +149,7 @@ class _PlaylistViewState extends State<PlaylistView> {
                       },
                     ),
                     const SizedBox(
-                      height: 50,
+                      height: 100,
                     )
                   ])))
         ]));

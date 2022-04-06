@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:holomusic/Common/Player/OfflineSong.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
+import 'package:holomusic/Common/Player/SongStateManager.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
+import 'package:holomusic/Common/Storage/PlaylistStorage.dart';
 import 'package:holomusic/Common/Storage/SongsStorage.dart';
 import 'package:localstore/localstore.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,13 +20,18 @@ abstract class Song {
   final db = Localstore.instance;
   final collectionName = SongsStorage.collectionName;
 
-  ValueNotifier<SongState> stateNotifier=ValueNotifier(SongState.online);
+  ValueNotifier<SongState>? stateNotifier;
+  bool useSongStateManager = SongStateManager.isInitialized();
 
   Song(this.id, this.title, this.thumbnail, {this.playlist}) {
     isOnline().then((res) {
-      stateNotifier.value = res ? SongState.online : SongState.offline;
+      if (useSongStateManager) {
+        setSongState(res ? SongState.online : SongState.offline);
+      } else {
+        stateNotifier =
+            ValueNotifier(res ? SongState.online : SongState.offline);
+      }
     });
-
   }
 
   Future<Uri> getAudioUri();
@@ -33,15 +40,16 @@ abstract class Song {
 
   Future<Song?> getFirstOfThePlaylist();
 
-  Future saveSong();
+  Future<bool> saveSong();
 
   Future deleteSong();
 
-  factory Song.fromJson(Map<String, dynamic> json, {PlaylistBase? playlistBase}) {
+  factory Song.fromJson(Map<String, dynamic> json,
+      {PlaylistBase? playlistBase}) {
     if (json['online'] == true) {
-      return OnlineSong.fromJson(json,playlist: playlistBase);
+      return OnlineSong.fromJson(json, playlist: playlistBase);
     } else {
-      return OfflineSong.fromJson(json,playlistBase: playlistBase);
+      return OfflineSong.fromJson(json, playlistBase: playlistBase);
     }
   }
 
@@ -50,7 +58,6 @@ abstract class Song {
   bool isAPlaylist() {
     return playlist != null;
   }
-
 
   Future<bool> hasNext() async {
     if (isAPlaylist()) {
@@ -95,15 +102,15 @@ abstract class Song {
   Future<bool> isOnline() async {
     final document = db.collection(collectionName).doc(id);
     final getDocumentPath = await getApplicationDocumentsDirectory();
-    File file = File(getDocumentPath.path+Platform.pathSeparator+document.path);
+    File file =
+        File(getDocumentPath.path + Platform.pathSeparator + document.path);
     bool isFilePresent = file.existsSync();
-    if(isFilePresent){
+    if (isFilePresent) {
       final content = await document.get();
-      bool hasContent = content!=null;
-      if(hasContent){
+      bool hasContent = content != null;
+      if (hasContent) {
         return false;
-      }
-      else {
+      } else {
         file.deleteSync();
       }
     }
@@ -111,10 +118,27 @@ abstract class Song {
   }
 
   ValueNotifier<SongState> getStateNotifier() {
-    return stateNotifier;
+    if (useSongStateManager) {
+      return SongStateManager.getSongState(id);
+    } else {
+      return stateNotifier!;
+    }
   }
 
-  void setSongState(SongState state){
-    stateNotifier.value=state;
+  void setSongState(SongState state) {
+    if (useSongStateManager) {
+      SongStateManager.setSongState(id, state);
+    } else {
+      stateNotifier!.value = state;
+    }
+  }
+
+  Future playlistConversion() async {
+    final playlists = await PlaylistStorage.getAllPlaylists();
+    for (var playlist in playlists) {
+      if (await playlist.containsSong(this)) {
+        await playlist.save();
+      }
+    }
   }
 }

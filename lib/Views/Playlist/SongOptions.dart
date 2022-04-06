@@ -22,13 +22,12 @@ class SongOptions extends StatelessWidget {
   final _titleStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white);
 
-  void onDownloadDeleteClick(BuildContext context, bool isOnline) async {
+  void onDownloadOrDeleteClick(bool isOnline) async {
     if (isOnline) {
-      song.saveSong();
+      await song.saveSong();
     } else {
-      song.deleteSong();
+      await song.deleteSong();
     }
-    Navigator.pop(context,false);
   }
 
   @override
@@ -70,7 +69,8 @@ class SongOptions extends StatelessWidget {
                                           ? Icons.add
                                           : Icons.delete_outline_rounded,
                                       onClick: () {
-                                        onDownloadDeleteClick(context,isOnline);
+                                        onDownloadOrDeleteClick(isOnline);
+                                        Navigator.pop(context, false);
                                       });
                                 }),
                             CommonComponents.generateButton(

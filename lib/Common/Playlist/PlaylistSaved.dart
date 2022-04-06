@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 import 'package:localstore/localstore.dart';
 
+import '../Player/OfflineSong.dart';
+import '../Player/OnlineSong.dart';
 import '../Player/Song.dart';
 
 class PlaylistSaved extends PlaylistBase {
@@ -30,7 +32,7 @@ class PlaylistSaved extends PlaylistBase {
 
   void addInTop(Song song) {
     if (!songs.any((element) => element.id == song.id)) {
-      songs.insert(0,song);
+      songs.insert(0, song);
     }
   }
 
@@ -39,14 +41,10 @@ class PlaylistSaved extends PlaylistBase {
     if (save) this.save();
   }
 
-  void save() {
-    if (id == null) {
-      // If Is it the first save
-      id = _db.collection(_collectionName).doc().id;
-      _db.collection(_collectionName).doc(id).set(toJson());
-    }
-    //check songs
-    _db.collection(_collectionName).doc(id).set(toJson());
+  Future save() async {
+    id ??= _db.collection(_collectionName).doc().id;
+    await updateStates();
+    await _db.collection(_collectionName).doc(id).set(toJson());
   }
 
   Future<bool> exists() async {
@@ -76,6 +74,24 @@ class PlaylistSaved extends PlaylistBase {
     if (id == null) {
       return;
     }
-    await _db.collection(_collectionName).doc(id).delete();
+    final ref = _db.collection(_collectionName).doc(id);
+    File file = File(ref.path);
+    ref.delete();
+    if (file.existsSync()) file.deleteSync();
+  }
+
+  Future updateStates() async {
+    final songs = await getSongs();
+    for (int i = 0; i < songs.length; i++) {
+      bool songIsStored = await OfflineSong.exists(songs[i].id);
+      bool songIsOnline = songs[i].runtimeType == OnlineSong;
+
+      if (songIsOnline && songIsStored) {
+        songs[i] =
+            (await OfflineSong.getById(songs[i].id, playlistBase: this))!;
+      } else if (!songIsOnline && !songIsStored) {
+        songs[i] = await OnlineSong.createFromId(songs[i].id, playlist: this);
+      }
+    }
   }
 }
