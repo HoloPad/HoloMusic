@@ -71,9 +71,9 @@ class _PlayerViewState extends State<PlayerView> {
         case RepetitionState.Off:
           return const Icon(Icons.repeat, size: _size, color: _color);
         case RepetitionState.OneItem:
-          return const Icon(Icons.repeat_one_on, size: _size, color: _color);
+          return const Icon(Icons.repeat_one_on_rounded, size: _size, color: _color);
         case RepetitionState.AllItems:
-          return const Icon(Icons.repeat_on, size: _size, color: _color);
+          return const Icon(Icons.repeat_on_rounded, size: _size, color: _color);
       }
     },
   );
