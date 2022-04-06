@@ -78,7 +78,7 @@ class _NotificationShimmerState extends State<NotificationShimmer> {
               loadedElements++;
               if (loadedElements >= widget.elementsToLoad && showLoading) {
                 WidgetsBinding.instance
-                    ?.addPostFrameCallback((timeStamp) => stopLoading());
+                    .addPostFrameCallback((timeStamp) => stopLoading());
               }
               timer?.cancel();
               _startTimer();

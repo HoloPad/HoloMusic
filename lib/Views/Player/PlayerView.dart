@@ -105,7 +105,7 @@ class _PlayerViewState extends State<PlayerView> {
     final palette = await PaletteGenerator.fromImageProvider(provider);
     if (palette.dominantColor != null) {
       final newColor = palette.dominantColor!.color;
-      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         setState(() {
           _mainColor = newColor;
         });
