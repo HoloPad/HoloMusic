@@ -115,7 +115,7 @@ class PlaylistOptions extends StatelessWidget {
                   builder: (_, value, __) {
                     if (value) {
                       return CommonComponents.generateButton(
-                          text: "Cancel download",
+                          text: AppLocalizations.of(context)!.cancelDownload,
                           icon: Icons.cancel_outlined,
                           onClick: () {
                             _cancelDownload();
