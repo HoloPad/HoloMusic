@@ -76,6 +76,9 @@ class PlaylistSaved extends PlaylistBase {
     if (id == null) {
       return;
     }
-    await _db.collection(_collectionName).doc(id).delete();
+    final ref = _db.collection(_collectionName).doc(id);
+    File file = File(ref.path);
+    ref.delete();
+    if (file.existsSync()) file.deleteSync();
   }
 }
