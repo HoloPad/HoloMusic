@@ -105,12 +105,12 @@ class OfflineSong extends Song {
   Future deleteSong() async {
     //Delete audio file
     File songPath = File(filePath);
-    songPath.deleteSync(recursive: true);
+    if (songPath.existsSync()) songPath.deleteSync(recursive: true);
 
     //Delete image
     if (thumbnail != null) {
       File imgPath = File(thumbnail!);
-      imgPath.deleteSync(recursive: true);
+      if(imgPath.existsSync()) imgPath.deleteSync(recursive: true);
     }
     //Delete noSQL content
     final document = db.collection(collectionName).doc(id);
