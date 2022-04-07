@@ -20,6 +20,7 @@ class OnlineSong extends Song {
   Future<Uri>? _offlineStream;
   bool _offlineCompleted = false;
   OnlineSong? _nextSong;
+  YtExplode.StreamManifest? _streamManifest;
 
   OnlineSong(YtExplode.Video video,
       {bool preload = false, PlaylistBase? playlist})
@@ -96,15 +97,18 @@ class OnlineSong extends Song {
     }
   }
 
+  Future<YtExplode.StreamManifest> _getManifest() async {
+    _streamManifest ??= await _yt.videos.streamsClient.getManifest(id);
+    return _streamManifest!;
+  }
+
   Future<Uri> _getOnlineStream() async {
-    final _video = await getVideo();
-    var manifest = await _yt.videos.streamsClient.getManifest(_video.id);
+    var manifest = await _getManifest();
     var streamInfo = manifest.audioOnly.withHighestBitrate();
     return streamInfo.url;
   }
 
   Future<Uri> _getOfflineStream() async {
-    final _video = await getVideo();
     //Create directory
     Directory tempDir = await getTemporaryDirectory();
     var folderPath = tempDir.path +
@@ -113,11 +117,11 @@ class OnlineSong extends Song {
         Platform.pathSeparator;
     print("Preloading");
     await Directory(folderPath).create(recursive: true);
-    var fileName = folderPath + _video.id.value + ".webm";
+    var fileName = folderPath + id + ".webm";
     var file = File(fileName);
     print(file.path);
     //Downloading
-    var manifest = await _yt.videos.streamsClient.getManifest(_video.id);
+    var manifest = await _getManifest();
     var streamInfo = manifest.audioOnly.withHighestBitrate();
     var stream = _yt.videos.streamsClient.get(streamInfo);
     var fileStream = file.openWrite();
@@ -199,20 +203,15 @@ class OnlineSong extends Song {
       offlineDirectory.createSync(recursive: true);
 
       final _video = await getVideo();
-
       final imageResponse =
           await http.get(Uri.parse(_video.thumbnails.highResUrl));
-      final imageFile = File(offlineDirectory.path +
-          Platform.pathSeparator +
-          _video.id.value +
-          ".jpg");
+      final imageFile =
+          File(offlineDirectory.path + Platform.pathSeparator + id + ".jpg");
       imageFile.writeAsBytes(imageResponse.bodyBytes, flush: true);
 
-      var songFile = File(offlineDirectory.path +
-          Platform.pathSeparator +
-          _video.id.value +
-          ".webm");
-      final manifest = await _yt.videos.streamsClient.getManifest(id);
+      var songFile =
+          File(offlineDirectory.path + Platform.pathSeparator + id + ".webm");
+      final manifest = await _getManifest();
       final streamInfo = manifest.audioOnly.withHighestBitrate();
       final stream = _yt.videos.streamsClient.get(streamInfo);
       var fileStream = songFile.openWrite();
@@ -221,7 +220,7 @@ class OnlineSong extends Song {
       await fileStream.flush();
       await fileStream.close();
 
-      await db.collection(collectionName).doc(_video.id.value).set(
+      await db.collection(collectionName).doc(id).set(
           {"title": title, "thumbnail": imageFile.path, "path": songFile.path});
 
       await playlistConversion();
