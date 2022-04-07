@@ -6,7 +6,6 @@ import 'package:android_long_task/long_task/service_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:holomusic/Common/ForegroundService/SharedDownloadData.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Common/Player/Song.dart';
@@ -98,7 +97,9 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
 
     PlayerEngine.getCurrentVideoHandlerPlaying().addListener(() {
-      final value = PlayerEngine.getCurrentVideoHandlerPlaying().value;
+      final value = PlayerEngine
+          .getCurrentVideoHandlerPlaying()
+          .value;
       if (value != null) {
         playerStateController.isVisible(true);
       }
@@ -141,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   child: ValueListenableBuilder<int>(
                       valueListenable:
-                          playerStateController.getPlayerStateValueNotifier(),
+                      playerStateController.getPlayerStateValueNotifier(),
                       builder: (context, value, child) {
                         List<Widget> children = List.empty(growable: true);
                         if (value & MyPlayerState.loading != 0) {
@@ -183,11 +184,65 @@ class _MyHomePageState extends State<MyHomePage> {
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
   @override
-  Set<PointerDeviceKind> get dragDevices => {
+  Set<PointerDeviceKind> get dragDevices =>
+      {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
         // etc.
       };
+}
+
+Future<bool> downloadSong(String id) async {
+  final instance = YoutubeExplode();
+
+  try {
+    final video = await instance.videos.get(id);
+    //get streams
+    var manifest = await instance.videos.streamsClient.getManifest(video.id);
+    var streamInfo = manifest.audioOnly.withHighestBitrate();
+    var stream = instance.videos.streamsClient.get(streamInfo);
+
+    //Create directories
+    final docDirectory = await getApplicationDocumentsDirectory();
+    final folderPath = docDirectory.path +
+        Platform.pathSeparator +
+        "holomusic" +
+        Platform.pathSeparator +
+        "offline";
+    final directory = await Directory(folderPath);
+    await directory.create(recursive: true);
+
+    //Create files
+    var songFile = File(
+        directory.path + Platform.pathSeparator + video.id.value + ".webm");
+    final imageFile =
+    File(directory.path + Platform.pathSeparator + video.id.value + ".jpg");
+
+    //Download song
+    var fileStream = songFile.openWrite();
+    await stream.pipe(fileStream);
+    // Close the file.
+    await fileStream.flush();
+    await fileStream.close();
+
+    //Download thumbnail
+    final imageResponse =
+    await http.get(Uri.parse(video.thumbnails.highResUrl));
+    imageFile.writeAsBytes(imageResponse.bodyBytes, flush: true);
+
+    //Store on the localstore
+    await Localstore.instance
+        .collection(SongsStorage.collectionName)
+        .doc(id)
+        .set({
+      "title": video.title,
+      "thumbnail": imageFile.path,
+      "path": songFile.path
+    });
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 //this entire function runs in your ForegroundService
@@ -202,16 +257,16 @@ serviceMain() async {
   ServiceClient.setExecutionCallback((initialData) async {
     //you set initialData when you are calling AppClient.execute()
     //from your flutter application code and receive it here
-    var serviceData = SharedDownloadData.fromJson(initialData);
-    final instance = YoutubeExplode();
+    List<String> songs = List.from(initialData.getKeyValue('songs'));
     //runs your code here
-    for (int i = 0; i < serviceData.songs.length; i++) {
-      serviceData.processingIndex = i;
-      serviceData.currentProcessingState = SongState.downloading;
-      await ServiceClient.update(serviceData);
-
-      final id = serviceData.songs[i];
-
+    for (int i = 0; i < songs.length; i++) {
+      final id = songs[i];
+      initialData.barProgress = i + 1;
+      initialData.notificationDescription = "Download ${i + 1}/${songs.length}";
+      initialData.setKeyValue(
+          'currentProcessingState', SongState.downloading.index);
+      initialData.setKeyValue('currentSong', id);
+      await ServiceClient.update(initialData);
 
       //Check if already exists
       final element = await Localstore.instance
@@ -220,66 +275,32 @@ serviceMain() async {
           .get();
 
       if (element == null) {
-        try {
-          final video = await instance.videos.get(id);
-
-          //get streams
-          var manifest =
-          await instance.videos.streamsClient.getManifest(video.id);
-          var streamInfo = manifest.audioOnly.withHighestBitrate();
-          var stream = instance.videos.streamsClient.get(streamInfo);
-
-          //Create directories
-          final docDirectory = await getApplicationDocumentsDirectory();
-          final folderPath = docDirectory.path +
-              Platform.pathSeparator +
-              "holomusic" +
-              Platform.pathSeparator +
-              "offline";
-          final directory = await Directory(folderPath);
-          await directory.create(recursive: true);
-
-          //Create files
-          var songFile = File(
-              directory.path + Platform.pathSeparator + video.id.value +
-                  ".webm");
-          final imageFile = File(
-              directory.path + Platform.pathSeparator + video.id.value +
-                  ".jpg");
-
-          //Download song
-          var fileStream = songFile.openWrite();
-          await stream.pipe(fileStream);
-          // Close the file.
-          await fileStream.flush();
-          await fileStream.close();
-
-          //Download thumbnail
-          final imageResponse =
-          await http.get(Uri.parse(video.thumbnails.highResUrl));
-          imageFile.writeAsBytes(imageResponse.bodyBytes, flush: true);
-
-          //Store on the localstore
-          await Localstore.instance
-              .collection(SongsStorage.collectionName)
-              .doc(id)
-              .set({
-            "title": video.title,
-            "thumbnail": imageFile.path,
-            "path": songFile.path
-          });
-          serviceData.currentProcessingState = SongState.offline;
+        bool success = false;
+        int maxAttempt = 3;
+        int currentAttemp = 0;
+        while(!success && currentAttemp<maxAttempt) {
+          success = await downloadSong(id)
+              .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () => false
+          );
+          currentAttemp++;
         }
-        catch (_){
-          serviceData.currentProcessingState = SongState.errorOnDownloading;
+        if (success) {
+          initialData.setKeyValue(
+              'currentProcessingState', SongState.offline.index);
+        } else {
+          initialData.setKeyValue(
+              'currentProcessingState', SongState.errorOnDownloading.index);
         }
       } else {
-        serviceData.currentProcessingState = SongState.offline;
+        initialData.setKeyValue(
+            'currentProcessingState', SongState.offline.index);
       }
-      await ServiceClient.update(serviceData);
+      await ServiceClient.update(initialData);
     }
 
-    await ServiceClient.endExecution(serviceData);
+    await ServiceClient.endExecution(initialData);
     await ServiceClient.stopService();
   });
 }

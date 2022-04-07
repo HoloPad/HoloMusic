@@ -33,85 +33,90 @@ class SongOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-            decoration: BoxDecoration(gradient: AppStyle.backgroundGradient),
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Expanded(
-                  child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            _image,
-                            SizedBox(height: PlatformSize.sizedBoxSpaceL),
-                            Flexible(
-                                child: Text(
-                              song.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: _titleStyle,
-                            )),
-                            SizedBox(height: PlatformSize.sizedBoxSpaceL),
-                            //Save or delete offline
-                            FutureBuilder<bool>(
-                                initialData: true,
-                                future: song.isOnline(),
-                                builder: (_, snapshot) {
-                                  final isOnline = snapshot.data ?? true;
-                                  return CommonComponents.generateButton(
-                                      text: isOnline
-                                          ? AppLocalizations.of(context)!
-                                              .saveOffline
-                                          : AppLocalizations.of(context)!
-                                              .deleteDownloadedSong,
-                                      icon: isOnline
-                                          ? Icons.add
-                                          : Icons.delete_outline_rounded,
-                                      onClick: () {
-                                        onDownloadOrDeleteClick(isOnline);
-                                        Navigator.pop(context, false);
-                                      });
-                                }),
-                            CommonComponents.generateButton(
-                                text:
-                                    AppLocalizations.of(context)!.addToPlaylist,
-                                icon: Icons.add,
-                                onClick: () {
-                                  Navigator.pop(context, false);
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              PlaylistListView(song)));
-                                }),
-                            (playlist != null && playlist is PlaylistSaved)
-                                ? CommonComponents.generateButton(
+        body: SafeArea(
+            child: Container(
+                decoration:
+                    BoxDecoration(gradient: AppStyle.backgroundGradient),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Expanded(
+                      child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _image,
+                                SizedBox(height: PlatformSize.sizedBoxSpaceL),
+                                Flexible(
+                                    child: Text(
+                                  song.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: _titleStyle,
+                                )),
+                                SizedBox(height: PlatformSize.sizedBoxSpaceL),
+                                //Save or delete offline
+                                FutureBuilder<bool>(
+                                    initialData: true,
+                                    future: song.isOnline(),
+                                    builder: (_, snapshot) {
+                                      final isOnline = snapshot.data ?? true;
+                                      return CommonComponents.generateButton(
+                                          text: isOnline
+                                              ? AppLocalizations.of(context)!
+                                                  .saveOffline
+                                              : AppLocalizations.of(context)!
+                                                  .deleteDownloadedSong,
+                                          icon: isOnline
+                                              ? Icons.add
+                                              : Icons.delete_outline_rounded,
+                                          onClick: () {
+                                            onDownloadOrDeleteClick(isOnline);
+                                            Navigator.pop(context, false);
+                                          });
+                                    }),
+                                CommonComponents.generateButton(
                                     text: AppLocalizations.of(context)!
-                                        .deleteSongFromPlaylist,
-                                    icon: Icons.delete_outline_rounded,
+                                        .addToPlaylist,
+                                    icon: Icons.add,
                                     onClick: () {
-                                      if (playlist != null &&
-                                          playlist is PlaylistSaved) {
-                                        (playlist as PlaylistSaved)
-                                            .deleteSong(song, save: true);
-                                      }
-                                      Navigator.pop(context, true);
-                                    })
-                                : const SizedBox(),
-                            CommonComponents.generateButton(
-                                text: AppLocalizations.of(context)!.addToQueue,
-                                icon: Icons.add,
-                                onClick: () {
-                                  PlayerEngine.addSongToQueue(song);
-                                  Navigator.pop(context, false);
-                                }),
-                            SizedBox(height: PlatformSize.sizedBoxSpaceL),
-                            CommonComponents.generateButton(
-                                text: AppLocalizations.of(context)!.cancel,
-                                onClick: () => Navigator.pop(context, false),
-                                opacity: 0.5),
-                          ]))),
-            ])));
+                                      Navigator.pop(context, false);
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PlaylistListView(song)));
+                                    }),
+                                (playlist != null && playlist is PlaylistSaved)
+                                    ? CommonComponents.generateButton(
+                                        text: AppLocalizations.of(context)!
+                                            .deleteSongFromPlaylist,
+                                        icon: Icons.delete_outline_rounded,
+                                        onClick: () {
+                                          if (playlist != null &&
+                                              playlist is PlaylistSaved) {
+                                            (playlist as PlaylistSaved)
+                                                .deleteSong(song, save: true);
+                                          }
+                                          Navigator.pop(context, true);
+                                        })
+                                    : const SizedBox(),
+                                CommonComponents.generateButton(
+                                    text: AppLocalizations.of(context)!
+                                        .addToQueue,
+                                    icon: Icons.add,
+                                    onClick: () {
+                                      PlayerEngine.addSongToQueue(song);
+                                      Navigator.pop(context, false);
+                                    }),
+                                SizedBox(height: PlatformSize.sizedBoxSpaceL),
+                                CommonComponents.generateButton(
+                                    text: AppLocalizations.of(context)!.cancel,
+                                    onClick: () =>
+                                        Navigator.pop(context, false),
+                                    opacity: 0.5),
+                              ]))),
+                ]))));
   }
 }
