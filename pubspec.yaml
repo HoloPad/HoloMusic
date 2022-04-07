@@ -51,7 +51,10 @@ dependencies:
   just_audio_background: ^0.0.1-beta.5
   localstore: ^1.2.3
   youtube_parser: ^2.0.0
-  android_long_task: ^1.0.0
+  android_long_task:
+    git:
+      url: https://github.com/HoloPad/android-long-task.git
+      ref: 347a35efb6b27cfc210d159873ff5182205a0b51
 
 dev_dependencies:
   flutter_test:

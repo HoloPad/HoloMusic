@@ -18,9 +18,11 @@ packages:
   android_long_task:
     dependency: "direct main"
     description:
-      name: android_long_task
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: "347a35efb6b27cfc210d159873ff5182205a0b51"
+      resolved-ref: "347a35efb6b27cfc210d159873ff5182205a0b51"
+      url: "https://github.com/HoloPad/android-long-task.git"
+    source: git
     version: "1.0.0"
   args:
     dependency: transitive

@@ -1,20 +1,22 @@
 import 'dart:io';
 
 import 'package:android_long_task/android_long_task.dart';
+import 'package:android_long_task/long_task/notification_components/button.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:holomusic/Common/ForegroundService/SharedDownloadData.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/Song.dart';
-import 'package:holomusic/Common/Player/SongStateManager.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 import 'package:holomusic/UIComponents/CommonComponents.dart';
 
+import '../../Common/Player/SongStateManager.dart';
+
 class PlaylistOptions extends StatelessWidget {
   PlaylistBase playlist;
+  AppClient appClient = AppClient("Download", "Download in corso");
 
   PlaylistOptions(this.playlist, {Key? key}) : super(key: key);
 
@@ -22,16 +24,29 @@ class PlaylistOptions extends StatelessWidget {
     playlist.setIsDownloading(true);
     if (Platform.isAndroid) {
       //Listen for shared data updates
-      AppClient.updates.listen((json) {
-        var serviceDataUpdate = SharedDownloadData.fromJson(json!);
-        SongStateManager.setSongState(serviceDataUpdate.getProcessingId(),
-            serviceDataUpdate.currentProcessingState);
+      appClient.userDataUpdates.listen((json) {
+
+        final currentProcessing = json?['currentSong'] as String?;
+        final currentProcessingStateIndex = json?['currentProcessingState'] as int?;
+
+        if (currentProcessing != null && currentProcessingStateIndex != null) {
+          SongStateManager.setSongState(currentProcessing,
+              SongState.values.elementAt(currentProcessingStateIndex));
+        }
+      });
+      appClient.buttonUpdates.listen((buttonId) {
+        if(buttonId=="cancel_button"){
+          _cancelDownload();
+        }
       });
 
-      SharedDownloadData sharedDownloadData = SharedDownloadData();
-      sharedDownloadData.songs =
+      List<String> songsIds =
           (await playlist.getSongs()).map((e) => e.id).toList();
-      await AppClient.execute(sharedDownloadData);
+      appClient.setKeyValue("songs", songsIds);
+
+      appClient.initProgressBar(0,songsIds.length,false);
+      appClient.addButton(Button("cancel_button","Cancel"));
+      await appClient.execute();
     } else {
       await playlist.downloadAllSongs();
     }
@@ -52,7 +67,7 @@ class PlaylistOptions extends StatelessWidget {
 
   void _cancelDownload() async {
     if (Platform.isAndroid) {
-      await AppClient.stopService();
+      await appClient.stopService();
       await _recomputeSongStates();
     } else {
       playlist.stopDownload();
