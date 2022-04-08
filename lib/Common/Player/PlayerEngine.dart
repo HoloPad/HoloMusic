@@ -58,7 +58,6 @@ class PlayerEngine {
           title: source.title,
           artUri: source.getThumbnailUri(),
         ));
-    print("PLAYED ${source.title}");
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
     await PlayerEngine.player.seek(Duration.zero);
@@ -106,7 +105,6 @@ class PlayerEngine {
         //Get the first song
         nextSong = await _currentPlaying?.getFirstOfThePlaylist();
       }
-      print("GETTED NEXT ${nextSong?.title}");
       //Play the song
       if (nextSong != null) {
         await PlayerEngine.play(nextSong);
