@@ -71,9 +71,11 @@ class _PlayerViewState extends State<PlayerView> {
         case RepetitionState.Off:
           return const Icon(Icons.repeat, size: _size, color: _color);
         case RepetitionState.OneItem:
-          return const Icon(Icons.repeat_one_on_rounded, size: _size, color: _color);
+          return const Icon(Icons.repeat_one_on_rounded,
+              size: _size, color: _color);
         case RepetitionState.AllItems:
-          return const Icon(Icons.repeat_on_rounded, size: _size, color: _color);
+          return const Icon(Icons.repeat_on_rounded,
+              size: _size, color: _color);
       }
     },
   );
@@ -118,134 +120,137 @@ class _PlayerViewState extends State<PlayerView> {
     });
   }
 
-  void _onMoreClick(Song song){
+  void _onMoreClick(Song song) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => SongOptions(song)));
+        context, MaterialPageRoute(builder: (context) => SongOptions(song)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-              gradient:
-                  AppStyle.getStandardPaletteWithAnotherMainColor(_mainColor)),
-          child: SafeArea(
-              child: Column(
-            children: [
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child:
-                        const Icon(Icons.arrow_drop_down, color: Colors.white)),
-                    ValueListenableBuilder<Song?>(
-                        valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
-                        builder: (context, value, _) {
-                          if(value!=null) {
-                            return TextButton(
-                                onPressed: () => _onMoreClick(value),
-                                child:
-                                const Icon(Icons.more_vert,
-                                    color: Colors.white));
-                          }
-                          else {
-                            return const SizedBox();
-                          }
-                        })
-              ]),
-              const SizedBox(height: 15),
-              ValueListenableBuilder<Song?>(
-                  valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
-                  builder: (context, value, _) {
-                    if (value != null) {
-                      final img = ExtendedImage(
-                          image: value.getThumbnailImageAsset(), height: 250);
-                      _updateBackground(img.image);
-                      return img;
-                    } else {
-                      return const Image(
-                          height: 250,
-                          image:
-                              AssetImage("resources/png/fake_thumbnail.png"));
-                    }
-                  }),
-              const SizedBox(height: 20),
-              ValueListenableBuilder<Song?>(
-                  valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
-                  builder: (context, value, _) {
-                    return Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                        child: MarqueeText(
-                          text: TextSpan(
-                              text: value == null ? "..." : value.title,
-                              style: _titleStyle),
-                          textAlign: TextAlign.center,
-                          speed: 25,
-                        ));
-                  }),
-              const SizedBox(height: 15),
-              StreamBuilder<Duration>(
-                  stream: PlayerEngine.player.positionStream,
-                  builder:
-                      (BuildContext context, AsyncSnapshot<Duration> snapshot) {
-                    if (snapshot.hasData) {
-                      return TimeSlider(
-                          current: snapshot.data,
-                          end: PlayerEngine.player.duration,
-                          textColor: Colors.white,
-                          onChange: (d) {
-                            PlayerEngine.player
-                                .seek(Duration(seconds: d.toInt()));
-                          });
-                    } else {
-                      return const SizedBox();
-                    }
-                  }),
-              const SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      body: SafeArea(
+          child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                  gradient: AppStyle.getStandardPaletteWithAnotherMainColor(
+                      _mainColor)),
+              child: SafeArea(
+                  child: Column(
                 children: [
-                  TextButton(onPressed: () => PlayerEngine.toggleShuffle(), child: shuffleIcon),
-                  TextButton(
-                      onPressed: () => PlayerEngine.playPreviousSong(),
-                      child: const Icon(
-                        Icons.skip_previous,
-                        size: 40,
-                        color: Colors.white,
-                      )),
-                  ValueListenableBuilder<int>(
-                      valueListenable: widget.playerStateStream,
-                      builder: (BuildContext context, value, child) {
-                        if (value & MyPlayerState.play == 0) {
-                          return playIcon;
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Icon(Icons.arrow_drop_down,
+                                color: Colors.white)),
+                        ValueListenableBuilder<Song?>(
+                            valueListenable:
+                                PlayerEngine.getCurrentVideoHandlerPlaying(),
+                            builder: (context, value, _) {
+                              if (value != null) {
+                                return TextButton(
+                                    onPressed: () => _onMoreClick(value),
+                                    child: const Icon(Icons.more_vert,
+                                        color: Colors.white));
+                              } else {
+                                return const SizedBox();
+                              }
+                            })
+                      ]),
+                  const SizedBox(height: 15),
+                  ValueListenableBuilder<Song?>(
+                      valueListenable:
+                          PlayerEngine.getCurrentVideoHandlerPlaying(),
+                      builder: (context, value, _) {
+                        if (value != null) {
+                          final img = ExtendedImage(
+                              image: value.getThumbnailImageAsset(),
+                              height: 250);
+                          _updateBackground(img.image);
+                          return img;
                         } else {
-                          return pauseIcon;
+                          return const Image(
+                              height: 250,
+                              image: AssetImage(
+                                  "resources/png/fake_thumbnail.png"));
                         }
                       }),
-                  TextButton(
-                      onPressed: () {
-                        if (_hasNextEnabled) {
-                          widget._outputStreamLoading.add(true);
-                          PlayerEngine.playNextSong();
+                  const SizedBox(height: 20),
+                  ValueListenableBuilder<Song?>(
+                      valueListenable:
+                          PlayerEngine.getCurrentVideoHandlerPlaying(),
+                      builder: (context, value, _) {
+                        return Padding(
+                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            child: MarqueeText(
+                              text: TextSpan(
+                                  text: value == null ? "..." : value.title,
+                                  style: _titleStyle),
+                              textAlign: TextAlign.center,
+                              speed: 25,
+                            ));
+                      }),
+                  const SizedBox(height: 15),
+                  StreamBuilder<Duration>(
+                      stream: PlayerEngine.player.positionStream,
+                      builder: (BuildContext context,
+                          AsyncSnapshot<Duration> snapshot) {
+                        if (snapshot.hasData) {
+                          return TimeSlider(
+                              current: snapshot.data,
+                              end: PlayerEngine.player.duration,
+                              textColor: Colors.white,
+                              onChange: (d) {
+                                PlayerEngine.player
+                                    .seek(Duration(seconds: d.toInt()));
+                              });
+                        } else {
+                          return const SizedBox();
                         }
-                      },
-                      child: Icon(
-                        Icons.skip_next,
-                        size: 40,
-                        color: Color.fromRGBO(
-                            255, 255, 255, _hasNextEnabled ? 1 : 0.5),
-                      )),
-                  TextButton(
-                      onPressed: _onRepetitionClick, child: repetitionIcon),
+                      }),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                          onPressed: () => PlayerEngine.toggleShuffle(),
+                          child: shuffleIcon),
+                      TextButton(
+                          onPressed: () => PlayerEngine.playPreviousSong(),
+                          child: const Icon(
+                            Icons.skip_previous,
+                            size: 40,
+                            color: Colors.white,
+                          )),
+                      ValueListenableBuilder<int>(
+                          valueListenable: widget.playerStateStream,
+                          builder: (BuildContext context, value, child) {
+                            if (value & MyPlayerState.play == 0) {
+                              return playIcon;
+                            } else {
+                              return pauseIcon;
+                            }
+                          }),
+                      TextButton(
+                          onPressed: () {
+                            if (_hasNextEnabled) {
+                              widget._outputStreamLoading.add(true);
+                              PlayerEngine.playNextSong();
+                            }
+                          },
+                          child: Icon(
+                            Icons.skip_next,
+                            size: 40,
+                            color: Color.fromRGBO(
+                                255, 255, 255, _hasNextEnabled ? 1 : 0.5),
+                          )),
+                      TextButton(
+                          onPressed: _onRepetitionClick, child: repetitionIcon),
+                    ],
+                  ),
                 ],
-              ),
-            ],
-          ))),
+              )))),
       bottomSheet: ValueListenableBuilder<int>(
           valueListenable: widget.playerStateStream,
           builder: (_, value, __) {

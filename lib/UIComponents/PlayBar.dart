@@ -116,10 +116,18 @@ class _PlayBarState extends State<PlayBar> {
                   )
                 ],
               ),
-              Container(
-                height: 2,
-                color: const Color.fromRGBO(0, 0, 0, 0.5),
+              StreamBuilder<Duration>(
+                stream: PlayerEngine.player.positionStream,
+                builder: (context, snapshot) {
+                  double value = (snapshot.data?.inSeconds.toDouble() ?? 0.0) / (PlayerEngine.player.duration?.inSeconds??1);
+                  return LinearProgressIndicator(
+                    value: value,
+                    color: const Color.fromRGBO(200, 200, 200, 0.4),
+                    backgroundColor: const Color.fromRGBO(54, 55, 61, 1.0),
+                  );
+                },
               )
+
             ]));
   }
 }
