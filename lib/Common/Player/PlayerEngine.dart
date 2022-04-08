@@ -58,14 +58,20 @@ class PlayerEngine {
           title: source.title,
           artUri: source.getThumbnailUri(),
         ));
-
+    print("PLAYED ${source.title}");
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
     await PlayerEngine.player.seek(Duration.zero);
     _currentVideoHandlerListenable.value = source;
     _history.add(source);
     _currentPlaying = source;
-    if (play) await PlayerEngine.player.play();
+    int attemp = 0;
+    if (play) {
+      while(++attemp<3 && !PlayerEngine.player.playerState.playing) {
+        await PlayerEngine.player.play();
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+    }
     _hasNextStream.value = await hasNext();
 
     //Pre-load the next-song
@@ -100,6 +106,7 @@ class PlayerEngine {
         //Get the first song
         nextSong = await _currentPlaying?.getFirstOfThePlaylist();
       }
+      print("GETTED NEXT ${nextSong?.title}");
       //Play the song
       if (nextSong != null) {
         await PlayerEngine.play(nextSong);
