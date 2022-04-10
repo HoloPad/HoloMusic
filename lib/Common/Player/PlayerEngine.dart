@@ -64,12 +64,8 @@ class PlayerEngine {
     _currentVideoHandlerListenable.value = source;
     _history.add(source);
     _currentPlaying = source;
-    int attemp = 0;
     if (play) {
-      while(++attemp<3 && !PlayerEngine.player.playerState.playing) {
-        await PlayerEngine.player.play();
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
+      PlayerEngine.player.play();
     }
     _hasNextStream.value = await hasNext();
 
@@ -108,7 +104,6 @@ class PlayerEngine {
       //Play the song
       if (nextSong != null) {
         await PlayerEngine.play(nextSong);
-        await PlayerEngine.player.play();
       }
     }
   }
