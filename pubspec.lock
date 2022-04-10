@@ -19,8 +19,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "347a35efb6b27cfc210d159873ff5182205a0b51"
-      resolved-ref: "347a35efb6b27cfc210d159873ff5182205a0b51"
+      ref: "81a49e713e10fd6703a20028f7ae7fce37061d29"
+      resolved-ref: "81a49e713e10fd6703a20028f7ae7fce37061d29"
       url: "https://github.com/HoloPad/android-long-task.git"
     source: git
     version: "1.0.0"

@@ -97,9 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
 
     PlayerEngine.getCurrentVideoHandlerPlaying().addListener(() {
-      final value = PlayerEngine
-          .getCurrentVideoHandlerPlaying()
-          .value;
+      final value = PlayerEngine.getCurrentVideoHandlerPlaying().value;
       if (value != null) {
         playerStateController.isVisible(true);
       }
@@ -142,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   child: ValueListenableBuilder<int>(
                       valueListenable:
-                      playerStateController.getPlayerStateValueNotifier(),
+                          playerStateController.getPlayerStateValueNotifier(),
                       builder: (context, value, child) {
                         List<Widget> children = List.empty(growable: true);
                         if (value & MyPlayerState.loading != 0) {
@@ -184,8 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
   @override
-  Set<PointerDeviceKind> get dragDevices =>
-      {
+  Set<PointerDeviceKind> get dragDevices => {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
         // etc.
@@ -216,7 +213,7 @@ Future<bool> downloadSong(String id) async {
     var songFile = File(
         directory.path + Platform.pathSeparator + video.id.value + ".webm");
     final imageFile =
-    File(directory.path + Platform.pathSeparator + video.id.value + ".jpg");
+        File(directory.path + Platform.pathSeparator + video.id.value + ".jpg");
 
     //Download song
     var fileStream = songFile.openWrite();
@@ -227,7 +224,7 @@ Future<bool> downloadSong(String id) async {
 
     //Download thumbnail
     final imageResponse =
-    await http.get(Uri.parse(video.thumbnails.highResUrl));
+        await http.get(Uri.parse(video.thumbnails.highResUrl));
     imageFile.writeAsBytes(imageResponse.bodyBytes, flush: true);
 
     //Store on the localstore
@@ -255,9 +252,17 @@ serviceMain() async {
 
   //set a callback and define the code you want to execute when your  ForegroundService runs
   ServiceClient.setExecutionCallback((initialData) async {
-    //you set initialData when you are calling AppClient.execute()
-    //from your flutter application code and receive it here
+    initialData.setKeyValue('hasFinish', false);
     List<String> songs = List.from(initialData.getKeyValue('songs'));
+
+    ServiceClient.setOnClickCallback((buttonId) async {
+      initialData.setKeyValue('currentProcessingState', SongState.online.index);
+      await ServiceClient.update(initialData);
+      await ServiceClient.endExecution(initialData);
+      await ServiceClient.stopService();
+      return;
+    });
+    //you set initialData when you are calling AppClient.execute()
     //runs your code here
     for (int i = 0; i < songs.length; i++) {
       final id = songs[i];
@@ -278,12 +283,9 @@ serviceMain() async {
         bool success = false;
         int maxAttempt = 3;
         int currentAttemp = 0;
-        while(!success && currentAttemp<maxAttempt) {
+        while (!success && currentAttemp < maxAttempt) {
           success = await downloadSong(id)
-              .timeout(
-              const Duration(seconds: 60),
-              onTimeout: () => false
-          );
+              .timeout(const Duration(seconds: 60), onTimeout: () => false);
           currentAttemp++;
         }
         if (success) {
@@ -297,9 +299,9 @@ serviceMain() async {
         initialData.setKeyValue(
             'currentProcessingState', SongState.offline.index);
       }
+      initialData.setKeyValue('hasFinish', true);
       await ServiceClient.update(initialData);
     }
-
     await ServiceClient.endExecution(initialData);
     await ServiceClient.stopService();
   });
