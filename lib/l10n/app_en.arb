@@ -5,7 +5,8 @@
   "search": "Search",
   "home": "Home",
   "library": "Library",
-  "searchASong": "Search a song",
+  "searchASong": "Search for a song",
+  "searchAnUser": "Search for a user",
   "addToQueue": "Add to queue",
   "addToPlaylist": "Add to a playlist",
   "cancel": "Cancel",
@@ -15,6 +16,7 @@
   "follow": "Follow",
   "cannotLoadSong": "Cannot load the song",
   "recentSearch": "Last searches",
+  "searchResult": "Search results",
   "noRecentSearch": "There aren't recent searches",
   "saveOffline": "Save offline",
   "cancelDownload": "Cancel download",
@@ -33,6 +35,9 @@
   "save": "Save",
   "insertPlaylistName": "Enter playlist name",
   "yourPlaylist": "Your playlists",
-  "yourRecentPlaylist": "Your last playlist"
+  "yourRecentPlaylist": "Your last playlist",
+  "music": "Music",
+  "users": "Users",
+  "publicPlaylist": "Public playlists"
 
 }

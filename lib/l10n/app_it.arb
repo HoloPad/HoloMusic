@@ -6,6 +6,7 @@
   "home": "Home",
   "library": "Raccolta",
   "searchASong": "Cerca una canzone",
+  "searchAnUser": "Cerca un utente",
   "addToQueue": "Aggiungi in coda",
   "addToPlaylist": "Aggiungi ad una playlist",
   "cancel": "Annulla",
@@ -15,6 +16,7 @@
   "follow": "Segui",
   "cannotLoadSong": "Impossibile caricare il brano",
   "recentSearch": "Ricerche recenti",
+  "searchResult": "Risultati di ricerca",
   "noRecentSearch": "Non ci sono ricerche recenti",
   "saveOffline": "Salva offline",
   "cancelDownload": "Annulla download",
@@ -33,5 +35,8 @@
   "save": "Salva",
   "insertPlaylistName": "Inserisci il nome della playlist",
   "yourPlaylist": "Le tue playlist",
-  "yourRecentPlaylist": "Le tue playlist recenti"
+  "yourRecentPlaylist": "Le tue playlist recenti",
+  "music": "Musica",
+  "users": "Utenti",
+  "publicPlaylist": "Playlist condivise"
 }

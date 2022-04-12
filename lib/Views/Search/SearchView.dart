@@ -4,10 +4,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSearchHistory.dart';
+import 'package:holomusic/ServerRequests/Response.dart';
+import 'package:holomusic/ServerRequests/User.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
+import 'package:holomusic/Views/Search/Components/ProfileCard.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-
 import '../../Common/Player/Song.dart';
 import '../../UIComponents/NotificationShimmer.dart';
 
@@ -21,11 +23,17 @@ class SearchView extends StatefulWidget {
 class _SearchViewState extends State<SearchView> {
   late YoutubeExplode _youtubeExplode;
   Future<SearchList?>? _searchResults;
+  Future<Response<List<User>>>? _userSearchResults;
+  final TextEditingController _textEditingController = TextEditingController();
+
   bool _hasFocus = false;
 
   bool _isLoadingData = false;
-  bool _showSearchData = false;
+  bool _showSearchResultMusic = false;
+  bool _showSearchResultUser = false;
+
   late PlaylistSearchHistory historyPlaylist;
+  bool _searchForMusic = true;
 
   _SearchViewState() {
     _youtubeExplode = YoutubeExplode();
@@ -33,17 +41,31 @@ class _SearchViewState extends State<SearchView> {
   }
 
   void _onSubmitted(String query) {
-    setState(() {
-      _showSearchData = true;
-      _isLoadingData = true;
-    });
-    final queryRes = _youtubeExplode.search.getVideos(query);
-    setState(() {
-      _searchResults = queryRes;
-    });
-    queryRes.whenComplete(() => setState(() {
-          _isLoadingData = false;
-        }));
+    if (_searchForMusic) {
+      setState(() {
+        _showSearchResultMusic = true;
+        _isLoadingData = true;
+      });
+      final queryRes = _youtubeExplode.search.getVideos(query);
+      setState(() {
+        _searchResults = queryRes;
+      });
+      queryRes.whenComplete(() => setState(() {
+            _isLoadingData = false;
+          }));
+    } else {
+      setState(() {
+        _showSearchResultUser = true;
+        _isLoadingData = true;
+      });
+      final queryRes = UserRequest.searchUserByUsername(query);
+      setState(() {
+        _userSearchResults = queryRes;
+      });
+      queryRes.whenComplete(() => setState(() {
+            _isLoadingData = false;
+          }));
+    }
   }
 
   Future<SearchList?> _loadNextPage() async {
@@ -67,8 +89,110 @@ class _SearchViewState extends State<SearchView> {
     historyPlaylist.addSong(song);
   }
 
+  ButtonStyle buttonsStyleGenerator(bool isLeft, bool isSelected) {
+    const double radius = 15.0;
+    return OutlinedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(isLeft ? radius : 0),
+                bottomLeft: Radius.circular(isLeft ? radius : 0),
+                topRight: Radius.circular(isLeft ? 0 : radius),
+                bottomRight: Radius.circular(isLeft ? 0 : radius))),
+        backgroundColor:
+            isSelected ? AppStyle.primaryBackground : Colors.transparent,
+        side: BorderSide(color: AppStyle.primaryBackground),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 10));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectionFieldsButtons =
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      OutlinedButton(
+          onPressed: () {
+            setState(() {
+              _searchForMusic = true;
+            });
+            _textEditingController.clear();
+          },
+          child: Text(AppLocalizations.of(context)!.music),
+          style: buttonsStyleGenerator(true, _searchForMusic)),
+      OutlinedButton(
+          onPressed: () {
+            setState(() {
+              _searchForMusic = false;
+            });
+            _textEditingController.clear();
+          },
+          child: Text(AppLocalizations.of(context)!.users),
+          style: buttonsStyleGenerator(false, !_searchForMusic)),
+    ]);
+    final songSearchItems = FutureBuilder<SearchList?>(
+      future: _searchResults,
+      builder: (_, snapshot) {
+        if (snapshot.hasData) {
+          final list = snapshot.data!;
+          return Expanded(
+              child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification.metrics.extentAfter < 20 &&
+                        !_isLoadingData) {
+                      //Loads new songs
+                      _getNextPage();
+                    }
+                    return true; //To stop the notification bubble
+                  },
+                  child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: ListView(
+                        clipBehavior: Clip.antiAlias,
+                        children: list
+                            .map((p0) => SongItem(OnlineSong(p0),
+                                onClickCallback: onItemClick))
+                            .toList(),
+                      ))));
+        } else {
+          return const SizedBox();
+        }
+      },
+    );
+    final lastMusicSearches = FutureBuilder<List<Song>>(
+        //No search, show last searches
+        future: historyPlaylist.getSongs(),
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.hasData) {
+            List<Widget> items = snapshot.data!
+                .map((e) => SongItem(e, playlist: historyPlaylist))
+                .toList();
+
+            return Expanded(
+                child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: NotificationShimmer(
+                        elementsToLoad: items.length,
+                        notificationId: 'songitem',
+                        child: ListView(children: [...items]))));
+          } else {
+            return Text(
+              AppLocalizations.of(context)!.noRecentSearch,
+              style: const TextStyle(color: Colors.white),
+            );
+          }
+        });
+    final userSearchItems = FutureBuilder<Response<List<User>>>(
+        future: _userSearchResults,
+        builder: (_, snapshot) {
+          if (snapshot.hasData && snapshot.data!.result.isNotEmpty) {
+            return Expanded(
+                child: ListView(
+              children:
+                  snapshot.data!.result.map((e) => ProfileCard(e)).toList(),
+            ));
+          } else {
+            return const SizedBox();
+          }
+        });
+
     return Padding(
         padding: PlayBar.isVisible
             ? const EdgeInsets.only(bottom: 40)
@@ -101,81 +225,36 @@ class _SearchViewState extends State<SearchView> {
                               borderSide: BorderSide(color: Colors.black),
                               borderRadius: BorderRadius.zero),
                           border: const OutlineInputBorder(),
-                          hintText: AppLocalizations.of(context)!.searchASong,
+                          hintText: _searchForMusic
+                              ? AppLocalizations.of(context)!.searchASong
+                              : AppLocalizations.of(context)!.searchAnUser,
                           hintStyle: const TextStyle(color: Colors.white),
                           suffixIcon:
                               const Icon(Icons.search, color: Colors.white),
                           fillColor: const Color.fromRGBO(34, 35, 39, 1),
                           filled: true),
                       onSubmitted: _onSubmitted,
+                      controller: _textEditingController,
                     ))),
-            //Search result
-            _showSearchData
-                ? FutureBuilder<SearchList?>(
-                    future: _searchResults,
-                    builder: (_, snapshot) {
-                      if (snapshot.hasData) {
-                        final list = snapshot.data!;
-                        return Expanded(
-                            child: NotificationListener<ScrollNotification>(
-                                onNotification: (notification) {
-                                  if (notification.metrics.extentAfter < 20 &&
-                                      !_isLoadingData) {
-                                    //Loads new songs
-                                    _getNextPage();
-                                  }
-                                  return true; //To stop the notification bubble
-                                },
-                                child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: ListView(
-                                      clipBehavior: Clip.antiAlias,
-                                      children: list
-                                          .map((p0) => SongItem(OnlineSong(p0),
-                                              onClickCallback: onItemClick))
-                                          .toList(),
-                                    ))));
-                      } else {
-                        return const SizedBox();
-                      }
-                    },
-                  )
-                : FutureBuilder<List<Song>>(
-                    future: historyPlaylist.getSongs(),
-                    builder: (BuildContext context, snapshot) {
-                      if (snapshot.hasData) {
-                        List<Widget> items =
-                            snapshot.data!.map((e) => SongItem(e,playlist: historyPlaylist)).toList();
-
-                        if (items.isEmpty) {
-                          return Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Text(
-                                  AppLocalizations.of(context)!.noRecentSearch,
-                                  style: AppStyle.textStyle));
-                        } else {
-                          return Expanded(
-                              child: Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: NotificationShimmer(
-                                      elementsToLoad: items.length,
-                                      notificationId: 'songitem',
-                                      child: ListView(children: [
-                                        Text(
-                                            AppLocalizations.of(context)!
-                                                .recentSearch,
-                                            style: AppStyle.textStyle),
-                                        const SizedBox(height: 10),
-                                        ...items
-                                      ]))));
-                        }
-                      } else {
-                        return Text(
-                          AppLocalizations.of(context)!.noRecentSearch,
-                          style: const TextStyle(color: Colors.white),
-                        );
-                      }
-                    }),
+            AnimatedPadding(
+                padding: EdgeInsets.fromLTRB(8, _hasFocus ? 8 : 0, 8, 0),
+                duration: const Duration(milliseconds: 100),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                          (_showSearchResultMusic && _searchForMusic ||
+                                  (_showSearchResultUser && !_searchForMusic))
+                              ? AppLocalizations.of(context)!.searchResult
+                              : AppLocalizations.of(context)!.recentSearch,
+                          style: AppStyle.textStyle),
+                      selectionFieldsButtons
+                    ])),
+            if (_searchForMusic && _showSearchResultMusic) ...[songSearchItems],
+            if (_searchForMusic && !_showSearchResultMusic) ...[
+              lastMusicSearches
+            ],
+            if (!_searchForMusic && _showSearchResultUser) ...[userSearchItems],
             //LinearProgressIndicator
             if (_isLoadingData) ...[const LinearProgressIndicator()]
           ],

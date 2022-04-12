@@ -8,12 +8,19 @@ import 'ServerParameters.dart';
 class User {
   int id;
   String username;
+  int public_playlist_count = -1;
 
   User(this.id, this.username);
 
-  User.fromJson(Map<String, dynamic> json)
-      : id = json['id'] as int,
-        username = json['username'] as String;
+  factory User.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as int;
+    final username = json['username'] as String;
+    final user = User(id, username);
+    if (json.containsKey("playlist_count")) {
+      user.public_playlist_count = json['playlist_count'] as int;
+    }
+    return user;
+  }
 
   @override
   String toString() {
