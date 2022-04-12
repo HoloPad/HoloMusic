@@ -1,14 +1,14 @@
-class Response<T> {
+class PaginatedResponse<T> {
   T result;
   int currentPage;
   bool hasNext;
 
-  Response(this.result, {this.currentPage = 0, this.hasNext = false});
+  PaginatedResponse(this.result, {this.currentPage = 0, this.hasNext = false});
 
-  factory Response.fromJson(T result, Map<String, dynamic> json) {
+  factory PaginatedResponse.fromJson(T result, Map<String, dynamic> json) {
     final hasNext = json['hasNextPage'] as bool;
     final currentPage = json['currentPage'] as int;
-    return Response(result, currentPage: currentPage, hasNext: hasNext);
+    return PaginatedResponse(result, currentPage: currentPage, hasNext: hasNext);
   }
 
   @override

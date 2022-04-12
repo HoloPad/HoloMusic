@@ -38,6 +38,6 @@
   "yourRecentPlaylist": "Your last playlist",
   "music": "Music",
   "users": "Users",
-  "publicPlaylist": "Public playlists"
-
+  "publicPlaylist": "Public playlists",
+  "removeFromHistory": "Remove from history"
 }

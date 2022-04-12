@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:holomusic/Common/Notifications/ReRenderNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSearchHistory.dart';
-import 'package:holomusic/ServerRequests/Response.dart';
+import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
 import 'package:holomusic/ServerRequests/User.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
@@ -23,7 +24,7 @@ class SearchView extends StatefulWidget {
 class _SearchViewState extends State<SearchView> {
   late YoutubeExplode _youtubeExplode;
   Future<SearchList?>? _searchResults;
-  Future<Response<List<User>>>? _userSearchResults;
+  Future<PaginatedResponse<List<User>>>? _userSearchResults;
   final TextEditingController _textEditingController = TextEditingController();
 
   bool _hasFocus = false;
@@ -89,6 +90,10 @@ class _SearchViewState extends State<SearchView> {
     historyPlaylist.addSong(song);
   }
 
+  void updateUI() {
+    setState(() {});
+  }
+
   ButtonStyle buttonsStyleGenerator(bool isLeft, bool isSelected) {
     const double radius = 15.0;
     return OutlinedButton.styleFrom(
@@ -127,6 +132,7 @@ class _SearchViewState extends State<SearchView> {
           child: Text(AppLocalizations.of(context)!.users),
           style: buttonsStyleGenerator(false, !_searchForMusic)),
     ]);
+
     final songSearchItems = FutureBuilder<SearchList?>(
       future: _searchResults,
       builder: (_, snapshot) {
@@ -171,7 +177,12 @@ class _SearchViewState extends State<SearchView> {
                     child: NotificationShimmer(
                         elementsToLoad: items.length,
                         notificationId: 'songitem',
-                        child: ListView(children: [...items]))));
+                        child: NotificationListener<ReRenderNotification>(
+                            onNotification: (_) {
+                              updateUI();
+                              return true;
+                            },
+                            child: ListView(children: [...items])))));
           } else {
             return Text(
               AppLocalizations.of(context)!.noRecentSearch,
@@ -179,7 +190,8 @@ class _SearchViewState extends State<SearchView> {
             );
           }
         });
-    final userSearchItems = FutureBuilder<Response<List<User>>>(
+
+    final userSearchItems = FutureBuilder<PaginatedResponse<List<User>>>(
         future: _userSearchResults,
         builder: (_, snapshot) {
           if (snapshot.hasData && snapshot.data!.result.isNotEmpty) {

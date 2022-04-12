@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:holomusic/ServerRequests/Response.dart';
+import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
 import 'package:http/http.dart' as http;
 
 import 'ServerParameters.dart';
@@ -29,7 +29,7 @@ class User {
 }
 
 class UserRequest {
-  static Future<Response<List<User>>> searchUserByUsername(String username,
+  static Future<PaginatedResponse<List<User>>> searchUserByUsername(String username,
       {int page = 0}) async {
     final queryParameters = {"username": username, "page": page.toString()};
     final uri =
@@ -41,6 +41,6 @@ class UserRequest {
     final userList = (jsonObject['results'] as List<dynamic>)
         .map((e) => User.fromJson(e))
         .toList();
-    return Response(userList, currentPage: currentPage, hasNext: hasNext);
+    return PaginatedResponse(userList, currentPage: currentPage, hasNext: hasNext);
   }
 }

@@ -38,5 +38,6 @@
   "yourRecentPlaylist": "Le tue playlist recenti",
   "music": "Musica",
   "users": "Utenti",
-  "publicPlaylist": "Playlist condivise"
+  "publicPlaylist": "Playlist condivise",
+  "removeFromHistory": "Rimuovi dalla cronologia"
 }

@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
+import 'package:holomusic/Common/Playlist/PlaylistSearchHistory.dart';
 import 'package:holomusic/Views/Playlist/PlaylistListView.dart';
 
 import '../../Common/Parameters/AppStyle.dart';
@@ -14,9 +15,13 @@ class SongOptions extends StatelessWidget {
   Song song;
   late Image _image;
   PlaylistBase? playlist;
+  bool removeFromSearchVisible;
 
-  SongOptions(this.song, {this.playlist, Key? key}) : super(key: key) {
+  SongOptions(this.song,
+      {this.playlist, this.removeFromSearchVisible = false, Key? key})
+      : super(key: key) {
     _image = Image(image: song.getThumbnailImageAsset(), height: 200);
+    removeFromSearchVisible = playlist.runtimeType == PlaylistSearchHistory;
   }
 
   final _titleStyle = const TextStyle(
@@ -90,8 +95,11 @@ class SongOptions extends StatelessWidget {
                                     }),
                                 (playlist != null && playlist is PlaylistSaved)
                                     ? CommonComponents.generateButton(
-                                        text: AppLocalizations.of(context)!
-                                            .deleteSongFromPlaylist,
+                                        text: removeFromSearchVisible
+                                            ? AppLocalizations.of(context)!
+                                                .removeFromHistory
+                                            : AppLocalizations.of(context)!
+                                                .deleteSongFromPlaylist,
                                         icon: Icons.delete_outline_rounded,
                                         onClick: () {
                                           if (playlist != null &&

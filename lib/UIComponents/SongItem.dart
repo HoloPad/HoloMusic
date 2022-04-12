@@ -1,6 +1,7 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
+import 'package:holomusic/Common/Notifications/ReRenderNotification.dart';
 import 'package:holomusic/Common/Notifications/ShimmerLoadingNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/PlayerEngine.dart';
@@ -28,7 +29,10 @@ class SongItem extends StatelessWidget {
             MaterialPageRoute(
                 builder: (context) => SongOptions(song, playlist: playlist)))
         .then((value) {
-      if ((value as bool) && reloadList != null) reloadList!();
+      if (value as bool) {
+        ReRenderNotification().dispatch(context);
+        if (reloadList != null) reloadList!();
+      }
     });
   }
 
@@ -39,7 +43,8 @@ class SongItem extends StatelessWidget {
       PlayerEngine.play(song);
     } else {
       //Check first on the offline storage
-      final offlineSong = await OfflineSong.getById(song.id, playlistBase: playlist);
+      final offlineSong =
+          await OfflineSong.getById(song.id, playlistBase: playlist);
       if (offlineSong != null) {
         PlayerEngine.play(offlineSong);
       } else {
