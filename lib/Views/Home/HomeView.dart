@@ -85,7 +85,7 @@ class _HomeState extends State<HomeView> {
               FutureBuilder<List<Widget>>(
                 future: _yourLastPlaylist,
                 builder: (_, snapshot) {
-                  if (snapshot.hasData) {
+                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                     return Column(children: [
                       Text(AppLocalizations.of(context)!.yourRecentPlaylist,
                           style: textStyle),
