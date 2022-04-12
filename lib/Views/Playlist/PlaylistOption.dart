@@ -26,16 +26,23 @@ class PlaylistOptions extends StatelessWidget {
       //Listen for shared data updates
       appClient.userDataUpdates.listen((json) {
 
+        final hasFinish = json?["hasFinish"] as bool;
         final currentProcessing = json?['currentSong'] as String?;
-        final currentProcessingStateIndex = json?['currentProcessingState'] as int?;
+        final currentProcessingStateIndex =
+            json?['currentProcessingState'] as int?;
 
         if (currentProcessing != null && currentProcessingStateIndex != null) {
           SongStateManager.setSongState(currentProcessing,
               SongState.values.elementAt(currentProcessingStateIndex));
         }
+
+        if (hasFinish) {
+          playlist.setIsDownloading(false);
+        }
       });
+
       appClient.buttonUpdates.listen((buttonId) {
-        if(buttonId=="cancel_button"){
+        if (buttonId == "cancel_button") {
           _cancelDownload();
         }
       });
@@ -44,8 +51,8 @@ class PlaylistOptions extends StatelessWidget {
           (await playlist.getSongs()).map((e) => e.id).toList();
       appClient.setKeyValue("songs", songsIds);
 
-      appClient.initProgressBar(0,songsIds.length,false);
-      appClient.addButton(Button("cancel_button","Cancel"));
+      appClient.initProgressBar(0, songsIds.length, false);
+      appClient.addButton(Button("cancel_button", "Cancel"));
       await appClient.execute();
     } else {
       await playlist.downloadAllSongs();
@@ -54,7 +61,9 @@ class PlaylistOptions extends StatelessWidget {
     if (playlist.runtimeType == PlaylistSaved) {
       (playlist as PlaylistSaved).save();
     }
-    playlist.setIsDownloading(false);
+    if (!Platform.isAndroid) {
+      playlist.setIsDownloading(false);
+    }
   }
 
   Future _recomputeSongStates() async {
@@ -72,6 +81,7 @@ class PlaylistOptions extends StatelessWidget {
     } else {
       playlist.stopDownload();
     }
+    playlist.setIsDownloading(false);
   }
 
   void _deleteDownloadedSongs() async {

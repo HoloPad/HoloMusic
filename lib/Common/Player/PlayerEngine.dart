@@ -58,14 +58,15 @@ class PlayerEngine {
           title: source.title,
           artUri: source.getThumbnailUri(),
         ));
-
     await PlayerEngine.player.pause();
     await PlayerEngine.player.setAudioSource(audioSource);
     await PlayerEngine.player.seek(Duration.zero);
     _currentVideoHandlerListenable.value = source;
     _history.add(source);
     _currentPlaying = source;
-    if (play) await PlayerEngine.player.play();
+    if (play) {
+      PlayerEngine.player.play();
+    }
     _hasNextStream.value = await hasNext();
 
     //Pre-load the next-song
@@ -103,7 +104,6 @@ class PlayerEngine {
       //Play the song
       if (nextSong != null) {
         await PlayerEngine.play(nextSong);
-        await PlayerEngine.player.play();
       }
     }
   }
