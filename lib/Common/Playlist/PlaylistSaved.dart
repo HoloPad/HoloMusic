@@ -12,6 +12,7 @@ class PlaylistSaved extends PlaylistBase {
   String _collectionName = "holomusic" + Platform.pathSeparator + "playlists";
   late List<Song> songs;
   String? id;
+  DateTime lastUpdate = DateTime.now();
 
   PlaylistSaved(name, {this.id, List<Song>? list, String? customCollectionName})
       : super(name, null, null) {
@@ -55,13 +56,15 @@ class PlaylistSaved extends PlaylistBase {
   }
 
   Map<String, dynamic> toJson() {
-    return {"name": name, "songs": songs, "id": id!};
+    return {"name": name, "songs": songs, "id": id!, "datetime":DateTime.now().toIso8601String()};
   }
 
   factory PlaylistSaved.fromJson(Map<String, dynamic> map) {
     List<dynamic> a = List.from(map['songs']);
     List<Song> aSongs = a.map((e) => Song.fromJson(e)).toList(growable: true);
-    return PlaylistSaved(map['name'], id: map['id'], list: aSongs);
+    final playlist = PlaylistSaved(map['name'], id: map['id'], list: aSongs);
+    playlist.lastUpdate=DateTime.parse(map['datetime']);
+    return playlist;
   }
 
   @override

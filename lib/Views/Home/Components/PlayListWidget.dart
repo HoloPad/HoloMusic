@@ -45,8 +45,7 @@ class _PlayListWidgetState extends State<PlayListWidget> {
             Container(
                 decoration: BoxDecoration(
                     color:
-                        widget.playlist.backgroundColor ?? Colors.transparent,
-                    borderRadius: BorderRadius.circular(10)),
+                        widget.playlist.backgroundColor ?? Colors.transparent),
                 child: FutureBuilder<ImageProvider<Object>>(
                     future: widget.playlist.getImageProvider(),
                     builder: (_, snapshot) {
@@ -61,11 +60,9 @@ class _PlayListWidgetState extends State<PlayListWidget> {
                           enableLoadState: true,
                           handleLoadingProgress: true,
                           loadStateChanged: _onImageLoaded,
-
                         );
-                      }
-                      else {
-                        return const SizedBox(width: 150,height: 150);
+                      } else {
+                        return const SizedBox(width: 150, height: 150);
                       }
                     })),
             SizedBox(

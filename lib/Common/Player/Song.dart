@@ -26,12 +26,12 @@ abstract class Song {
   Song(this.id, this.title, this.thumbnail, {this.playlist}) {
     isOnline().then((res) {
       if (useSongStateManager) {
-        if(getStateNotifier().value!=SongState.downloading) {
+        if (getStateNotifier().value != SongState.downloading) {
           setSongState(res ? SongState.online : SongState.offline);
         }
       } else {
-          stateNotifier =
-              ValueNotifier(res ? SongState.online : SongState.offline);
+        stateNotifier =
+            ValueNotifier(res ? SongState.online : SongState.offline);
       }
     });
   }
@@ -113,7 +113,7 @@ abstract class Song {
       if (hasContent) {
         return false;
       } else {
-        file.deleteSync();
+        if (file.existsSync()) file.deleteSync();
       }
     }
     return true;
