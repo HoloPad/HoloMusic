@@ -32,5 +32,7 @@
   "selectWhereToSavePlaylist": "Select the destination playlist",
   "save": "Save",
   "insertPlaylistName": "Enter playlist name",
-  "yourPlaylist": "Your playlists"
+  "yourPlaylist": "Your playlists",
+  "yourRecentPlaylist": "Your last playlist"
+
 }

@@ -32,5 +32,6 @@
   "selectWhereToSavePlaylist": "In quale playlist vuoi aggiungere il brano?",
   "save": "Salva",
   "insertPlaylistName": "Inserisci il nome della playlist",
-  "yourPlaylist": "Le tue playlist"
+  "yourPlaylist": "Le tue playlist",
+  "yourRecentPlaylist": "Le tue playlist recenti"
 }
