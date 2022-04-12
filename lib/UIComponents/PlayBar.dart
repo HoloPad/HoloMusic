@@ -120,6 +120,7 @@ class _PlayBarState extends State<PlayBar> {
                 stream: PlayerEngine.player.positionStream,
                 builder: (context, snapshot) {
                   double value = (snapshot.data?.inSeconds.toDouble() ?? 0.0) / (PlayerEngine.player.duration?.inSeconds??1);
+                  if(value.isNaN || value.isInfinite) value = 0;
                   return LinearProgressIndicator(
                     value: value,
                     color: const Color.fromRGBO(200, 200, 200, 0.4),

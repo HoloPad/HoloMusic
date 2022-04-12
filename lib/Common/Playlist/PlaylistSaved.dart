@@ -37,9 +37,9 @@ class PlaylistSaved extends PlaylistBase {
     }
   }
 
-  void deleteSong(Song song, {bool save = false}) {
+  Future deleteSong(Song song, {bool save = false}) async {
     songs.removeWhere((element) => element.id == song.id);
-    if (save) this.save();
+    if (save) await this.save();
   }
 
   Future save() async {
@@ -56,14 +56,19 @@ class PlaylistSaved extends PlaylistBase {
   }
 
   Map<String, dynamic> toJson() {
-    return {"name": name, "songs": songs, "id": id!, "datetime":DateTime.now().toIso8601String()};
+    return {
+      "name": name,
+      "songs": songs,
+      "id": id!,
+      "datetime": DateTime.now().toIso8601String()
+    };
   }
 
   factory PlaylistSaved.fromJson(Map<String, dynamic> map) {
     List<dynamic> a = List.from(map['songs']);
     List<Song> aSongs = a.map((e) => Song.fromJson(e)).toList(growable: true);
     final playlist = PlaylistSaved(map['name'], id: map['id'], list: aSongs);
-    playlist.lastUpdate=DateTime.parse(map['datetime']);
+    playlist.lastUpdate = DateTime.parse(map['datetime']);
     return playlist;
   }
 
