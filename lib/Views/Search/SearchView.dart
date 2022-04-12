@@ -268,7 +268,7 @@ class _SearchViewState extends State<SearchView> {
             ],
             if (!_searchForMusic && _showSearchResultUser) ...[userSearchItems],
             //LinearProgressIndicator
-            if (_isLoadingData) ...[const LinearProgressIndicator()]
+            if (_isLoadingData) ...[const Padding(padding: EdgeInsets.only(top: 8),child:LinearProgressIndicator())]
           ],
         ));
   }
