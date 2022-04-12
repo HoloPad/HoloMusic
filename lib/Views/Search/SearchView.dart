@@ -5,6 +5,7 @@ import 'package:holomusic/Common/Notifications/ReRenderNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSearchHistory.dart';
+import 'package:holomusic/Common/Storage/UserHistoryStorage.dart';
 import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
 import 'package:holomusic/ServerRequests/User.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
@@ -205,6 +206,26 @@ class _SearchViewState extends State<SearchView> {
           }
         });
 
+    final lastSearchedUser = FutureBuilder<List<User>>(
+      future: UserHistoryStorage.getUserHistory(),
+      builder: (_, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          return Expanded(
+              child: NotificationListener<ReRenderNotification>(
+                  onNotification: (_) {
+                    updateUI();
+                    return true;
+                  },
+                  child: ListView(
+                    children:
+                        snapshot.data!.map((e) => ProfileCard(e)).toList(),
+                  )));
+        } else {
+          return const SizedBox();
+        }
+      },
+    );
+
     return Padding(
         padding: PlayBar.isVisible
             ? const EdgeInsets.only(bottom: 40)
@@ -267,8 +288,15 @@ class _SearchViewState extends State<SearchView> {
               lastMusicSearches
             ],
             if (!_searchForMusic && _showSearchResultUser) ...[userSearchItems],
+            if (!_searchForMusic && !_showSearchResultUser) ...[
+              lastSearchedUser
+            ],
             //LinearProgressIndicator
-            if (_isLoadingData) ...[const Padding(padding: EdgeInsets.only(top: 8),child:LinearProgressIndicator())]
+            if (_isLoadingData) ...[
+              const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: LinearProgressIndicator())
+            ]
           ],
         ));
   }

@@ -22,6 +22,14 @@ class User {
     return user;
   }
 
+  toJson() {
+    return jsonEncode({
+      "id": id,
+      "username": username,
+      "playlist_count": public_playlist_count
+    });
+  }
+
   @override
   String toString() {
     return "ID: $id, username: $username";
@@ -29,7 +37,8 @@ class User {
 }
 
 class UserRequest {
-  static Future<PaginatedResponse<List<User>>> searchUserByUsername(String username,
+  static Future<PaginatedResponse<List<User>>> searchUserByUsername(
+      String username,
       {int page = 0}) async {
     final queryParameters = {"username": username, "page": page.toString()};
     final uri =
@@ -41,6 +50,7 @@ class UserRequest {
     final userList = (jsonObject['results'] as List<dynamic>)
         .map((e) => User.fromJson(e))
         .toList();
-    return PaginatedResponse(userList, currentPage: currentPage, hasNext: hasNext);
+    return PaginatedResponse(userList,
+        currentPage: currentPage, hasNext: hasNext);
   }
 }
