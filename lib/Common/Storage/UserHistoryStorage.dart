@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:holomusic/ServerRequests/User.dart';
@@ -14,7 +15,10 @@ class UserHistoryStorage {
         .doc(documentName)
         .get();
     if (data?.containsKey("users") ?? false) {
-      return List<User>.from(data!['users']);
+      List<dynamic> a = List.from(data!['users']);
+      return a.
+      map((e) => e.runtimeType==String ? jsonDecode(e):e).
+      map((e) => User.fromJson(e)).toList(growable: true);
     } else {
       return List.empty(growable: true);
     }
