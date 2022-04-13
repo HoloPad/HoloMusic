@@ -10,10 +10,10 @@ class CommonComponents {
     required Function() onClick,
     double opacity = 0.8,
   }) {
-    double distance = PlatformSize.isMobile ? 0 :12;
+    double distance = PlatformSize.isMobile ? 0 : 12;
     return TextButton(
         style: TextButton.styleFrom(
-            padding: EdgeInsets.only(bottom: distance,top:distance),
+            padding: EdgeInsets.only(bottom: distance, top: distance),
             alignment: Alignment.centerLeft),
         onPressed: onClick,
         child: Card(
@@ -27,9 +27,11 @@ class CommonComponents {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(text, style: AppStyle.textStyle),
-                      const SizedBox(width: 5),
-                      Icon(icon, color: AppStyle.text)
+                      Text(text,
+                          style: AppStyle.textStyle,
+                          textAlign: TextAlign.center),
+                      SizedBox(width: icon != null ? 5 : 0),
+                      if (icon != null) Icon(icon, color: AppStyle.text)
                     ]))));
   }
 }
