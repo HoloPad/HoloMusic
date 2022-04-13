@@ -32,7 +32,7 @@ class User {
 
   @override
   String toString() {
-    return "ID: $id, username: $username";
+    return "id: $id, username: $username";
   }
 }
 
