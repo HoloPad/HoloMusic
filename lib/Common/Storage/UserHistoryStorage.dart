@@ -14,8 +14,7 @@ class UserHistoryStorage {
         .doc(documentName)
         .get();
     if (data?.containsKey("users") ?? false) {
-      final userList = (data!['users'] as List<User>);
-      return userList;
+      return List<User>.from(data!['users']);
     } else {
       return List.empty(growable: true);
     }
