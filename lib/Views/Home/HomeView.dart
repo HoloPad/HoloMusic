@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Playlist/PlaylistOffline.dart';
 import 'package:holomusic/Common/Storage/PlaylistStorage.dart';
+import 'package:holomusic/ServerRequests/User.dart';
 import 'package:holomusic/Views/Home/Components/PlayListWidget.dart';
 import 'package:holomusic/Views/Playlist/PlaylistView.dart';
 
@@ -80,10 +81,16 @@ class _HomeState extends State<HomeView> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => LoginView()),
-                            );
+                            ).then((value) {
+                              setState(() {});
+                            });
                           },
-                          child: const Icon(Icons.manage_accounts_rounded,
-                              size: 30, color: Colors.white)))
+                          child: Icon(
+                              UserRequest.isLogin()
+                                  ? Icons.manage_accounts_rounded
+                                  : Icons.manage_accounts_outlined,
+                              size: 30,
+                              color: Colors.white)))
                 ],
               ),
               Text(AppLocalizations.of(context)!.charts, style: textStyle),

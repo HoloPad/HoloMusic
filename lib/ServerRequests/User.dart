@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 import 'ServerParameters.dart';
 
@@ -38,9 +39,13 @@ class User {
 
 class UserRequest {
   static var dio = Dio();
-  static var cookieJar = CookieJar();
+  static late PersistCookieJar cookieJar;
 
-  static init() {
+  //Init the CookieManager, if a directory is not passed, it will use the tmp directory to store cookies
+  static Future init([Directory? directory]) async {
+    directory ??= await getTemporaryDirectory();
+    var tempPath = directory.path;
+    cookieJar = PersistCookieJar(storage: FileStorage(tempPath));
     dio.interceptors.add(CookieManager(
         cookieJar)); //CookieManager stores the sessionCookie for the authenticated request
   }
@@ -75,10 +80,12 @@ class UserRequest {
   }
 
   //Logout an user, returns true on success, false otherwise
-  static Future<bool> logout() async {
+  static Future logout() async {
+    if (!UserRequest.isLogin()) {
+      return;
+    }
     final uri = Uri.http(ServerParameters.FULL_URL, "logout");
-    final response = await dio.get(uri.toString());
-    return response.statusCode == 200 && response.data['success'];
+    await dio.get(uri.toString());
   }
 
   static Future<Map<String, dynamic>> register(String email, String username, String password,
@@ -112,5 +119,14 @@ class UserRequest {
 
     return errors.keys.contains("username") &&
         List<String>.from(errors['username']).any((element) => element.contains("already"));
+  }
+
+  static bool isLogin() {
+    try {
+      final sessionCookie = cookieJar.hostCookies.values.first.values.first['sessionid']?.cookie;
+      return sessionCookie?.expires?.isAfter(DateTime.now()) ?? false;
+    } catch (_) {
+      return false;
+    }
   }
 }

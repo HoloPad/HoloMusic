@@ -39,5 +39,14 @@
   "music": "Music",
   "users": "Users",
   "publicPlaylist": "Public playlists",
-  "removeFromHistory": "Remove from history"
+  "removeFromHistory": "Remove from history",
+  "enterYourEmail": "Please, enter your email",
+  "itIsNotAnEmail": "This is not an email",
+  "pleaseEnterYourPassword": "Please, enter your password",
+  "userManager":"User manager",
+  "login": "Login",
+  "emailOrUsername": "E-Mail or username",
+  "password": "Password",
+  "wrongCredential": "Username and/or password are wrong",
+  "logout": "Logout"
 }

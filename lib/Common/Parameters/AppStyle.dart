@@ -29,6 +29,7 @@ class AppStyle {
   static Color ShimmerColorBackground = const Color.fromRGBO(68, 68, 68, 1.0);
 
   static TextStyle textStyle = const TextStyle(color: Colors.white);
+  static TextStyle errorTextStyle = const TextStyle(color: Colors.red);
   static TextStyle titleStyle =
       const TextStyle(color: Colors.white, fontSize: 15);
   static Color scaffoldBackgroundColor = Colors.blue;

@@ -1,9 +1,14 @@
-import 'package:holomusic/ServerRequests/User.dart';
-import 'package:test/test.dart';
+import 'dart:io';
 
-void main() {
+import 'package:flutter_test/flutter_test.dart';
+import 'package:holomusic/ServerRequests/User.dart';
+
+void main() async {
   group('User manager:', () {
-    UserRequest.init();
+    final tmpDirectory = Directory("./tmpDirectory");
+    setUpAll(() async {
+      await UserRequest.init(tmpDirectory);
+    });
 
     test('Get user', () async {
       final response = await UserRequest.searchUserByUsername("luca");
@@ -41,18 +46,29 @@ void main() {
       expect(response, false);
     });
 
-    test('login', () async {
+    test('login and logout', () async {
+      await UserRequest.logout();
       var response = await UserRequest.userLogin("hackerino", "hackerino");
       expect(response, true);
+      expect(UserRequest.isLogin(), true);
+      await UserRequest.logout();
+
+      response = await UserRequest.userLogin("hackerino", "wrongpass");
+      expect(response, false);
+      expect(UserRequest.isLogin(), false);
+
       response = await UserRequest.userLogin("luca00_97@hotmail.it", "hackerino");
       expect(response, true);
+      expect(UserRequest.isLogin(), true);
+      UserRequest.logout();
+
       response = await UserRequest.userLogin("utente", "non_registrato");
       expect(response, false);
+      expect(UserRequest.isLogin(), false);
     });
 
-    test('logout', () async {
-      final response = await UserRequest.logout();
-      expect(response, true);
+    tearDownAll(() async {
+      tmpDirectory.deleteSync(recursive: true);
     });
   });
 }

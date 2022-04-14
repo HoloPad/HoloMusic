@@ -39,5 +39,14 @@
   "music": "Musica",
   "users": "Utenti",
   "publicPlaylist": "Playlist condivise",
-  "removeFromHistory": "Rimuovi dalla cronologia"
+  "removeFromHistory": "Rimuovi dalla cronologia",
+  "enterYourEmail": "Inserisci la tua email",
+  "itIsNotAnEmail": "Non è un email",
+  "pleaseEnterYourPassword": "Inserisci la tua password",
+  "userManager":"Gestione utente",
+  "login": "Login",
+  "emailOrUsername": "E-Mail o username",
+  "password": "Password",
+  "wrongCredential": "Username e/o password errati",
+  "logout": "Logout"
 }
