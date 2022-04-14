@@ -83,7 +83,6 @@ class UserRequest {
 
   static Future<Map<String, dynamic>> register(String email, String username, String password,
       [String languageCode = "it-it"]) async {
-    print("REGISTER $email $username $password");
     final uri = Uri.http(ServerParameters.FULL_URL, "signUp");
 
     //Get request to get csrf

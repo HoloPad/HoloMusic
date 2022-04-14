@@ -44,6 +44,8 @@ void main() {
     test('login', () async {
       var response = await UserRequest.userLogin("hackerino", "hackerino");
       expect(response, true);
+      response = await UserRequest.userLogin("luca00_97@hotmail.it", "hackerino");
+      expect(response, true);
       response = await UserRequest.userLogin("utente", "non_registrato");
       expect(response, false);
     });
