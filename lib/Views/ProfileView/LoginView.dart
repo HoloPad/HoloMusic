@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/ServerRequests/User.dart';
 import 'package:holomusic/UIComponents/CommonComponents.dart';
+import 'package:holomusic/Views/ProfileView/RegisterView.dart';
 
 class LoginView extends StatefulWidget {
   @override
@@ -108,7 +109,35 @@ class _LoginViewState extends State<LoginView> {
                             }
                           })
                     ]),
-                  )
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Row(children: [
+                    const Expanded(
+                        child: Divider(
+                      color: Colors.white,
+                    )),
+                    Container(
+                        margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        child: Text(AppLocalizations.of(context)!.or, style: AppStyle.textStyle)),
+                    const Expanded(
+                        child: Divider(
+                      color: Colors.white,
+                    )),
+                  ]),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  CommonComponents.generateButton(
+                      text: AppLocalizations.of(context)!.signup,
+                      onClick: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterView()),
+                        ).then((value) => Navigator.pop(context));
+                        //Navigator.pop(context);
+                      })
                 ] else ...[
                   CommonComponents.generateButton(
                       text: AppLocalizations.of(context)!.logout,
