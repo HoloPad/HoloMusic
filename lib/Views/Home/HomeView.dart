@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Playlist/PlaylistOffline.dart';
 import 'package:holomusic/Common/Storage/PlaylistStorage.dart';
-import 'package:holomusic/ServerRequests/User.dart';
+import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:holomusic/Views/Home/Components/PlayListWidget.dart';
 import 'package:holomusic/Views/Playlist/PlaylistView.dart';
 
@@ -10,7 +10,7 @@ import '../../Common/Player/Song.dart';
 import '../../Common/Playlist/PlaylistBase.dart';
 import '../../Common/Playlist/Providers/TheGotOfficial.dart';
 import '../../UIComponents/NotificationShimmer.dart';
-import '../ProfileView/LoginView.dart';
+import '../ProfileView/UserManagerView.dart';
 
 class HomeView extends StatefulWidget {
   late Future<List<Song>> theGotOfficialChart;
@@ -80,7 +80,7 @@ class _HomeState extends State<HomeView> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => LoginView()),
+                              MaterialPageRoute(builder: (context) => UserManagerView()),
                             ).then((value) {
                               setState(() {});
                             });

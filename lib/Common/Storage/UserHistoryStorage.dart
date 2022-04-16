@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:holomusic/ServerRequests/User.dart';
+import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:localstore/localstore.dart';
 
 class UserHistoryStorage {

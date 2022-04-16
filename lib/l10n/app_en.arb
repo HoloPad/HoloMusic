@@ -61,5 +61,11 @@
   "isNotAnEmail": "This is not an E-Mail",
   "operationSuccess": "Task success",
   "signUpSuccessMessage": "Sign up was successful!\nAn email has been sent to the address entered to proceed with the account verification",
-  "ok": "Ok"
+  "ok": "Ok",
+  "deleteAccount": "Delete account",
+  "confirmDeleteAccount": "Do you confirm that you want to delete your account?\nThis operation is irreversible\nTo confirm, enter your password",
+  "emailNotVerified": "E-Mail not verified, please check you e-mail box to validate your account",
+  "reSendVerificationEmail": "Send a verification e-mail",
+  "emailSent": "E-mail sent",
+  "cannotSentEmail": "Cannot send the email"
 }

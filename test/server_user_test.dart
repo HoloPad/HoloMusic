@@ -1,12 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:holomusic/ServerRequests/User.dart';
+import 'package:holomusic/ServerRequests/UserRequest.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   group('User manager:', () {
     final tmpDirectory = Directory("./tmpDirectory");
     setUpAll(() async {
+      SharedPreferences.setMockInitialValues({}); //set values here
+      if(!tmpDirectory.existsSync())tmpDirectory.createSync();
       await UserRequest.init(tmpDirectory);
     });
 
@@ -31,13 +34,13 @@ void main() async {
       expect(alreadyExists, true);
     });
 
-    /*
+/*
     test('Register', () async {
       final response =
-          await UserRequest.register("pippo@franco.it", "pippo_franco", "superpassowrd");
+          await UserRequest.register("luca00_97@hotmail.it", "hackerino", "hackerino");
       expect(response.length, 0);
-    });
-     */
+    });*/
+
 
     test('Already exists', () async {
       bool response = await UserRequest.alreadyExists("hackerino");
@@ -49,23 +52,36 @@ void main() async {
     test('login and logout', () async {
       await UserRequest.logout();
       var response = await UserRequest.userLogin("hackerino", "hackerino");
-      expect(response, true);
+      expect(response, LoginResponse.success);
       expect(UserRequest.isLogin(), true);
       await UserRequest.logout();
 
       response = await UserRequest.userLogin("hackerino", "wrongpass");
-      expect(response, false);
+      expect(response, LoginResponse.error);
       expect(UserRequest.isLogin(), false);
 
       response = await UserRequest.userLogin("luca00_97@hotmail.it", "hackerino");
-      expect(response, true);
+      expect(response, LoginResponse.success);
       expect(UserRequest.isLogin(), true);
       UserRequest.logout();
 
       response = await UserRequest.userLogin("utente", "non_registrato");
-      expect(response, false);
+      expect(response, LoginResponse.error);
       expect(UserRequest.isLogin(), false);
     });
+
+/*
+    test("user delete", () async {
+      bool response = await UserRequest.deleteAccount("hackerino");
+      expect(response, false);
+
+      LoginResponse resp = await UserRequest.userLogin("hackerino", "hackerino");
+      expect(resp, LoginResponse.success);
+
+      response = await UserRequest.deleteAccount("hackerino");
+      expect(response, true);
+
+    });*/
 
     tearDownAll(() async {
       tmpDirectory.deleteSync(recursive: true);

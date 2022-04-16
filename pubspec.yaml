@@ -58,6 +58,7 @@ dependencies:
   validators: ^3.0.0
   dio: ^4.0.6
   dio_cookie_manager: ^2.0.0
+  shared_preferences: ^2.0.13
 
 dev_dependencies:
   flutter_test:
