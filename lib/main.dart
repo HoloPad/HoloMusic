@@ -11,6 +11,7 @@ import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Common/Player/Song.dart';
 import 'package:holomusic/Common/Player/SongStateManager.dart';
 import 'package:holomusic/Common/Storage/SongsStorage.dart';
+import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/Views/Home/HomeView.dart';
 import 'package:holomusic/Views/Library/LibraryView.dart';
@@ -31,6 +32,7 @@ Future<void> main() async {
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
   );
+  UserRequest.init();
   SongStateManager.init();
   PlayerEngine.initialize();
   runApp(const MyApp());

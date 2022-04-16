@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Playlist/PlaylistOffline.dart';
 import 'package:holomusic/Common/Storage/PlaylistStorage.dart';
+import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:holomusic/Views/Home/Components/PlayListWidget.dart';
 import 'package:holomusic/Views/Playlist/PlaylistView.dart';
 
@@ -9,6 +10,7 @@ import '../../Common/Player/Song.dart';
 import '../../Common/Playlist/PlaylistBase.dart';
 import '../../Common/Playlist/Providers/TheGotOfficial.dart';
 import '../../UIComponents/NotificationShimmer.dart';
+import '../ProfileView/UserManagerView.dart';
 
 class HomeView extends StatefulWidget {
   late Future<List<Song>> theGotOfficialChart;
@@ -28,7 +30,7 @@ class _HomeState extends State<HomeView> {
   late Future<List<Widget>> _yourLastPlaylist;
 
   @override
-  initState(){
+  initState() {
     super.initState();
     chartsWidgets = <Widget>[
       PlayListWidget(playlist: TheGotOfficial("it"), onClick: onClicked),
@@ -42,10 +44,8 @@ class _HomeState extends State<HomeView> {
     final playlists = await PlaylistStorage.getAllPlaylists();
     playlists.sort((a, b) => a.lastUpdate.compareTo(b.lastUpdate));
     final widgetList = playlists.reversed.toList().take(3).map((e) {
-      return Row(children: [
-        PlayListWidget(playlist: e, onClick: onClicked),
-        const SizedBox(width: 15)
-      ]);
+      return Row(
+          children: [PlayListWidget(playlist: e, onClick: onClicked), const SizedBox(width: 15)]);
     }).toList(growable: false);
     return widgetList;
   }
@@ -71,6 +71,28 @@ class _HomeState extends State<HomeView> {
           child: SingleChildScrollView(
               child: Column(
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => UserManagerView()),
+                            ).then((value) {
+                              setState(() {});
+                            });
+                          },
+                          child: Icon(
+                              UserRequest.isLogin()
+                                  ? Icons.manage_accounts_rounded
+                                  : Icons.manage_accounts_outlined,
+                              size: 30,
+                              color: Colors.white)))
+                ],
+              ),
               Text(AppLocalizations.of(context)!.charts, style: textStyle),
               const Divider(height: 10, color: Colors.transparent),
               SingleChildScrollView(
@@ -87,8 +109,7 @@ class _HomeState extends State<HomeView> {
                 builder: (_, snapshot) {
                   if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                     return Column(children: [
-                      Text(AppLocalizations.of(context)!.yourRecentPlaylist,
-                          style: textStyle),
+                      Text(AppLocalizations.of(context)!.yourRecentPlaylist, style: textStyle),
                       const Divider(height: 10, color: Colors.transparent),
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(8),
@@ -103,11 +124,9 @@ class _HomeState extends State<HomeView> {
                   }
                 },
               ),
-              Text(AppLocalizations.of(context)!.offlineContent,
-                  style: textStyle),
+              Text(AppLocalizations.of(context)!.offlineContent, style: textStyle),
               const Divider(height: 10, color: Colors.transparent),
-              PlayListWidget(
-                  playlist: PlaylistOffline(context), onClick: onClicked)
+              PlayListWidget(playlist: PlaylistOffline(context), onClick: onClicked)
             ],
           )));
     } else {

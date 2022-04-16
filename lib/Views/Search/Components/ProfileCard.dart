@@ -4,7 +4,7 @@ import 'package:holomusic/Common/Notifications/ReRenderNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Storage/UserHistoryStorage.dart';
-import '../../../ServerRequests/User.dart';
+import '../../../ServerRequests/UserRequest.dart';
 
 class ProfileCard extends StatelessWidget {
   User user;

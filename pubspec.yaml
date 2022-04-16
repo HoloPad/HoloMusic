@@ -55,6 +55,10 @@ dependencies:
     git:
       url: https://github.com/HoloPad/android-long-task.git
       ref: 81a49e713e10fd6703a20028f7ae7fce37061d29
+  validators: ^3.0.0
+  dio: ^4.0.6
+  dio_cookie_manager: ^2.0.0
+  shared_preferences: ^2.0.13
 
 dev_dependencies:
   flutter_test:

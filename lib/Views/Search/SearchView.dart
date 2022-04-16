@@ -7,7 +7,7 @@ import 'package:holomusic/Common/Player/OnlineSong.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSearchHistory.dart';
 import 'package:holomusic/Common/Storage/UserHistoryStorage.dart';
 import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
-import 'package:holomusic/ServerRequests/User.dart';
+import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:holomusic/UIComponents/PlayBar.dart';
 import 'package:holomusic/UIComponents/SongItem.dart';
 import 'package:holomusic/Views/Search/Components/ProfileCard.dart';
