@@ -10,6 +10,7 @@ class UserHistoryStorage {
   static const String documentName = "user_history";
 
   static Future<List<User>> getUserHistory() async {
+    //print("manz");
     final data = await Localstore.instance
         .collection(collectionName)
         .doc(documentName)

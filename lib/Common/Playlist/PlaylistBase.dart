@@ -11,6 +11,7 @@ abstract class PlaylistBase {
   late String name;
   late Color? backgroundColor;
   bool isOnline = true;
+  bool isOnServer = false;
   bool _canDownload = true;
   ValueNotifier<bool> isDownloading = ValueNotifier(false);
 
