@@ -67,5 +67,7 @@
   "emailNotVerified": "Indirizzo email non validato, controlla la tua e-mail per procedere",
   "reSendVerificationEmail": "Invia un email di verifica",
   "emailSent": "E-mail inviata",
-  "cannotSentEmail": "Impossibile inviare l'email"
+  "cannotSentEmail": "Impossibile inviare l'email",
+  "makePrivatePlaylist": "Mettila privata",
+  "makePublicPlaylist":"Rendila pubblica"
 }

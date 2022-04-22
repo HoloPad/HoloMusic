@@ -67,5 +67,7 @@
   "emailNotVerified": "E-Mail not verified, please check you e-mail box to validate your account",
   "reSendVerificationEmail": "Send a verification e-mail",
   "emailSent": "E-mail sent",
-  "cannotSentEmail": "Cannot send the email"
+  "cannotSentEmail": "Cannot send the email",
+  "makePrivatePlaylist": "Make it private",
+  "makePublicPlaylist":"Make it public"
 }
