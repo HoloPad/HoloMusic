@@ -3,12 +3,18 @@ import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
+
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
+
 import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 import 'RequestComponents/CustomCookieManager.dart';
 import 'RequestComponents/MyFileStorage.dart';
+import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 import 'ServerParameters.dart';
 
 class User {
@@ -39,6 +45,7 @@ class User {
 }
 
 enum LoginResponse { success, emailNotVerified, error }
+enum PlaylistResponse{success, error}
 
 class UserRequest {
   static var dio = Dio();
@@ -73,7 +80,6 @@ class UserRequest {
     final response0 = await dio.get(uri.toString());
     final cookie =
         Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
-
     //POST Request
     final bodyContent = FormData.fromMap(
         {'username': username, 'password': password, 'csrfmiddlewaretoken': cookie.value});
@@ -103,6 +109,56 @@ class UserRequest {
     final uri = Uri.http(ServerParameters.FULL_URL, "logout");
     await dio.get(uri.toString());
     await cookieJar.deleteAll();
+  }
+
+  static Future <bool> makePlaylistPublic(PlaylistBase playlist) async{
+    final uri = Uri.http(ServerParameters.FULL_URL, "makePlaylistPublic");
+
+    //Get request to get csrf
+    final response0 = await dio.get(uri.toString());
+    final cookie =
+    Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
+
+    //POST Request
+    final bodyContent = FormData.fromMap({
+      'json_file': ((playlist as PlaylistSaved).toJson()),
+      'csrfmiddlewaretoken': cookie.value
+    });
+    final headers = {"X-CSRFToken": cookie.value};
+    final response1 =
+    await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
+
+    if (response1.statusCode == 200 && response1.data['success'] == true) {
+      //Success
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static Future <bool> makePlaylistPrivate(PlaylistBase playlist) async{
+    final uri = Uri.http(ServerParameters.FULL_URL, "makePlaylistPrivate");
+
+    //Get request to get csrf
+    final response0 = await dio.get(uri.toString());
+    final cookie =
+    Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
+
+    //POST Request
+    final bodyContent = FormData.fromMap({
+      'playlistname': playlist.name,
+      'csrfmiddlewaretoken': cookie.value
+    });
+    final headers = {"X-CSRFToken": cookie.value};
+    final response1 =
+    await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
+
+    if (response1.statusCode == 200 && response1.data['success'] == true) {
+      //Success
+      return true;
+    } else {
+      return false;
+    }
   }
 
   static Future<Map<String, dynamic>> register(String email, String username, String password,
