@@ -3,18 +3,14 @@ import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
-
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
-
+import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import 'RequestComponents/CustomCookieManager.dart';
 import 'RequestComponents/MyFileStorage.dart';
-import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 import 'ServerParameters.dart';
 
 class User {
@@ -103,7 +99,7 @@ class UserRequest {
   static Future logout() async {
     await prefs.remove("username");
     await prefs.remove("email");
-    if (!await UserRequest.isLogin()) {
+    if (!UserRequest.isLogin()) {
       return;
     }
     final uri = Uri.http(ServerParameters.FULL_URL, "logout");
@@ -209,7 +205,7 @@ class UserRequest {
   }
 
   static Future<bool> deleteAccount(String password) async {
-    if (!await isLogin()) {
+    if (!isLogin()) {
       return false;
     }
     final uri = Uri.http(ServerParameters.FULL_URL, "deleteAccount");
