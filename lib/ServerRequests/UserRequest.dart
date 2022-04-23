@@ -197,7 +197,8 @@ class UserRequest {
 
   static bool isLogin() {
     try {
-      final sessionCookie = cookieJar.hostCookies.values.first.values.first['sessionid']?.cookie;
+      final cookie = cookieJar.hostCookies.values.firstWhere((e) => e.values.any((e) => e.keys.contains("sessionid")));
+      final sessionCookie = cookie.values.first['sessionid']?.cookie;
       return sessionCookie?.expires?.isAfter(DateTime.now()) ?? false;
     } catch (_) {
       return false;

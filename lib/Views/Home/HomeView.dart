@@ -28,6 +28,7 @@ class _HomeState extends State<HomeView> {
   late List<Widget> chartsWidgets;
   PlaylistBase? _playListToView;
   late Future<List<Widget>> _yourLastPlaylist;
+  bool userIsLogged = false;
 
   @override
   initState() {
@@ -37,6 +38,7 @@ class _HomeState extends State<HomeView> {
       PlayListWidget(playlist: TheGotOfficial("it"), onClick: onClicked),
       PlayListWidget(playlist: TheGotOfficial("es"), onClick: onClicked)
     ];
+    userIsLogged = UserRequest.isLogin();
     _yourLastPlaylist = loadLastPlaylist();
   }
 
@@ -82,11 +84,14 @@ class _HomeState extends State<HomeView> {
                               context,
                               MaterialPageRoute(builder: (context) => UserManagerView()),
                             ).then((value) {
-                              setState(() {});
+                              print(userIsLogged);
+                              setState(() {
+                                userIsLogged = UserRequest.isLogin();
+                              });
                             });
                           },
                           child: Icon(
-                              UserRequest.isLogin()
+                              userIsLogged
                                   ? Icons.manage_accounts_rounded
                                   : Icons.manage_accounts_outlined,
                               size: 30,
