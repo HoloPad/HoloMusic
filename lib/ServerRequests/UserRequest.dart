@@ -3,13 +3,14 @@ import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
+import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
+
+import 'RequestComponents/CustomCookieManager.dart';
+import 'RequestComponents/MyFileStorage.dart';
 import 'ServerParameters.dart';
 
 class User {
@@ -47,14 +48,12 @@ class UserRequest {
   static late PersistCookieJar cookieJar;
   static late SharedPreferences prefs;
 
-  //Init the CookieManager, if a directory is not passed, it will use the tmp directory to store cookies
+  //Init the CookieManager, if a directory is not passed, it will use the document/holomusic/cookies directory to store cookies
   static Future init([Directory? directory]) async {
-    directory ??= await getTemporaryDirectory();
-    var tempPath = directory.path;
-    cookieJar = PersistCookieJar(storage: FileStorage(tempPath));
-    dio.interceptors.add(CookieManager(
-        cookieJar)); //CookieManager stores the sessionCookie for the authenticated request
     prefs = await SharedPreferences.getInstance();
+    final fileStorage = MyFileStorage();
+    cookieJar = PersistCookieJar(storage: fileStorage);
+    dio.interceptors.add(CustomCookieManager(cookieJar, prefs));
   }
 
   static Future<PaginatedResponse<List<User>>> searchUserByUsername(String username,
@@ -198,7 +197,8 @@ class UserRequest {
 
   static bool isLogin() {
     try {
-      final sessionCookie = cookieJar.hostCookies.values.first.values.first['sessionid']?.cookie;
+      final cookie = cookieJar.hostCookies.values.firstWhere((e) => e.values.any((e) => e.keys.contains("sessionid")));
+      final sessionCookie = cookie.values.first['sessionid']?.cookie;
       return sessionCookie?.expires?.isAfter(DateTime.now()) ?? false;
     } catch (_) {
       return false;
