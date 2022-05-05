@@ -10,27 +10,25 @@ import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 
 
 class UsersPlaylists extends StatefulWidget {
-  late String username;
-  late BuildContext context;
+  Function() onBackPressed;
+  String username;
 
-  UsersPlaylists(this.username, this.context);
+  UsersPlaylists(this.username, this.onBackPressed, {Key? key}) : super(key: key);
   @override
-  UsersPlaylistsState createState() => new UsersPlaylistsState(username, context);
+  UsersPlaylistsState createState() => UsersPlaylistsState();
 
 }
 
 class UsersPlaylistsState extends State<UsersPlaylists> {
   Color _mainColor = AppStyle.scaffoldBackgroundColor;
-  late String username;
   late BuildContext context;
   //Future<PaginatedResponse<List<String>>>? _userSongsResults;
   Future<PaginatedResponse<List<PlaylistSaved>>>? _userSongsResults;
   bool _isLoadingData = false;
 
-  UsersPlaylistsState(String username, BuildContext context){
-    this.username = username;
-    this.context = context;
-    final queryRes = UserRequest.getPlaylistsFromUsername(username);
+  @override
+  initState(){
+    final queryRes = UserRequest.getPlaylistsFromUsername(widget.username);
     _userSongsResults = queryRes;
     queryRes.whenComplete(() => _isLoadingData = false);
   }
@@ -68,7 +66,7 @@ class UsersPlaylistsState extends State<UsersPlaylists> {
         child: SafeArea(child: Column(mainAxisAlignment: MainAxisAlignment.start,children: [Align(
           alignment: Alignment.topLeft, child:ElevatedButton(
           onPressed: () {
-            Navigator.pop(context);
+            widget.onBackPressed();
           },
 
           style: ElevatedButton.styleFrom(
@@ -84,7 +82,7 @@ class UsersPlaylistsState extends State<UsersPlaylists> {
                 color: AppStyle.scaffoldBackgroundColor,
                 size: 24.0,
               ),
-              SizedBox(
+              const SizedBox(
                 width:10,
               ),
             ],
