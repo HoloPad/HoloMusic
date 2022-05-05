@@ -5,21 +5,21 @@ import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:localstore/localstore.dart';
 
 class UserHistoryStorage {
-  static final String collectionName =
-      "holomusic" + Platform.pathSeparator + "history";
+  static final String collectionName = "holomusic" + Platform.pathSeparator + "history";
   static const String documentName = "user_history";
 
   static Future<List<User>> getUserHistory() async {
-    //print("manz");
-    final data = await Localstore.instance
-        .collection(collectionName)
-        .doc(documentName)
-        .get();
+    final data = await Localstore.instance.collection(collectionName).doc(documentName).get();
     if (data?.containsKey("users") ?? false) {
       List<dynamic> a = List.from(data!['users']);
-      return a.
-      map((e) => e.runtimeType==String ? jsonDecode(e):e).
-      map((e) => User.fromJson(e)).toList(growable: true);
+      final userList = a.map((e) => e.runtimeType == String ? jsonDecode(e) : e);
+      Iterable<User> users;
+      if (userList.any((element) => element.runtimeType == User)) {
+        users = userList.map((e) => e as User);
+      } else {
+        users = userList.map((e) => User.fromJson(e));
+      }
+      return users.toList();
     } else {
       return List.empty(growable: true);
     }
@@ -35,10 +35,7 @@ class UserHistoryStorage {
     }
     userList.insert(0, user);
 
-    await Localstore.instance
-        .collection(collectionName)
-        .doc(documentName)
-        .set({"users": userList});
+    await Localstore.instance.collection(collectionName).doc(documentName).set({"users": userList});
   }
 
   static void deleteUser(User user) async {
@@ -46,9 +43,6 @@ class UserHistoryStorage {
 
     userList.removeWhere((element) => element.id == user.id);
 
-    await Localstore.instance
-        .collection(collectionName)
-        .doc(documentName)
-        .set({"users": userList});
+    await Localstore.instance.collection(collectionName).doc(documentName).set({"users": userList});
   }
 }
