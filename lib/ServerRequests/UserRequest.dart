@@ -69,6 +69,21 @@ class UserRequest {
     return PaginatedResponse(userList, currentPage: currentPage, hasNext: hasNext);
   }
 
+
+  //static Future<PaginatedResponse<List<String>>> getPlaylistsFromUsername(String username,
+  static Future<PaginatedResponse<List<PlaylistSaved>>> getPlaylistsFromUsername(String username,
+      {int page = 0}) async {
+    final queryParameters = {"username": username, "page": page.toString()};
+    final uri = Uri.http(ServerParameters.FULL_URL, "getPlaylistsFromUsername", queryParameters);
+    final response = await http.get(uri);
+    final jsonObject = jsonDecode(response.body);
+    final hasNext = jsonObject['hasNextPage'] as bool;
+    final currentPage = jsonObject['currentPage'] as int;
+    //final userList = (jsonObject['results'] as List<dynamic>).map((e) => e.toString()).toList();
+    final userList = (jsonObject['results'] as List<dynamic>).map((e) => PlaylistSaved.fromJson(e)).toList();
+    return PaginatedResponse(userList, currentPage: currentPage, hasNext: hasNext);
+  }
+
   //Login an user, returns true if success, false otherwise
   static Future<LoginResponse> userLogin(String username, String password) async {
     final uri = Uri.http(ServerParameters.FULL_URL, "signIn");

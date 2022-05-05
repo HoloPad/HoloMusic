@@ -61,7 +61,6 @@ class OnServerButtonState extends State<OnServerButton> {
     else{
       res = await UserRequest.makePlaylistPublic(playlist);
     }
-    debugPrint(res.toString());
 
     setState(() {
       if(UserRequest.isLogin() && playlist.runtimeType == PlaylistSaved) {

@@ -5,7 +5,7 @@ import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Storage/UserHistoryStorage.dart';
 import '../../../ServerRequests/UserRequest.dart';
-
+import 'package:holomusic/Views/Search/UsersPlaylists.dart';
 class ProfileCard extends StatelessWidget {
   User user;
 
@@ -31,21 +31,32 @@ class ProfileCard extends StatelessWidget {
                       Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              user.username,
-                              style: TextStyle(
-                                  color: AppStyle.textStyle.color,
-                                  fontSize: 20),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(builder:(context)=>UsersPlaylists(user.username,context)));
+                              },
+                              child: Text(
+                                user.username,
+                                style: TextStyle(
+                                    color: AppStyle.textStyle.color,
+                                    fontSize: 20),
+                              ),
                             ),
-                            Text(
-                              AppLocalizations.of(context)!.publicPlaylist +
-                                  " " +
-                                  user.public_playlist_count.toString(),
-                              style: TextStyle(
-                                  color: AppStyle.textStyle.color
-                                      ?.withOpacity(0.8),
-                                  fontSize: 12),
-                            )
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(builder:(context)=>UsersPlaylists(user.username,context)));
+                              },
+                              child: Text(
+                                AppLocalizations.of(context)!.publicPlaylist +
+                                    " " +
+                                    user.public_playlist_count.toString(),
+                                style: TextStyle(
+                                    color: AppStyle.textStyle.color
+                                        ?.withOpacity(0.8),
+                                    fontSize: 12),
+                              )
+                            ),
+
                           ]),
                       TextButton(
                           onPressed: ()=>onCancelClicked(context), child: const Icon(Icons.cancel_outlined))
