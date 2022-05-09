@@ -61,7 +61,6 @@ class OnServerButtonState extends State<OnServerButton> {
     else{
       res = await UserRequest.makePlaylistPublic(playlist);
     }
-    debugPrint(res.toString());
 
     setState(() {
       if(UserRequest.isLogin() && playlist.runtimeType == PlaylistSaved) {
@@ -262,7 +261,8 @@ class PlaylistOptions extends StatelessWidget {
                       setState(() => playlist.isOnServer = !playlist.isOnServer);
                     }),
                  */
-                new OnServerButton(this.playlist, context),
+                if(UserRequest.isLogin())
+                  new OnServerButton(this.playlist, context),
                 CommonComponents.generateButton(
                     text: AppLocalizations.of(context)!.deletePlaylist,
                     icon: Icons.delete_sweep_outlined,

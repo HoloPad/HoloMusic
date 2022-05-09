@@ -14,6 +14,9 @@ import 'package:holomusic/Views/Search/Components/ProfileCard.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../../Common/Player/Song.dart';
 import '../../UIComponents/NotificationShimmer.dart';
+import 'UsersPlaylists.dart';
+import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
+import '../Playlist/PlaylistView.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({Key? key}) : super(key: key);
@@ -27,6 +30,8 @@ class _SearchViewState extends State<SearchView> {
   Future<SearchList?>? _searchResults;
   Future<PaginatedResponse<List<User>>>? _userSearchResults;
   final TextEditingController _textEditingController = TextEditingController();
+  UsersPlaylists? Usersplaylists;
+  PlaylistBase? _playListToView;
 
   bool _hasFocus = false;
 
@@ -68,6 +73,31 @@ class _SearchViewState extends State<SearchView> {
             _isLoadingData = false;
           }));
     }
+  }
+
+  void onClicked(PlaylistBase playlist) {
+    setState(() {
+      _playListToView = playlist;
+    });
+  }
+
+  void onBackPressed() {
+    setState(() {
+      _playListToView = null;
+    });
+  }
+
+
+  void onUsersPlaylistBackPressed(){
+    setState(() {
+      Usersplaylists=null;
+    });
+  }
+
+  void onUserClicked(String username){
+    setState(() {
+      Usersplaylists=UsersPlaylists(username,onUsersPlaylistBackPressed,onClicked,context);
+    });
   }
 
   Future<SearchList?> _loadNextPage() async {
@@ -113,7 +143,7 @@ class _SearchViewState extends State<SearchView> {
   @override
   Widget build(BuildContext context) {
     final selectionFieldsButtons =
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
       OutlinedButton(
           onPressed: () {
             setState(() {
@@ -154,7 +184,8 @@ class _SearchViewState extends State<SearchView> {
                       child: ListView(
                         clipBehavior: Clip.antiAlias,
                         children: list
-                            .map((p0) => SongItem(OnlineSong(p0),
+                            .map((p0) =>
+                            SongItem(OnlineSong(p0),
                                 onClickCallback: onItemClick))
                             .toList(),
                       ))));
@@ -164,7 +195,7 @@ class _SearchViewState extends State<SearchView> {
       },
     );
     final lastMusicSearches = FutureBuilder<List<Song>>(
-        //No search, show last searches
+      //No search, show last searches
         future: historyPlaylist.getSongs(),
         builder: (BuildContext context, snapshot) {
           if (snapshot.hasData) {
@@ -198,9 +229,9 @@ class _SearchViewState extends State<SearchView> {
           if (snapshot.hasData && snapshot.data!.result.isNotEmpty) {
             return Expanded(
                 child: ListView(
-              children:
-                  snapshot.data!.result.map((e) => ProfileCard(e)).toList(),
-            ));
+                  children:
+                  snapshot.data!.result.map((e) => ProfileCard(e, onUserClicked)).toList(),
+                ));
           } else {
             return const SizedBox();
           }
@@ -218,7 +249,7 @@ class _SearchViewState extends State<SearchView> {
                   },
                   child: ListView(
                     children:
-                        snapshot.data!.map((e) => ProfileCard(e)).toList(),
+                    snapshot.data!.map((e) => ProfileCard(e, onUserClicked)).toList(),
                   )));
         } else {
           return const SizedBox();
@@ -226,78 +257,89 @@ class _SearchViewState extends State<SearchView> {
       },
     );
 
-    return Padding(
-        padding: PlayBar.isVisible
-            ? const EdgeInsets.only(bottom: 40)
-            : const EdgeInsets.all(0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            //Search bar
-            AnimatedPadding(
-                padding: EdgeInsets.all(_hasFocus ? 0 : 8),
-                duration: const Duration(milliseconds: 100),
-                curve: Curves.easeIn,
-                child: Focus(
-                    onFocusChange: (hasFocus) {
-                      setState(() {
-                        _hasFocus = hasFocus;
-                      });
-                    },
-                    child: TextField(
-                      style: const TextStyle(color: Colors.white),
-                      //Text entered by the user
-                      decoration: InputDecoration(
-                          labelStyle: const TextStyle(
-                              color: Color.fromRGBO(0, 0, 0, 1)),
-                          contentPadding: const EdgeInsets.all(8),
-                          enabledBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black),
-                              borderRadius: BorderRadius.zero),
-                          focusedBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black),
-                              borderRadius: BorderRadius.zero),
-                          border: const OutlineInputBorder(),
-                          hintText: _searchForMusic
-                              ? AppLocalizations.of(context)!.searchASong
-                              : AppLocalizations.of(context)!.searchAnUser,
-                          hintStyle: const TextStyle(color: Colors.white),
-                          suffixIcon:
-                              const Icon(Icons.search, color: Colors.white),
-                          fillColor: const Color.fromRGBO(34, 35, 39, 1),
-                          filled: true),
-                      onSubmitted: _onSubmitted,
-                      controller: _textEditingController,
-                    ))),
-            AnimatedPadding(
-                padding: EdgeInsets.fromLTRB(8, _hasFocus ? 8 : 0, 8, 0),
-                duration: const Duration(milliseconds: 100),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                          (_showSearchResultMusic && _searchForMusic ||
-                                  (_showSearchResultUser && !_searchForMusic))
-                              ? AppLocalizations.of(context)!.searchResult
-                              : AppLocalizations.of(context)!.recentSearch,
-                          style: AppStyle.textStyle),
-                      selectionFieldsButtons
-                    ])),
-            if (_searchForMusic && _showSearchResultMusic) ...[songSearchItems],
-            if (_searchForMusic && !_showSearchResultMusic) ...[
-              lastMusicSearches
+
+    if (_playListToView != null){
+      return PlaylistView(_playListToView!, onBackPressed);
+
+    }
+    if (Usersplaylists != null) {
+      return Usersplaylists!;
+    }
+
+    else {
+      return Padding(
+          padding: PlayBar.isVisible
+              ? const EdgeInsets.only(bottom: 40)
+              : const EdgeInsets.all(0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              //Search bar
+              AnimatedPadding(
+                  padding: EdgeInsets.all(_hasFocus ? 0 : 8),
+                  duration: const Duration(milliseconds: 100),
+                  curve: Curves.easeIn,
+                  child: Focus(
+                      onFocusChange: (hasFocus) {
+                        setState(() {
+                          _hasFocus = hasFocus;
+                        });
+                      },
+                      child: TextField(
+                        style: const TextStyle(color: Colors.white),
+                        //Text entered by the user
+                        decoration: InputDecoration(
+                            labelStyle: const TextStyle(
+                                color: Color.fromRGBO(0, 0, 0, 1)),
+                            contentPadding: const EdgeInsets.all(8),
+                            enabledBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black),
+                                borderRadius: BorderRadius.zero),
+                            focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black),
+                                borderRadius: BorderRadius.zero),
+                            border: const OutlineInputBorder(),
+                            hintText: _searchForMusic
+                                ? AppLocalizations.of(context)!.searchASong
+                                : AppLocalizations.of(context)!.searchAnUser,
+                            hintStyle: const TextStyle(color: Colors.white),
+                            suffixIcon:
+                            const Icon(Icons.search, color: Colors.white),
+                            fillColor: const Color.fromRGBO(34, 35, 39, 1),
+                            filled: true),
+                        onSubmitted: _onSubmitted,
+                        controller: _textEditingController,
+                      ))),
+              AnimatedPadding(
+                  padding: EdgeInsets.fromLTRB(8, _hasFocus ? 8 : 0, 8, 0),
+                  duration: const Duration(milliseconds: 100),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                            (_showSearchResultMusic && _searchForMusic ||
+                                (_showSearchResultUser && !_searchForMusic))
+                                ? AppLocalizations.of(context)!.searchResult
+                                : AppLocalizations.of(context)!.recentSearch,
+                            style: AppStyle.textStyle),
+                        selectionFieldsButtons
+                      ])),
+              if (_searchForMusic && _showSearchResultMusic) ...[songSearchItems],
+              if (_searchForMusic && !_showSearchResultMusic) ...[
+                lastMusicSearches
+              ],
+              if (!_searchForMusic && _showSearchResultUser) ...[userSearchItems],
+              if (!_searchForMusic && !_showSearchResultUser) ...[
+                lastSearchedUser
+              ],
+              //LinearProgressIndicator
+              if (_isLoadingData) ...[
+                const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: LinearProgressIndicator())
+              ]
             ],
-            if (!_searchForMusic && _showSearchResultUser) ...[userSearchItems],
-            if (!_searchForMusic && !_showSearchResultUser) ...[
-              lastSearchedUser
-            ],
-            //LinearProgressIndicator
-            if (_isLoadingData) ...[
-              const Padding(
-                  padding: EdgeInsets.only(top: 8),
-                  child: LinearProgressIndicator())
-            ]
-          ],
-        ));
+          ));
+    }
   }
 }

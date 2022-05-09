@@ -5,21 +5,26 @@ import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Storage/UserHistoryStorage.dart';
 import '../../../ServerRequests/UserRequest.dart';
-
 class ProfileCard extends StatelessWidget {
   User user;
+  Function(String) onUserClick;
 
-  ProfileCard(this.user, {Key? key}) : super(key: key);
+  ProfileCard(this.user,this.onUserClick, {Key? key}) : super(key: key);
 
   void onCancelClicked(BuildContext context){
     UserHistoryStorage.deleteUser(user);
     ReRenderNotification().dispatch(context);
   }
 
+  void onClick(BuildContext context){
+    UserHistoryStorage.addUser(user);
+    onUserClick(user.username);
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
-        onTap: () => UserHistoryStorage.addUser(user),
+        onTap: () => onClick(context),
         hoverColor: AppStyle.primaryBackground.withOpacity(0.6),
         child: Card(
             color: AppStyle.primaryBackground,
@@ -32,20 +37,21 @@ class ProfileCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user.username,
-                              style: TextStyle(
-                                  color: AppStyle.textStyle.color,
-                                  fontSize: 20),
+                                user.username,
+                                style: TextStyle(
+                                    color: AppStyle.textStyle.color,
+                                    fontSize: 20),
                             ),
                             Text(
-                              AppLocalizations.of(context)!.publicPlaylist +
-                                  " " +
-                                  user.public_playlist_count.toString(),
-                              style: TextStyle(
-                                  color: AppStyle.textStyle.color
-                                      ?.withOpacity(0.8),
-                                  fontSize: 12),
-                            )
+                                AppLocalizations.of(context)!.publicPlaylist +
+                                    " " +
+                                    user.public_playlist_count.toString(),
+                                style: TextStyle(
+                                    color: AppStyle.textStyle.color
+                                        ?.withOpacity(0.8),
+                                    fontSize: 12),
+                            ),
+
                           ]),
                       TextButton(
                           onPressed: ()=>onCancelClicked(context), child: const Icon(Icons.cancel_outlined))
