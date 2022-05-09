@@ -5,26 +5,37 @@ import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
 import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:holomusic/Views/Search/Components/PlaylistsCard.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
-
+import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 
 
 
 class UsersPlaylists extends StatefulWidget {
-  Function() onBackPressed;
-  String username;
+  late Function() onBackPressed;
+  late String username;
+  late Function(PlaylistBase playlist) onClicked;
+  late BuildContext context;
 
-  UsersPlaylists(this.username, this.onBackPressed, {Key? key}) : super(key: key);
+  UsersPlaylists(String u, Function() onBack, Function(PlaylistBase playlist) onCli, BuildContext c){
+    this.username = u;
+    this.onBackPressed = onBack;
+    this.onClicked = onCli;
+    this.context = c;
+  }
   @override
-  UsersPlaylistsState createState() => UsersPlaylistsState();
+  UsersPlaylistsState createState() => UsersPlaylistsState(this.onClicked,context);
 
 }
 
 class UsersPlaylistsState extends State<UsersPlaylists> {
+  late Function(PlaylistBase playlist) onClicked;
   Color _mainColor = AppStyle.scaffoldBackgroundColor;
   late BuildContext context;
-  //Future<PaginatedResponse<List<String>>>? _userSongsResults;
   Future<PaginatedResponse<List<PlaylistSaved>>>? _userSongsResults;
   bool _isLoadingData = false;
+  UsersPlaylistsState(Function(PlaylistBase playlist) onCli, BuildContext context){
+    this.onClicked = onCli;
+    this.context = context;
+  }
 
   @override
   initState(){
@@ -49,7 +60,7 @@ class UsersPlaylistsState extends State<UsersPlaylists> {
             return Expanded(
                 child: ListView(
                   children:
-                  snapshot.data!.result.map((e) => PlaylistsCard(e)).toList(),
+                  snapshot.data!.result.map((e) => PlaylistsCard(e,this.onClicked, context)).toList(),
                 ));
           } else {
             return const SizedBox();

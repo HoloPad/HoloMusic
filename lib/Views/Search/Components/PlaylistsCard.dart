@@ -1,26 +1,45 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:holomusic/Common/Notifications/ReRenderNotification.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:holomusic/Common/Storage/UserHistoryStorage.dart';
-import '../../../ServerRequests/UserRequest.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
+import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 
-class PlaylistsCard extends StatelessWidget {
-  /*
-  String playlistname;
 
-  PlaylistsCard(this.playlistname, {Key? key}) : super(key: key);
-*/
-  PlaylistSaved playlist;
+class PlaylistsCard extends StatefulWidget {
+  late PlaylistSaved playlist;
+  late BuildContext context;
+  late Function(PlaylistBase playlist) onClicked;
+  PlaylistsCard(PlaylistSaved playlist, Function(PlaylistBase playlist) onCli, BuildContext context){
+    this.onClicked = onCli;
+    this.playlist = playlist;
+    this.context = context;
+  }
 
-  PlaylistsCard(this.playlist, {Key? key}) : super(key: key);
+  @override
+  PlaylistsCardState createState() => new PlaylistsCardState(playlist, context);
+}
+
+class PlaylistsCardState extends State<PlaylistsCard> {
+  late PlaylistSaved playlist;
+  late BuildContext context;
+
+
+
+  PlaylistsCardState(PlaylistSaved playlist, BuildContext context){
+    this.playlist = playlist;
+    this.context = context;
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
         hoverColor: AppStyle.primaryBackground.withOpacity(0.6),
+        onTap: (){
+          widget.onClicked(playlist);
+        },
         child: Card(
             color: AppStyle.primaryBackground,
             child: Padding(

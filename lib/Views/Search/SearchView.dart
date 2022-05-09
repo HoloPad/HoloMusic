@@ -15,6 +15,8 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../../Common/Player/Song.dart';
 import '../../UIComponents/NotificationShimmer.dart';
 import 'UsersPlaylists.dart';
+import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
+import '../Playlist/PlaylistView.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({Key? key}) : super(key: key);
@@ -29,6 +31,7 @@ class _SearchViewState extends State<SearchView> {
   Future<PaginatedResponse<List<User>>>? _userSearchResults;
   final TextEditingController _textEditingController = TextEditingController();
   UsersPlaylists? Usersplaylists;
+  PlaylistBase? _playListToView;
 
   bool _hasFocus = false;
 
@@ -72,6 +75,19 @@ class _SearchViewState extends State<SearchView> {
     }
   }
 
+  void onClicked(PlaylistBase playlist) {
+    setState(() {
+      _playListToView = playlist;
+    });
+  }
+
+  void onBackPressed() {
+    setState(() {
+      _playListToView = null;
+    });
+  }
+
+
   void onUsersPlaylistBackPressed(){
     setState(() {
       Usersplaylists=null;
@@ -80,7 +96,7 @@ class _SearchViewState extends State<SearchView> {
 
   void onUserClicked(String username){
     setState(() {
-      Usersplaylists=UsersPlaylists(username,onUsersPlaylistBackPressed);
+      Usersplaylists=UsersPlaylists(username,onUsersPlaylistBackPressed,onClicked,context);
     });
   }
 
@@ -241,9 +257,15 @@ class _SearchViewState extends State<SearchView> {
       },
     );
 
+
+    if (_playListToView != null){
+      return PlaylistView(_playListToView!, onBackPressed);
+
+    }
     if (Usersplaylists != null) {
       return Usersplaylists!;
     }
+
     else {
       return Padding(
           padding: PlayBar.isVisible
