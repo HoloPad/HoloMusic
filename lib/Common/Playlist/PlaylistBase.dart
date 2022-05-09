@@ -20,10 +20,11 @@ abstract class PlaylistBase {
   Future<List<Song>> getSongs();
 
   Future<ImageProvider> getImageProvider() async {
-    final videos = await getSongs();
     if (imageProvider != null) {
       return Future.value(imageProvider);
-    } else if (videos.isNotEmpty) {
+    }
+    final videos = await getSongs();
+    if (videos.isNotEmpty) {
       return videos.first.getThumbnailImageAsset();
     } else {
       return const AssetImage("resources/png/fake_thumbnail.png");

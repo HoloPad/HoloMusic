@@ -62,8 +62,12 @@ class _PlayListWidgetState extends State<PlayListWidget> {
                           loadStateChanged: _onImageLoaded,
                         );
                       } else {
-                        return const SizedBox(width: 150, height: 150);
-                      }
+                        return const Padding(
+                            padding: EdgeInsets.all((150 - 50) / 2),
+                            child: SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: CircularProgressIndicator()));                      }
                     })),
             SizedBox(
                 width: 150,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Playlist/PlaylistOffline.dart';
+import 'package:holomusic/Common/Playlist/Providers/YouTubePlaylist.dart';
 import 'package:holomusic/Common/Storage/PlaylistStorage.dart';
 import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:holomusic/Views/Home/Components/PlayListWidget.dart';
@@ -33,11 +34,25 @@ class _HomeState extends State<HomeView> {
   @override
   initState() {
     super.initState();
-    chartsWidgets = <Widget>[
-      PlayListWidget(playlist: TheGotOfficial("it"), onClick: onClicked),
-      PlayListWidget(playlist: TheGotOfficial("it"), onClick: onClicked),
-      PlayListWidget(playlist: TheGotOfficial("es"), onClick: onClicked)
+    List<String> url = [
+      //Add here more youtube playlists
+      "https://www.youtube.com/watch?list=PL4fGSI1pDJn6puJdseH2Rt9sMvt9E2M4i",//Top 100 worlds
+      "https://www.youtube.com/watch?list=RDCLAK5uy_nBQm8_YpP--R6zU8p3dypKm1QKqzWY6qU",//Electronic
+      "https://www.youtube.com/watch?list=RDCLAK5uy_km8O-Ih1wUwDSDLdsobHb0PURoU136_5Q",//Rock
+      "https://www.youtube.com/watch?list=RDCLAK5uy_ms55UKAmQE5XAkphnhV1GPaWnd6fx_5Fc",//90's
+      "https://www.youtube.com/watch?list=RDCLAK5uy_lqkZ7XVUPH7IZbFwDY6zkjEM6nSCiov0E",//POP
     ];
+    chartsWidgets = url
+        .map((e) => FutureBuilder<YoutubePlaylist>(
+            future: YoutubePlaylist.createFromUrl(e),
+            builder: (_, snapshot) {
+              if (snapshot.hasData) {
+                return PlayListWidget(playlist: snapshot.data!, onClick: onClicked);
+              } else {
+                return const SizedBox(width: 150, height: 150,);
+              }
+            }))
+        .toList(growable: false);
     userIsLogged = UserRequest.isLogin();
     _yourLastPlaylist = loadLastPlaylist();
   }
@@ -98,7 +113,7 @@ class _HomeState extends State<HomeView> {
                               color: Colors.white)))
                 ],
               ),
-              Text(AppLocalizations.of(context)!.charts, style: textStyle),
+              Text(AppLocalizations.of(context)!.suggestions, style: textStyle),
               const Divider(height: 10, color: Colors.transparent),
               SingleChildScrollView(
                 padding: const EdgeInsets.all(8),
