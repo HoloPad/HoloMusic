@@ -46,29 +46,33 @@ class _PlaylistViewState extends State<PlaylistView> {
               child: NotificationListener<ScrollNotification>(
                   onNotification: (notification) {
                     setState(() {
-                      _imageSize =
-                          max(150 - notification.metrics.extentBefore, 0);
+                      _imageSize = max(150 - notification.metrics.extentBefore, 0);
                     });
                     return true;
                   },
-                  child:
-                      ListView(clipBehavior: Clip.antiAlias, children: <Widget>[
+                  child: ListView(clipBehavior: Clip.antiAlias, children: <Widget>[
                     Column(children: [
                       Container(
                           decoration: BoxDecoration(
-                              color: widget.playlist.backgroundColor ??
-                                  Colors.transparent,
+                              color: widget.playlist.backgroundColor ?? Colors.transparent,
                               borderRadius: BorderRadius.circular(10)),
                           child: FutureBuilder<ImageProvider<Object>>(
                               future: widget.playlist.getImageProvider(),
                               builder: (_, snapshot) {
-                                return ExtendedImage(
-                                  image: snapshot.data ??
-                                      const AssetImage(
-                                          "resources/png/fake_thumbnail.png"),
-                                  width: _imageSize,
-                                  height: _imageSize,
-                                );
+                                if (snapshot.hasData) {
+                                  return ExtendedImage(
+                                    image: snapshot.data!,
+                                    width: _imageSize,
+                                    height: _imageSize,
+                                  );
+                                } else {
+                                  return Padding(
+                                      padding: EdgeInsets.all((_imageSize - 50) / 2),
+                                      child: const SizedBox(
+                                          width: 50,
+                                          height: 50,
+                                          child: CircularProgressIndicator()));
+                                }
                               })),
                       const SizedBox(height: 15),
                       Text(widget.playlist.name, style: AppStyle.titleStyle),
@@ -80,14 +84,11 @@ class _PlaylistViewState extends State<PlaylistView> {
                             widget.playlist.isOnline
                                 ? OutlinedButton(
                                     onPressed: () {},
-                                    child: Text(
-                                        AppLocalizations.of(context)!.follow),
+                                    child: Text(AppLocalizations.of(context)!.follow),
                                     style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(
-                                            width: 0.5, color: Colors.white),
+                                        side: const BorderSide(width: 0.5, color: Colors.white),
                                         shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(50))),
+                                            borderRadius: BorderRadius.circular(50))),
                                   )
                                 : const SizedBox(),
                             widget.playlist.getReferenceUrl() != null
@@ -95,8 +96,7 @@ class _PlaylistViewState extends State<PlaylistView> {
                                     onPressed: _onLinkClicked,
                                     child: const Icon(Icons.link_rounded),
                                     style: TextButton.styleFrom(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            4, 0, 4, 0),
+                                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
                                         minimumSize: Size.zero))
                                 : const SizedBox()
                           ]),
@@ -108,15 +108,13 @@ class _PlaylistViewState extends State<PlaylistView> {
                               onPressed: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          PlaylistOptions(widget.playlist))),
+                                      builder: (context) => PlaylistOptions(widget.playlist))),
                               child: Icon(
                                 Icons.more_vert,
                                 color: AppStyle.text,
                               ),
                               style: TextButton.styleFrom(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(4, 0, 4, 0),
+                                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
                                   minimumSize: Size.zero))
                         ],
                       )
@@ -132,19 +130,13 @@ class _PlaylistViewState extends State<PlaylistView> {
                               child: ListBody(
                                 children: snapshot.data!.map((e) {
                                   return SongItem(e,
-                                      playlist: widget.playlist,
-                                      reloadList: () => setState(() {}));
+                                      playlist: widget.playlist, reloadList: () => setState(() {}));
                                 }).toList(),
                               ));
                         } else {
-                          return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                SizedBox(
-                                    width: 50,
-                                    height: 50,
-                                    child: CircularProgressIndicator())
-                              ]);
+                          return Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
+                            SizedBox(width: 50, height: 50, child: CircularProgressIndicator())
+                          ]);
                         }
                       },
                     ),
