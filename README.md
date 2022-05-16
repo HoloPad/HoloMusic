@@ -1,5 +1,7 @@
 # HoloMusic
-<img src="https://user-images.githubusercontent.com/40276199/168561523-b5fe882e-ace1-497b-9f3a-f2030317a10b.png" width="150px"/>
+<p align="center">
+ <img src="https://user-images.githubusercontent.com/40276199/168561523-b5fe882e-ace1-497b-9f3a-f2030317a10b.png" width="150px"/>
+</p>
 
 ### What is it? 
 HoloMusic is a music player that streams music from YouTube
