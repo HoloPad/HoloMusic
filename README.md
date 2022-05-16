@@ -1,16 +1,20 @@
-# holomusic
+# HoloMusic
+<img src="https://user-images.githubusercontent.com/40276199/168561523-b5fe882e-ace1-497b-9f3a-f2030317a10b.png" width="150px"/>
 
-Holomusic
+### What is it? 
+HoloMusic is a music player that streams music from YouTube
+### How it works? 
+HoluMusic fetches music from YouTube, so if a song is on YouTube, it is definitely on HoloMusic!
+### What are the features?
+HoloMusic has a lot of features:
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+ - Search a song by name and/or artist
+ - Suggested playlists, in the homepage there are some playlists that could be interesting for you
+ - You can create a private playlist
+ - You can share your playlists with the other users of HoloMusic
+ - You can search other users and listen their playlists
+ - You can download a songs or a playlist offline, so you can listen it also when there is not an internet connection.
+ - Cross platform, it can run on Android, Windows and Linux
+ - It is completely free!!
+### How to download?
+You can find the files for each platform in the releases page[missing url]
