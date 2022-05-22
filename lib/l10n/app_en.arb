@@ -69,5 +69,6 @@
   "emailSent": "E-mail sent",
   "cannotSentEmail": "Cannot send the email",
   "makePrivatePlaylist": "Make it private",
-  "makePublicPlaylist":"Make it public"
+  "makePublicPlaylist":"Make it public",
+  "resetPassword":"Reset Password"
 }
