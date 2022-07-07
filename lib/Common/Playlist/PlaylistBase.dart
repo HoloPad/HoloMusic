@@ -25,7 +25,9 @@ abstract class PlaylistBase {
     }
     final videos = await getSongs();
     if (videos.isNotEmpty) {
-      return videos.first.getThumbnailImageAsset();
+      final uri = videos.firstWhere((element) => element.getThumbnailUri()!=null);
+      final url = uri.getThumbnailUri()!.toString();
+      return NetworkImage(url);
     } else {
       return const AssetImage("resources/png/fake_thumbnail.png");
     }
