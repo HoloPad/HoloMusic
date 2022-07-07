@@ -14,13 +14,11 @@ class PlayerEngine {
   static late List<Song> _mainPlaylist;
   static late List<Song> _history;
   static Song? _currentPlaying;
-  static final ValueNotifier<Song?> _currentVideoHandlerListenable =
-      ValueNotifier(null);
+  static final ValueNotifier<Song?> _currentVideoHandlerListenable = ValueNotifier(null);
   static final ValueNotifier<bool> _hasNextStream = ValueNotifier(true);
   static final ValueNotifier<bool> _isShuffleEnable = ValueNotifier(false);
   static bool _isPlaylistLooping = false;
-  static final ValueNotifier<RepetitionState> _repetitionState =
-      ValueNotifier(RepetitionState.Off);
+  static final ValueNotifier<RepetitionState> _repetitionState = ValueNotifier(RepetitionState.Off);
   static bool canSkip = true;
 
   static void initialize() {
@@ -42,8 +40,7 @@ class PlayerEngine {
   }
 
   static void onTrackEnd() async {
-    if (_mainPlaylist.isNotEmpty ||
-        (_currentPlaying != null && await _currentPlaying!.hasNext())) {
+    if (_mainPlaylist.isNotEmpty || (_currentPlaying != null && await _currentPlaying!.hasNext())) {
       PlayerEngine.playNextSong(nextOnQueue: true);
     } else {
       await PlayerEngine.player.pause();
@@ -65,7 +62,10 @@ class PlayerEngine {
     _history.add(source);
     _currentPlaying = source;
     if (play) {
-      PlayerEngine.player.play();
+      await PlayerEngine.player.play();
+      Future.delayed(const Duration(milliseconds: 300), () { //Sometime the next song doesn't play, this is a temporary fix
+        if (!PlayerEngine.player.playing) PlayerEngine.player.play();
+      });
     }
     _hasNextStream.value = await hasNext();
 
@@ -103,6 +103,7 @@ class PlayerEngine {
       }
       //Play the song
       if (nextSong != null) {
+        print("PRESSING PLAY");
         await PlayerEngine.play(nextSong);
       }
     }
@@ -120,8 +121,7 @@ class PlayerEngine {
     Song? previousSong;
     if (_history.isNotEmpty) {
       //Search in history the previous different from the current
-      final currentIndex =
-          _history.indexWhere((element) => element.id == _currentPlaying?.id);
+      final currentIndex = _history.indexWhere((element) => element.id == _currentPlaying?.id);
       if (currentIndex - 1 >= 0) {
         previousSong = _history.elementAt(currentIndex - 1);
       }
@@ -132,8 +132,7 @@ class PlayerEngine {
       if (songs == null) {
         return;
       }
-      final currentIndex =
-          songs.indexWhere((element) => element.id == _currentPlaying?.id);
+      final currentIndex = songs.indexWhere((element) => element.id == _currentPlaying?.id);
       if (currentIndex - 1 < 0) {
         return;
       }
