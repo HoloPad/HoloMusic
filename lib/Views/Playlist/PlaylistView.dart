@@ -124,15 +124,21 @@ class _PlaylistViewState extends State<PlaylistView> {
                       future: widget.playlist.getSongs(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
-                          return NotificationShimmer(
-                              elementsToLoad: snapshot.data!.length,
-                              notificationId: 'songitem',
-                              child: ListBody(
-                                children: snapshot.data!.map((e) {
-                                  return SongItem(e,
-                                      playlist: widget.playlist, reloadList: () => setState(() {}));
-                                }).toList(),
-                              ));
+                          if(snapshot.data!.isEmpty){
+                            return Text(AppLocalizations.of(context)!.noSongsInThisPlaylist, style: AppStyle.textStyle, textAlign: TextAlign.center,);
+                          }
+                          else {
+                            return NotificationShimmer(
+                                elementsToLoad: snapshot.data!.length,
+                                notificationId: 'songitem',
+                                child: ListBody(
+                                  children: snapshot.data!.map((e) {
+                                    return SongItem(e,
+                                        playlist: widget.playlist,
+                                        reloadList: () => setState(() {}));
+                                  }).toList(),
+                                ));
+                          }
                         } else {
                           return Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
                             SizedBox(width: 50, height: 50, child: CircularProgressIndicator())
