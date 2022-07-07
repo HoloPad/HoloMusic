@@ -5,6 +5,7 @@ import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:holomusic/UIComponents/CommonComponents.dart';
 import 'package:holomusic/Views/ProfileView/RegisterView.dart';
+import 'package:holomusic/Views/ProfileView/ResetPasswordView.dart';
 
 class UserManagerView extends StatefulWidget {
   @override
@@ -242,7 +243,16 @@ class _UserManagerViewState extends State<UserManagerView> {
                           context,
                           MaterialPageRoute(builder: (context) => RegisterView()),
                         ).then((value) => Navigator.pop(context));
-                      })
+                      }),
+                  const Divider(),
+                  CommonComponents.generateButton(
+                      text: "Reset Password",
+                      onClick: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ResetPasswordView()),
+                        ).then((value) => Navigator.pop(context));
+                      }),
                 ] else ...[
                   CommonComponents.generateButton(
                       text: AppLocalizations.of(context)!.logout,

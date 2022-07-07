@@ -203,6 +203,37 @@ class UserRequest {
     }
   }
 
+  static Future<Map<String, dynamic>> resetPassword(String email, String password,
+      [String languageCode = "it-it"]) async {
+    final uri = Uri.http(ServerParameters.FULL_URL, "resetPassword");
+
+    //Get request to get csrf
+    final response0 = await dio.get(uri.toString());
+    final cookie =
+    Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
+
+    //POST Request
+    final bodyContent = FormData.fromMap({
+      'password': password,
+      'email': email,
+      'csrfmiddlewaretoken': cookie.value
+    });
+    final headers = {"X-CSRFToken": cookie.value, "Accept-Language": languageCode};
+    try {
+      final response1 =
+      await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
+
+      if (response1.statusCode == 200 && response1.data['success'] != true) {
+        return (response1.data['errors'] as Map<String, dynamic>);
+      } else {
+        return {};
+      }
+    } catch (_) {
+      return {};
+    }
+  }
+
+
   static Future<bool> alreadyExists(String username, [String languageCode = "it-it"]) async {
     final errors = await register("", username, "");
 
