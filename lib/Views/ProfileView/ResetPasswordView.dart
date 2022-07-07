@@ -14,7 +14,6 @@ class ResetPasswordView extends StatefulWidget {
 
 class _ResetPasswordState extends State<ResetPasswordView> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -57,7 +56,7 @@ class _ResetPasswordState extends State<ResetPasswordView> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text("Reset ok!"),
+                Text(AppLocalizations.of(context)!.resetPasswordSuccess),
               ],
             ),
           ),
@@ -83,7 +82,6 @@ class _ResetPasswordState extends State<ResetPasswordView> {
         _isLoading = true;
       });
       final email = _emailController.text.characters.string;
-      final username = _usernameController.text.characters.string;
       final password = _passwordController.text.characters.string;
 
       final response = await UserRequest.resetPassword(email, password);

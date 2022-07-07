@@ -70,5 +70,7 @@
   "cannotSentEmail": "Impossibile inviare l'email",
   "makePrivatePlaylist": "Mettila privata",
   "makePublicPlaylist":"Rendila pubblica",
-  "resetPassword":"Resetta la Password"
+  "resetPassword":"Resetta la Password",
+  "resetPasswordSuccess":"Reset della password avvenuto con successo, verifica la tua email per confermare la nuova password"
+
 }

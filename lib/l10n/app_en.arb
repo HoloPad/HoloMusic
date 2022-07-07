@@ -70,5 +70,7 @@
   "cannotSentEmail": "Cannot send the email",
   "makePrivatePlaylist": "Make it private",
   "makePublicPlaylist":"Make it public",
-  "resetPassword":"Reset Password"
+  "resetPassword":"Reset Password",
+  "resetPasswordSuccess":"Password reset success! Check your email to confirm the new password"
+
 }
