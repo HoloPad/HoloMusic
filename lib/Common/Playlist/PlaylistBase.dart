@@ -14,6 +14,7 @@ abstract class PlaylistBase {
   bool isOnServer = false;
   bool _canDownload = true;
   ValueNotifier<bool> isDownloading = ValueNotifier(false);
+  bool isOtherUsersPlaylist = true;
 
   PlaylistBase(this.name, this.imageProvider, this.backgroundColor);
 

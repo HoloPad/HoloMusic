@@ -13,7 +13,8 @@
   "millions": "Milioni",
   "billions": "Miliardi",
   "suggestions": "Playlist suggerite",
-  "follow": "Segui",
+  "addToFavourite": "Aggiungi ai preferiti",
+  "removeFromFavourite": "Rimuovi dai preferiti",
   "cannotLoadSong": "Impossibile caricare il brano",
   "recentSearch": "Ricerche recenti",
   "searchResult": "Risultati di ricerca",
@@ -74,6 +75,7 @@
   "resetPasswordSuccess":"Reset della password avvenuto con successo, verifica la tua email per confermare la nuova password",
   "addToFavorite": "Aggiungi alle preferite",
   "cantAddToFavorite": "Impossibile aggiungere questa playlist alle preferite",
-  "noSongsInThisPlaylist": "Non ci sono brani in questa playlist"
+  "noSongsInThisPlaylist": "Non ci sono brani in questa playlist",
+  "favouritePlaylist": "Playlist preferite"
 
 }

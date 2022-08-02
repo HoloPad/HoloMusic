@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 import 'package:localstore/localstore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Player/OfflineSong.dart';
 import '../Player/OnlineSong.dart';
@@ -11,14 +12,21 @@ class PlaylistSaved extends PlaylistBase {
   final _db = Localstore.instance;
   String _collectionName = "holomusic" + Platform.pathSeparator + "playlists";
   late List<Song> songs;
+  String? ownerId;
 
   String? id;
   DateTime lastUpdate = DateTime.now();
 
-  PlaylistSaved(name, {this.id, List<Song>? list, bool? online, String? customCollectionName})
+  PlaylistSaved(name,
+      {this.id,
+      List<Song>? list,
+      bool? online,
+      String? customCollectionName,
+      this.ownerId})
       : super(name, null, null) {
     super.isOnServer = false;
-    if(online != null){
+
+    if (online != null) {
       super.isOnServer = online;
     }
     if (customCollectionName != null) {
@@ -71,15 +79,17 @@ class PlaylistSaved extends PlaylistBase {
       "songs": jsonSongs,
       "id": id!,
       "datetime": DateTime.now().toIso8601String(),
-      "onServer":super.isOnServer
+      "onServer": super.isOnServer
     };
   }
 
   factory PlaylistSaved.fromJson(Map<String, dynamic> map) {
     List<dynamic> a = List.from(map['songs']);
     List<Song> aSongs = a.map((e) => Song.fromJson(e)).toList(growable: true);
-    final playlist = PlaylistSaved(map['name'],online: map['onServer'], id: map['id'], list: aSongs);
+    final playlist =
+        PlaylistSaved(map['name'], online: map['onServer'], id: map['id'], list: aSongs);
     playlist.lastUpdate = DateTime.parse(map['datetime']);
+    playlist.ownerId = map['creator'];
     return playlist;
   }
 
@@ -106,10 +116,9 @@ class PlaylistSaved extends PlaylistBase {
       bool songIsOnline = songs[i].runtimeType == OnlineSong;
 
       if (songIsOnline && songIsStored) {
-        songs[i] =
-            (await OfflineSong.getById(songs[i].id, playlistBase: this))!;
+        songs[i] = (await OfflineSong.getById(songs[i].id, playlistBase: this))! as Song;
       } else if (!songIsOnline && !songIsStored) {
-        songs[i] = await OnlineSong.createFromId(songs[i].id, playlist: this);
+        songs[i] = (await OnlineSong.createFromId(songs[i].id, playlist: this)) as Song;
       }
     }
   }

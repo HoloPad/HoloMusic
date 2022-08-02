@@ -13,7 +13,8 @@
   "millions": "Millions",
   "billions": "Billions",
   "suggestions": "Suggested playlist",
-  "follow": "Follow",
+  "addToFavourite": "Add to favourite",
+  "removeFromFavourite": "Remove from favourite",
   "cannotLoadSong": "Cannot load the song",
   "recentSearch": "Last searches",
   "searchResult": "Search results",
@@ -74,6 +75,8 @@
   "resetPasswordSuccess":"Password reset success! Check your email to confirm the new password",
   "addToFavorite": "Add to favorite",
   "cantAddToFavorite": "Cannot add this playlist to the favorites",
-  "noSongsInThisPlaylist": "There are not songs in this playlist"
+  "noSongsInThisPlaylist": "There are not songs in this playlist",
+  "favouritePlaylist": "Favourite playlists"
+
 
 }

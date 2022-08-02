@@ -12,17 +12,14 @@ import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
 import 'package:holomusic/UIComponents/CommonComponents.dart';
 import 'package:holomusic/ServerRequests/UserRequest.dart';
+import 'package:oktoast/oktoast.dart';
 import '../../Common/Player/SongStateManager.dart';
-
-
-
-
 
 class OnServerButton extends StatefulWidget {
   late PlaylistBase playlist;
   late BuildContext context;
 
-  OnServerButton(PlaylistBase playlist, BuildContext context){
+  OnServerButton(PlaylistBase playlist, BuildContext context) {
     this.playlist = playlist;
     this.context = context;
   }
@@ -36,68 +33,68 @@ class OnServerButtonState extends State<OnServerButton> {
   late BuildContext context;
   late IconData icon;
   String displayedString = "";
-  OnServerButtonState(PlaylistBase playlist, BuildContext context){
+
+  OnServerButtonState(PlaylistBase playlist, BuildContext context) {
     this.playlist = playlist;
     this.context = context;
-      if(!this.playlist.isOnServer) {
-        this.displayedString =
-            AppLocalizations.of(this.context)!.makePublicPlaylist;
-        this.icon = Icons.key_off;
-      }
-    else {
-        this.displayedString =
-            AppLocalizations.of(this.context)!.makePrivatePlaylist;
-        this.icon = Icons.key;
-      }
+    if (!this.playlist.isOnServer) {
+      this.displayedString = AppLocalizations.of(this.context)!.makePublicPlaylist;
+      this.icon = Icons.key_off;
+    } else {
+      this.displayedString = AppLocalizations.of(this.context)!.makePrivatePlaylist;
+      this.icon = Icons.key;
+    }
   }
 
-  void onPressed() async{
+  void onPressed() async {
     bool res = false;
-    if(!UserRequest.isLogin() || playlist.runtimeType != PlaylistSaved)
-        return;
+    if (!UserRequest.isLogin() || playlist.runtimeType != PlaylistSaved) return;
     if (this.playlist.isOnServer) {
       res = await UserRequest.makePlaylistPrivate(playlist);
-    }
-    else{
+    } else {
       res = await UserRequest.makePlaylistPublic(playlist);
     }
 
     setState(() {
-      if(UserRequest.isLogin() && playlist.runtimeType == PlaylistSaved) {
-
-          if (this.playlist.isOnServer) {
-
-            if(res){
-              playlist.isOnServer = !playlist.isOnServer;
-              this.displayedString =
-                  AppLocalizations.of(this.context)!.makePublicPlaylist;
-              this.icon = Icons.key_off;
-            }
+      if (UserRequest.isLogin() && playlist.runtimeType == PlaylistSaved) {
+        if (this.playlist.isOnServer) {
+          if (res) {
+            playlist.isOnServer = !playlist.isOnServer;
+            this.displayedString = AppLocalizations.of(this.context)!.makePublicPlaylist;
+            this.icon = Icons.key_off;
           }
-          else {
-
-            if(res) {
-              playlist.isOnServer = !playlist.isOnServer;
-              this.displayedString =
-                  AppLocalizations.of(this.context)!.makePrivatePlaylist;
-              this.icon = Icons.key;
-            }
+        } else {
+          if (res) {
+            playlist.isOnServer = !playlist.isOnServer;
+            this.displayedString = AppLocalizations.of(this.context)!.makePrivatePlaylist;
+            this.icon = Icons.key;
           }
-          (playlist as PlaylistSaved).save();
+        }
+        (playlist as PlaylistSaved).save();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return CommonComponents.generateButton(
-        text: displayedString,
-        icon: icon,
-        onClick: onPressed);
+    return Column(children: [
+      CommonComponents.generateButton(text: displayedString, icon: icon, onClick: onPressed),
+      CommonComponents.generateButton(
+          text: AppLocalizations.of(context)!.addToFavorite,
+          icon: Icons.add,
+          onClick: () {
+            final id = (playlist as PlaylistSaved).id;
+            if (id == null) {
+              OKToast(
+                  child: Text(AppLocalizations.of(context)!.cantAddToFavorite),
+                  position: ToastPosition.bottom);
+            } else {
+              print("Adding $id to favorites");
+            }
+          }),
+    ]);
   }
 }
-
-
 
 class PlaylistOptions extends StatelessWidget {
   PlaylistBase playlist;
@@ -110,15 +107,13 @@ class PlaylistOptions extends StatelessWidget {
     if (Platform.isAndroid) {
       //Listen for shared data updates
       appClient.userDataUpdates.listen((json) {
-
         final hasFinish = json?["hasFinish"] as bool;
         final currentProcessing = json?['currentSong'] as String?;
-        final currentProcessingStateIndex =
-            json?['currentProcessingState'] as int?;
+        final currentProcessingStateIndex = json?['currentProcessingState'] as int?;
 
         if (currentProcessing != null && currentProcessingStateIndex != null) {
-          SongStateManager.setSongState(currentProcessing,
-              SongState.values.elementAt(currentProcessingStateIndex));
+          SongStateManager.setSongState(
+              currentProcessing, SongState.values.elementAt(currentProcessingStateIndex));
         }
 
         if (hasFinish) {
@@ -132,8 +127,7 @@ class PlaylistOptions extends StatelessWidget {
         }
       });
 
-      List<String> songsIds =
-          (await playlist.getSongs()).map((e) => e.id).toList();
+      List<String> songsIds = (await playlist.getSongs()).map((e) => e.id).toList();
       appClient.setKeyValue("songs", songsIds);
 
       appClient.initProgressBar(0, songsIds.length, false);
@@ -192,9 +186,8 @@ class PlaylistOptions extends StatelessWidget {
                     future: playlist.getImageProvider(),
                     builder: (_, snapshot) {
                       return ExtendedImage(
-                        image: snapshot.data ??
-                            const AssetImage(
-                                "resources/png/fake_thumbnail.png"),
+                        image:
+                            snapshot.data ?? const AssetImage("resources/png/fake_thumbnail.png"),
                         width: 150,
                         height: 150,
                         fit: BoxFit.fill,
@@ -208,8 +201,7 @@ class PlaylistOptions extends StatelessWidget {
                   builder: (_, snapshot) {
                     if (snapshot.hasData && (snapshot.data!) == false) {
                       return CommonComponents.generateButton(
-                          text:
-                              AppLocalizations.of(context)!.saveOfflineAllSongs,
+                          text: AppLocalizations.of(context)!.saveOfflineAllSongs,
                           icon: Icons.download_outlined,
                           onClick: () {
                             _startDownload();
@@ -241,8 +233,7 @@ class PlaylistOptions extends StatelessWidget {
                   builder: (_, snapshot) {
                     if (snapshot.hasData && snapshot.data!) {
                       return CommonComponents.generateButton(
-                          text: AppLocalizations.of(context)!
-                              .deleteDownloadedSongs,
+                          text: AppLocalizations.of(context)!.deleteDownloadedSongs,
                           icon: Icons.delete_outline_rounded,
                           onClick: () {
                             _deleteDownloadedSongs();
@@ -261,8 +252,7 @@ class PlaylistOptions extends StatelessWidget {
                       setState(() => playlist.isOnServer = !playlist.isOnServer);
                     }),
                  */
-                if(UserRequest.isLogin())
-                  new OnServerButton(this.playlist, context),
+                if (UserRequest.isLogin()) OnServerButton(this.playlist, context),
                 CommonComponents.generateButton(
                     text: AppLocalizations.of(context)!.deletePlaylist,
                     icon: Icons.delete_sweep_outlined,
