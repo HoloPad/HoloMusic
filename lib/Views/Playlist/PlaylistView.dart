@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:holomusic/Common/Parameters/AppStyle.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
+import 'package:holomusic/Common/Playlist/Providers/YouTubePlaylist.dart';
 import 'package:holomusic/ServerRequests/UserRequest.dart';
 import 'package:holomusic/UIComponents/NotificationShimmer.dart';
 import 'package:holomusic/UIComponents/Shimmer.dart';
@@ -26,7 +27,7 @@ class PlaylistView extends StatefulWidget {
   State<PlaylistView> createState() => _PlaylistViewState();
 }
 
-enum FollowButtonState { Loading, Followed, Unfollowed }
+enum FollowButtonState { Loading, Followed, Unfollowed, Hidden }
 
 class _PlaylistViewState extends State<PlaylistView> {
   double _imageSize = 150;
@@ -39,10 +40,17 @@ class _PlaylistViewState extends State<PlaylistView> {
     super.initState();
     if (widget.playlist.runtimeType == PlaylistSaved) {
       UserRequest.checkIfPlaylistIsFavourite(widget.playlist as PlaylistSaved).then((value) async {
-        await Future.delayed(Duration(seconds: 1));
         _isFavouriteListenable.value =
             value ? FollowButtonState.Followed : FollowButtonState.Unfollowed;
       });
+
+    } /*else if (widget.playlist.runtimeType == YoutubePlaylist) {
+      UserRequest.isYoutubePlaylistFollowed(widget.playlist as YoutubePlaylist).then((value) {
+        _isFavouriteListenable.value =
+            value ? FollowButtonState.Followed : FollowButtonState.Unfollowed;
+      });
+    } */else {
+      _isFavouriteListenable.value = FollowButtonState.Hidden;
     }
   }
 
@@ -53,12 +61,20 @@ class _PlaylistViewState extends State<PlaylistView> {
   }
 
   void onFollowClick() async {
-    UserRequest.makePlaylistAsFavourite(widget.playlist);
+    if (widget.playlist.runtimeType == PlaylistSaved) {
+      UserRequest.makePlaylistAsFavourite(widget.playlist as PlaylistSaved);
+    } else if (widget.playlist.runtimeType == YoutubePlaylist) {
+      UserRequest.addYoutubePlaylistToFavourite(widget.playlist as YoutubePlaylist);
+    }
     _isFavouriteListenable.value = FollowButtonState.Followed;
   }
 
   void onUnFollowClick() async {
-    UserRequest.unsetPlaylistAsFavourite(widget.playlist);
+    if (widget.playlist.runtimeType == PlaylistSaved) {
+      UserRequest.unsetPlaylistAsFavourite(widget.playlist as PlaylistSaved);
+    } else if (widget.playlist.runtimeType == YoutubePlaylist) {
+      UserRequest.removeYoutubePlaylistToFavourite(widget.playlist as YoutubePlaylist);
+    }
     _isFavouriteListenable.value = FollowButtonState.Unfollowed;
   }
 
@@ -116,12 +132,18 @@ class _PlaylistViewState extends State<PlaylistView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            widget.playlist.isOnline && (widget.playlist.runtimeType==PlaylistSaved && (widget.playlist as PlaylistSaved).isOtherUsersPlaylist)
+                            widget.playlist.isOnline &&
+                                    ((widget.playlist.runtimeType == PlaylistSaved &&
+                                            (widget.playlist as PlaylistSaved)
+                                                .isOtherUsersPlaylist) ||
+                                        widget.playlist.runtimeType == YoutubePlaylist)
                                 ? ValueListenableBuilder<FollowButtonState>(
                                     valueListenable: _isFavouriteListenable,
                                     builder: (_, isFavourite, __) {
                                       bool isFollow = isFavourite == FollowButtonState.Followed;
-
+                                      if (isFavourite == FollowButtonState.Hidden) {
+                                        return SizedBox();
+                                      }
                                       return Shimmer.fromColors(
                                           baseColor: AppStyle.ShimmerColorBase,
                                           highlightColor: AppStyle.ShimmerColorBackground,

@@ -380,4 +380,28 @@ class UserRequest {
     } while (paginatedResponse.hasNext);
     return false;
   }
+
+  static Future<bool> addYoutubePlaylistToFavourite(YoutubePlaylist playlist) async{
+    await Future.delayed(const Duration(seconds: 1));
+    return false;
+    //TODO
+  }
+
+  static Future<bool> removeYoutubePlaylistToFavourite(YoutubePlaylist playlist) async{
+    await Future.delayed(const Duration(seconds: 1));
+    return false;
+    //TODO
+  }
+
+  static Future<List<YoutubePlaylist>> getFollowedYoutubePlaylist() async{
+    await Future.delayed(const Duration(seconds: 1));
+    return List.empty();
+    //TODO
+  }
+
+  static Future<bool> isYoutubePlaylistFollowed(YoutubePlaylist playlist) async{
+    final playlists = await getFollowedYoutubePlaylist();
+    return false;
+    //TODO
+  }
 }
