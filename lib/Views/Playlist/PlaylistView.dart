@@ -120,9 +120,9 @@ class _PlaylistViewState extends State<PlaylistView> {
                                           child: CircularProgressIndicator()));
                                 }
                               })),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 5),
                       Text(widget.playlist.name,
-                          style: TextStyle(color: AppStyle.text, fontSize: 40)),
+                          style: TextStyle(color: AppStyle.text, fontSize: 25)),
                       if (widget.playlist.runtimeType == PlaylistSaved &&
                           (widget.playlist as PlaylistSaved).ownerId != null)
                         Text((widget.playlist as PlaylistSaved).ownerId!,
