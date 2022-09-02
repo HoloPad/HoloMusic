@@ -76,7 +76,8 @@
   "addToFavorite": "Add to favorite",
   "cantAddToFavorite": "Cannot add this playlist to the favorites",
   "noSongsInThisPlaylist": "There are not songs in this playlist",
-  "favouritePlaylist": "Favourite playlists"
+  "favouritePlaylist": "Favourite playlists",
+  "noInternetConnection": "No internet connection, cannot load some elements"
 
 
 }
