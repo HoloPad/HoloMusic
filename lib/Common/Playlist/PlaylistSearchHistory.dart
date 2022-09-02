@@ -9,10 +9,8 @@ import '../Player/Song.dart';
 class PlaylistSearchHistory extends PlaylistSaved {
   static const maxHistoryLength = 20;
 
-  PlaylistSearchHistory(
-      String name, String? id, List<Song>? list, String? customCollectionName)
-      : super(name,
-            id: id, list: list, customCollectionName: customCollectionName);
+  PlaylistSearchHistory(String name, String? id, List<Song>? list, String? customCollectionName)
+      : super(name, id: id, list: list, customCollectionName: customCollectionName);
 
   static PlaylistSearchHistory instance() {
     final collection = "holomusic" + Platform.pathSeparator + "history";
@@ -30,11 +28,7 @@ class PlaylistSearchHistory extends PlaylistSaved {
     const id = "history";
     final map = await Localstore.instance.collection(collection).doc(id).get();
     if (map != null) {
-      if (map['songs'].runtimeType == List<dynamic>) {
-        songs = List.from(map['songs']).map((e) => Song.fromJson(e,playlistBase: this)).toList();
-      } else {
-        songs = List.from(map['songs']);
-      }
+        songs = List.from(map['songs']).map((e) => Song.fromJson(e, playlistBase: this)).toList();
     } else {
       songs = List.empty(growable: true);
     }
@@ -54,8 +48,9 @@ class PlaylistSearchHistory extends PlaylistSaved {
       songs.removeAt(index);
     }
 
-    song.playlist=this;
+    song.playlist = this;
     super.addInTop(song);
+    print(song);
     super.save();
   }
 }
