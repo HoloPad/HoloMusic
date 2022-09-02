@@ -62,7 +62,7 @@ class PlayerEngine {
     _history.add(source);
     _currentPlaying = source;
     if (play) {
-      await PlayerEngine.player.play();
+      PlayerEngine.player.play();
       Future.delayed(const Duration(milliseconds: 300), () { //Sometime the next song doesn't play, this is a temporary fix
         if (!PlayerEngine.player.playing) PlayerEngine.player.play();
       });
