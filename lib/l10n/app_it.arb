@@ -70,12 +70,12 @@
   "emailSent": "E-mail inviata",
   "cannotSentEmail": "Impossibile inviare l'email",
   "makePrivatePlaylist": "Mettila privata",
-  "makePublicPlaylist":"Rendila pubblica",
-  "resetPassword":"Resetta la Password",
-  "resetPasswordSuccess":"Reset della password avvenuto con successo, verifica la tua email per confermare la nuova password",
+  "makePublicPlaylist": "Rendila pubblica",
+  "resetPassword": "Resetta la Password",
+  "resetPasswordSuccess": "Reset della password avvenuto con successo, verifica la tua email per confermare la nuova password",
   "addToFavorite": "Aggiungi alle preferite",
   "cantAddToFavorite": "Impossibile aggiungere questa playlist alle preferite",
   "noSongsInThisPlaylist": "Non ci sono brani in questa playlist",
-  "favouritePlaylist": "Playlist preferite"
-
+  "favouritePlaylist": "Playlist preferite",
+  "noInternetConnection": "Nessuna connessione internet, impossibile caricare alcuni elementi"
 }

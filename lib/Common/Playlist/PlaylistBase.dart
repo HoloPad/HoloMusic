@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -24,14 +25,21 @@ abstract class PlaylistBase {
     if (imageProvider != null) {
       return Future.value(imageProvider);
     }
+
     final videos = await getSongs();
     if (videos.isNotEmpty) {
-      final uri = videos.firstWhere((element) => element.getThumbnailUri()!=null);
-      final url = uri.getThumbnailUri()!.toString();
-      return NetworkImage(url);
-    } else {
-      return const AssetImage("resources/png/fake_thumbnail.png");
+      final song = videos.firstWhere((element) => element.getThumbnailUri() != null);
+      if (await song.isOnline()) {
+        final url = song.getThumbnailUri()!.toString();
+        return NetworkImage(url);
+      } else {
+        final a = song.getThumbnailUri()?.path;
+        if (a != null) {
+          return FileImage(File(a));
+        }
+      }
     }
+    return const AssetImage("resources/png/fake_thumbnail.png");
   }
 
   /*

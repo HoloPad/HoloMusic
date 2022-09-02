@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 import 'package:localstore/localstore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Player/OfflineSong.dart';
 import '../Player/OnlineSong.dart';
@@ -18,11 +17,7 @@ class PlaylistSaved extends PlaylistBase {
   DateTime lastUpdate = DateTime.now();
 
   PlaylistSaved(name,
-      {this.id,
-      List<Song>? list,
-      bool? online,
-      String? customCollectionName,
-      this.ownerId})
+      {this.id, List<Song>? list, bool? online, String? customCollectionName, this.ownerId})
       : super(name, null, null) {
     super.isOnServer = false;
 
