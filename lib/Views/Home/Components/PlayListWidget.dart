@@ -59,7 +59,7 @@ class _PlayListWidgetState extends State<PlayListWidget> {
                               : BoxFit.contain,
                           enableLoadState: true,
                           handleLoadingProgress: true,
-                          loadStateChanged: _onImageLoaded,
+                          //loadStateChanged: _onImageLoaded,
                         );
                       } else {
                         return const Padding(

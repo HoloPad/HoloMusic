@@ -5,6 +5,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:holomusic/Common/Playlist/PlaylistBase.dart';
 import 'package:holomusic/Common/Playlist/PlaylistSaved.dart';
+import 'package:holomusic/Common/Playlist/Providers/YouTubePlaylist.dart';
 import 'package:holomusic/ServerRequests/PaginatedResponse.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,7 +42,8 @@ class User {
 }
 
 enum LoginResponse { success, emailNotVerified, error }
-enum PlaylistResponse{success, error}
+
+enum PlaylistResponse { success, error }
 
 class UserRequest {
   static var dio = Dio();
@@ -68,7 +70,6 @@ class UserRequest {
     return PaginatedResponse(userList, currentPage: currentPage, hasNext: hasNext);
   }
 
-
   //static Future<PaginatedResponse<List<String>>> getPlaylistsFromUsername(String username,
   static Future<PaginatedResponse<List<PlaylistSaved>>> getPlaylistsFromUsername(String username,
       {int page = 0}) async {
@@ -79,7 +80,11 @@ class UserRequest {
     final hasNext = jsonObject['hasNextPage'] as bool;
     final currentPage = jsonObject['currentPage'] as int;
     //final userList = (jsonObject['results'] as List<dynamic>).map((e) => e.toString()).toList();
-    final userList = (jsonObject['results'] as List<dynamic>).map((e) => PlaylistSaved.fromJson(e)).toList();
+    final userList =
+        (jsonObject['results'] as List<dynamic>).map((e) => PlaylistSaved.fromJson(e)).toList();
+    for (var value in userList) {
+      value.ownerId = username;
+    }
     return PaginatedResponse(userList, currentPage: currentPage, hasNext: hasNext);
   }
 
@@ -122,22 +127,20 @@ class UserRequest {
     await cookieJar.deleteAll();
   }
 
-  static Future <bool> makePlaylistPublic(PlaylistBase playlist) async{
+  static Future<bool> makePlaylistPublic(PlaylistBase playlist) async {
     final uri = Uri.http(ServerParameters.FULL_URL, "makePlaylistPublic");
 
     //Get request to get csrf
     final response0 = await dio.get(uri.toString());
     final cookie =
-    Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
+        Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
 
     //POST Request
-    final bodyContent = FormData.fromMap({
-      'json_file': ((playlist as PlaylistSaved).toJson()),
-      'csrfmiddlewaretoken': cookie.value
-    });
+    final bodyContent = FormData.fromMap(
+        {'json_file': ((playlist as PlaylistSaved).toJson()), 'csrfmiddlewaretoken': cookie.value});
     final headers = {"X-CSRFToken": cookie.value};
     final response1 =
-    await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
+        await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
 
     if (response1.statusCode == 200 && response1.data['success'] == true) {
       //Success
@@ -147,22 +150,20 @@ class UserRequest {
     }
   }
 
-  static Future <bool> makePlaylistPrivate(PlaylistBase playlist) async{
+  static Future<bool> makePlaylistPrivate(PlaylistBase playlist) async {
     final uri = Uri.http(ServerParameters.FULL_URL, "makePlaylistPrivate");
 
     //Get request to get csrf
     final response0 = await dio.get(uri.toString());
     final cookie =
-    Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
+        Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
 
     //POST Request
-    final bodyContent = FormData.fromMap({
-      'playlistname': playlist.name,
-      'csrfmiddlewaretoken': cookie.value
-    });
+    final bodyContent =
+        FormData.fromMap({'playlistname': playlist.name, 'csrfmiddlewaretoken': cookie.value});
     final headers = {"X-CSRFToken": cookie.value};
     final response1 =
-    await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
+        await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
 
     if (response1.statusCode == 200 && response1.data['success'] == true) {
       //Success
@@ -210,18 +211,15 @@ class UserRequest {
     //Get request to get csrf
     final response0 = await dio.get(uri.toString());
     final cookie =
-    Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
+        Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
 
     //POST Request
-    final bodyContent = FormData.fromMap({
-      'password': password,
-      'email': email,
-      'csrfmiddlewaretoken': cookie.value
-    });
+    final bodyContent = FormData.fromMap(
+        {'password': password, 'email': email, 'csrfmiddlewaretoken': cookie.value});
     final headers = {"X-CSRFToken": cookie.value, "Accept-Language": languageCode};
     try {
       final response1 =
-      await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
+          await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
 
       if (response1.statusCode == 200 && response1.data['success'] != true) {
         return (response1.data['errors'] as Map<String, dynamic>);
@@ -233,7 +231,6 @@ class UserRequest {
     }
   }
 
-
   static Future<bool> alreadyExists(String username, [String languageCode = "it-it"]) async {
     final errors = await register("", username, "");
 
@@ -243,7 +240,8 @@ class UserRequest {
 
   static bool isLogin() {
     try {
-      final cookie = cookieJar.hostCookies.values.firstWhere((e) => e.values.any((e) => e.keys.contains("sessionid")));
+      final cookie = cookieJar.hostCookies.values
+          .firstWhere((e) => e.values.any((e) => e.keys.contains("sessionid")));
       final sessionCookie = cookie.values.first['sessionid']?.cookie;
       return sessionCookie?.expires?.isAfter(DateTime.now()) ?? false;
     } catch (_) {
@@ -294,5 +292,116 @@ class UserRequest {
     final response =
         await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
     return response.statusCode == 200 && response.data['success'];
+  }
+
+  static Future<bool> makePlaylistAsFavourite(PlaylistBase playlistBase) async {
+    final uri = Uri.http(ServerParameters.FULL_URL, "setFavouritePlaylist");
+    //Get request to get csrf
+    final response0 = await dio.get(uri.toString());
+    final cookie =
+        Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
+    var bodyContent = FormData.fromMap({});
+    if (playlistBase.runtimeType == PlaylistSaved) {
+      final playlist = playlistBase as PlaylistSaved;
+
+      bodyContent = FormData.fromMap({
+        'playlist_id': playlist.id,
+        'username_playlist_creator': playlist.ownerId,
+        'csrfmiddlewaretoken': cookie.value
+      });
+    } else if (playlistBase.runtimeType == YoutubePlaylist) {
+      final playlist = playlistBase as YoutubePlaylist;
+      bodyContent = FormData.fromMap({
+        'playlist_id': playlist.id,
+        //'username_playlist_creator': owner.id,
+        'csrfmiddlewaretoken': cookie.value
+      });
+    } else {
+      return false;
+    }
+    final headers = {"X-CSRFToken": cookie.value};
+    final response =
+        await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
+    return response.statusCode == 200 && response.data['success'];
+  }
+
+  static Future<bool> unsetPlaylistAsFavourite(PlaylistBase playlistBase) async {
+    final uri = Uri.http(ServerParameters.FULL_URL, "unsetFavouritePlaylist");
+    //Get request to get csrf
+    final response0 = await dio.get(uri.toString());
+    final cookie =
+    Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
+    var bodyContent = FormData.fromMap({});
+    if (playlistBase.runtimeType == PlaylistSaved) {
+      final playlist = playlistBase as PlaylistSaved;
+
+      bodyContent = FormData.fromMap({
+        'playlist_id': playlist.id,
+        'username_playlist_creator': playlist.ownerId,
+        'csrfmiddlewaretoken': cookie.value
+      });
+    } else if (playlistBase.runtimeType == YoutubePlaylist) {
+      final playlist = playlistBase as YoutubePlaylist;
+      bodyContent = FormData.fromMap({
+        'playlist_id': playlist.id,
+        'csrfmiddlewaretoken': cookie.value
+      });
+    } else {
+      return false;
+    }
+    final headers = {"X-CSRFToken": cookie.value};
+    final response =
+    await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
+    return response.statusCode == 200 && response.data['success'];
+  }
+
+  static Future<PaginatedResponse<List<PlaylistSaved>>> getFavouritePlaylists(
+      {int page = 0}) async {
+    final uri = Uri.http(ServerParameters.FULL_URL, "getFavouritePlaylists");
+    final response = await dio.get(uri.toString());
+    final hasNext = response.data['hasNextPage'] as bool;
+    final currentPage = response.data['currentPage'] as int;
+    final userList =
+        (response.data['results'] as List<dynamic>).map((e) => PlaylistSaved.fromJson(e)).toList();
+    return PaginatedResponse(userList, currentPage: currentPage, hasNext: hasNext);
+  }
+
+  static Future<bool> checkIfPlaylistIsFavourite(PlaylistSaved playlistSaved) async {
+    PaginatedResponse paginatedResponse = await UserRequest.getFavouritePlaylists();
+    do {
+      if (paginatedResponse.result.any((element) => element.id == playlistSaved.id)) {
+        return true;
+      }
+      if (!paginatedResponse.hasNext) {
+        return false;
+      }
+      paginatedResponse =
+          await UserRequest.getFavouritePlaylists(page: paginatedResponse.currentPage + 1);
+    } while (paginatedResponse.hasNext);
+    return false;
+  }
+
+  static Future<bool> addYoutubePlaylistToFavourite(YoutubePlaylist playlist) async{
+    await Future.delayed(const Duration(seconds: 1));
+    return false;
+    //TODO
+  }
+
+  static Future<bool> removeYoutubePlaylistToFavourite(YoutubePlaylist playlist) async{
+    await Future.delayed(const Duration(seconds: 1));
+    return false;
+    //TODO
+  }
+
+  static Future<List<YoutubePlaylist>> getFollowedYoutubePlaylist() async{
+    await Future.delayed(const Duration(seconds: 1));
+    return List.empty();
+    //TODO
+  }
+
+  static Future<bool> isYoutubePlaylistFollowed(YoutubePlaylist playlist) async{
+    final playlists = await getFollowedYoutubePlaylist();
+    return false;
+    //TODO
   }
 }

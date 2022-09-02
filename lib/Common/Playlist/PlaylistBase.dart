@@ -14,6 +14,7 @@ abstract class PlaylistBase {
   bool isOnServer = false;
   bool _canDownload = true;
   ValueNotifier<bool> isDownloading = ValueNotifier(false);
+  bool isOtherUsersPlaylist = true;
 
   PlaylistBase(this.name, this.imageProvider, this.backgroundColor);
 
@@ -25,7 +26,9 @@ abstract class PlaylistBase {
     }
     final videos = await getSongs();
     if (videos.isNotEmpty) {
-      return videos.first.getThumbnailImageAsset();
+      final uri = videos.firstWhere((element) => element.getThumbnailUri()!=null);
+      final url = uri.getThumbnailUri()!.toString();
+      return NetworkImage(url);
     } else {
       return const AssetImage("resources/png/fake_thumbnail.png");
     }
