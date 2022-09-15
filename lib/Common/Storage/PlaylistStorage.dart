@@ -29,18 +29,14 @@ class PlaylistStorage {
   }
 
   static Future syncUserPlaylist() async {
-    print("HERE");
     if (UserRequest.isLogin()) {
-      print("LOGGED");
 
       final onlinePlaylistResponse = await UserRequest.getUserOnlinePlaylists();
       if (onlinePlaylistResponse == null) {
         return;
       }
-      print("NOT null");
 
       final localPlaylist = await PlaylistStorage.getAllPlaylists();
-      print("FOUND " + onlinePlaylistResponse.result.length.toString());
 
       for (var onlinePlaylist in onlinePlaylistResponse.result) {
         final localIds = localPlaylist.map((e) => e.id);
@@ -50,6 +46,5 @@ class PlaylistStorage {
         }
       }
     }
-    print("NOT LOGGED");
   }
 }
