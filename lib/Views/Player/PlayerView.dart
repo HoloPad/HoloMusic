@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:holomusic/Common/Player/PlayerEngine.dart';
 import 'package:holomusic/Views/Player/Components/TimeSlider.dart';
 import 'package:marquee_text/marquee_text.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 import '../../Common/Player/PlayerStateController.dart';
 import '../../Common/Player/Song.dart';
@@ -129,114 +131,124 @@ class _PlayerViewState extends State<PlayerView> {
           return false;
         },
         child: Scaffold(
-          body: SafeArea(
-              child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                      gradient: AppStyle.getStandardPaletteWithAnotherMainColor(_mainColor)),
-                  child: SafeArea(
-                      child: Column(
-                    children: [
-                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                        TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Icon(Icons.arrow_drop_down, color: Colors.white)),
+          body: StreamBuilder<AccelerometerEvent>(
+              stream: accelerometerEvents.asBroadcastStream(),
+              builder: (_, snapshot) {
+                //return Text(snapshot?.data?.x)
+                var angle = 0.0;
+                if (snapshot.hasData) {
+                  angle = asin(snapshot.data!.x / 9.81); // *180/pi;
+                }
+                return Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: AppStyle.getStandardPaletteWithAnotherMainColor(_mainColor,
+                          rotation: angle, stops: [0.1, 0.2]),
+                    ),
+                    child: SafeArea(
+                        child: Column(
+                      children: [
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Icon(Icons.arrow_drop_down, color: Colors.white)),
+                          ValueListenableBuilder<Song?>(
+                              valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
+                              builder: (context, value, _) {
+                                if (value != null) {
+                                  return TextButton(
+                                      onPressed: () => _onMoreClick(value),
+                                      child: const Icon(Icons.more_vert, color: Colors.white));
+                                } else {
+                                  return const SizedBox();
+                                }
+                              })
+                        ]),
+                        const SizedBox(height: 15),
                         ValueListenableBuilder<Song?>(
                             valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
                             builder: (context, value, _) {
                               if (value != null) {
-                                return TextButton(
-                                    onPressed: () => _onMoreClick(value),
-                                    child: const Icon(Icons.more_vert, color: Colors.white));
+                                final img = ExtendedImage(
+                                    image: value.getThumbnailImageAsset(), height: 250);
+                                _updateBackground(img.image);
+                                return img;
+                              } else {
+                                return const Image(
+                                    height: 250,
+                                    image: AssetImage("resources/png/fake_thumbnail.png"));
+                              }
+                            }),
+                        const SizedBox(height: 20),
+                        ValueListenableBuilder<Song?>(
+                            valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
+                            builder: (context, value, _) {
+                              return Padding(
+                                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  child: MarqueeText(
+                                    text: TextSpan(
+                                        text: value == null ? "..." : value.title,
+                                        style: _titleStyle),
+                                    textAlign: TextAlign.center,
+                                    speed: 25,
+                                  ));
+                            }),
+                        const SizedBox(height: 15),
+                        StreamBuilder<Duration>(
+                            stream: PlayerEngine.player.positionStream,
+                            builder: (BuildContext context, AsyncSnapshot<Duration> snapshot) {
+                              if (snapshot.hasData) {
+                                return TimeSlider(
+                                    current: snapshot.data,
+                                    end: PlayerEngine.player.duration,
+                                    textColor: Colors.white,
+                                    onChange: (d) {
+                                      PlayerEngine.player.seek(Duration(seconds: d.toInt()));
+                                    });
                               } else {
                                 return const SizedBox();
                               }
-                            })
-                      ]),
-                      const SizedBox(height: 15),
-                      ValueListenableBuilder<Song?>(
-                          valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
-                          builder: (context, value, _) {
-                            if (value != null) {
-                              final img =
-                                  ExtendedImage(image: value.getThumbnailImageAsset(), height: 250);
-                              _updateBackground(img.image);
-                              return img;
-                            } else {
-                              return const Image(
-                                  height: 250,
-                                  image: AssetImage("resources/png/fake_thumbnail.png"));
-                            }
-                          }),
-                      const SizedBox(height: 20),
-                      ValueListenableBuilder<Song?>(
-                          valueListenable: PlayerEngine.getCurrentVideoHandlerPlaying(),
-                          builder: (context, value, _) {
-                            return Padding(
-                                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                child: MarqueeText(
-                                  text: TextSpan(
-                                      text: value == null ? "..." : value.title,
-                                      style: _titleStyle),
-                                  textAlign: TextAlign.center,
-                                  speed: 25,
-                                ));
-                          }),
-                      const SizedBox(height: 15),
-                      StreamBuilder<Duration>(
-                          stream: PlayerEngine.player.positionStream,
-                          builder: (BuildContext context, AsyncSnapshot<Duration> snapshot) {
-                            if (snapshot.hasData) {
-                              return TimeSlider(
-                                  current: snapshot.data,
-                                  end: PlayerEngine.player.duration,
-                                  textColor: Colors.white,
-                                  onChange: (d) {
-                                    PlayerEngine.player.seek(Duration(seconds: d.toInt()));
-                                  });
-                            } else {
-                              return const SizedBox();
-                            }
-                          }),
-                      const SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton(
-                              onPressed: () => PlayerEngine.toggleShuffle(), child: shuffleIcon),
-                          TextButton(
-                              onPressed: () => PlayerEngine.playPreviousSong(),
-                              child: const Icon(
-                                Icons.skip_previous,
-                                size: 40,
-                                color: Colors.white,
-                              )),
-                          ValueListenableBuilder<int>(
-                              valueListenable: widget.playerStateStream,
-                              builder: (BuildContext context, value, child) {
-                                if (value & MyPlayerState.play == 0) {
-                                  return playIcon;
-                                } else {
-                                  return pauseIcon;
-                                }
-                              }),
-                          TextButton(
-                              onPressed: () {
-                                if (_hasNextEnabled) {
-                                  widget._outputStreamLoading.add(true);
-                                  PlayerEngine.playNextSong();
-                                }
-                              },
-                              child: Icon(
-                                Icons.skip_next,
-                                size: 40,
-                                color: Color.fromRGBO(255, 255, 255, _hasNextEnabled ? 1 : 0.5),
-                              )),
-                          TextButton(onPressed: _onRepetitionClick, child: repetitionIcon),
-                        ],
-                      ),
-                    ],
-                  )))),
+                            }),
+                        const SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(
+                                onPressed: () => PlayerEngine.toggleShuffle(), child: shuffleIcon),
+                            TextButton(
+                                onPressed: () => PlayerEngine.playPreviousSong(),
+                                child: const Icon(
+                                  Icons.skip_previous,
+                                  size: 40,
+                                  color: Colors.white,
+                                )),
+                            ValueListenableBuilder<int>(
+                                valueListenable: widget.playerStateStream,
+                                builder: (BuildContext context, value, child) {
+                                  if (value & MyPlayerState.play == 0) {
+                                    return playIcon;
+                                  } else {
+                                    return pauseIcon;
+                                  }
+                                }),
+                            TextButton(
+                                onPressed: () {
+                                  if (_hasNextEnabled) {
+                                    widget._outputStreamLoading.add(true);
+                                    PlayerEngine.playNextSong();
+                                  }
+                                },
+                                child: Icon(
+                                  Icons.skip_next,
+                                  size: 40,
+                                  color: Color.fromRGBO(255, 255, 255, _hasNextEnabled ? 1 : 0.5),
+                                )),
+                            TextButton(onPressed: _onRepetitionClick, child: repetitionIcon),
+                          ],
+                        ),
+                      ],
+                    )));
+              }),
           bottomSheet: ValueListenableBuilder<int>(
               valueListenable: widget.playerStateStream,
               builder: (_, value, __) {

@@ -45,8 +45,7 @@ class _HomeState extends State<HomeView> {
       "https://www.youtube.com/watch?list=RDCLAK5uy_lqkZ7XVUPH7IZbFwDY6zkjEM6nSCiov0E", //POP
     ];
     chartsWidgets = url
-        .map((e) =>
-        FutureBuilder<YoutubePlaylist>(
+        .map((e) => FutureBuilder<YoutubePlaylist>(
             future: YoutubePlaylist.createFromUrl(e),
             builder: (_, snapshot) {
               if (snapshot.hasData) {
@@ -93,88 +92,89 @@ class _HomeState extends State<HomeView> {
           notificationId: 'playlistwidget',
           child: SingleChildScrollView(
               child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => UserManagerView()),
-                                ).then((value) {
-                                  print(userIsLogged);
-                                  setState(() {
-                                    userIsLogged = UserRequest.isLogin();
-                                  });
-                                });
-                              },
-                              child: Icon(
-                                  userIsLogged
-                                      ? Icons.manage_accounts_rounded
-                                      : Icons.manage_accounts_outlined,
-                                  size: 30,
-                                  color: Colors.white)))
-                    ],
-                  ),
-                  FutureBuilder<bool>(
-                      future: _hasConnection,
-                      builder: (_, snapshot) {
-                        if (snapshot.hasData && snapshot.data != null && snapshot.data!) {
-                          return Column(
-                            children: [
-                              Text(AppLocalizations.of(context)!.suggestions, style: textStyle),
-                              const Divider(height: 10, color: Colors.transparent),
-                              SingleChildScrollView(
-                                padding: const EdgeInsets.all(8),
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: chartsWidgets.map((e) {
-                                    return Row(children: [e, const SizedBox(width: 15)]);
-                                  }).toList(),
-                                ),
-                              ),
-                            ],
-                          );
-                        } else {
-                          return Container(
-                              margin: const EdgeInsets.fromLTRB(10, 10, 10, 20),
-                              child: Text(
-                                AppLocalizations.of(context)!.noInternetConnection,
-                                style: const TextStyle(
-                                  color: Color.fromARGB(124, 255, 255, 255),
-                                  fontSize: 10,
-                                ),
-                              ));
-                        }
-                      }),
-                  FutureBuilder<List<Widget>>(
-                    future: _yourLastPlaylist,
-                    builder: (_, snapshot) {
-                      if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                        return Column(children: [
-                          Text(AppLocalizations.of(context)!.yourRecentPlaylist, style: textStyle),
+                  Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => UserManagerView()),
+                            ).then((value) {
+                              print(userIsLogged);
+                              setState(() {
+                                userIsLogged = UserRequest.isLogin();
+                                _yourLastPlaylist = loadLastPlaylist();
+                              });
+                            });
+                          },
+                          child: Icon(
+                              userIsLogged
+                                  ? Icons.manage_accounts_rounded
+                                  : Icons.manage_accounts_outlined,
+                              size: 30,
+                              color: Colors.white)))
+                ],
+              ),
+              FutureBuilder<bool>(
+                  future: _hasConnection,
+                  builder: (_, snapshot) {
+                    if (snapshot.hasData && snapshot.data != null && snapshot.data!) {
+                      return Column(
+                        children: [
+                          Text(AppLocalizations.of(context)!.suggestions, style: textStyle),
                           const Divider(height: 10, color: Colors.transparent),
                           SingleChildScrollView(
                             padding: const EdgeInsets.all(8),
                             scrollDirection: Axis.horizontal,
                             child: Row(
-                              children: snapshot.data!,
+                              children: chartsWidgets.map((e) {
+                                return Row(children: [e, const SizedBox(width: 15)]);
+                              }).toList(),
                             ),
-                          )
-                        ]);
-                      } else {
-                        return const SizedBox();
-                      }
-                    },
-                  ),
-                  Text(AppLocalizations.of(context)!.offlineContent, style: textStyle),
-                  const Divider(height: 10, color: Colors.transparent),
-                  PlayListWidget(playlist: PlaylistOffline(context), onClick: onClicked)
-                ],
-              )));
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Container(
+                          margin: const EdgeInsets.fromLTRB(10, 10, 10, 20),
+                          child: Text(
+                            AppLocalizations.of(context)!.noInternetConnection,
+                            style: const TextStyle(
+                              color: Color.fromARGB(124, 255, 255, 255),
+                              fontSize: 10,
+                            ),
+                          ));
+                    }
+                  }),
+              FutureBuilder<List<Widget>>(
+                future: _yourLastPlaylist,
+                builder: (_, snapshot) {
+                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    return Column(children: [
+                      Text(AppLocalizations.of(context)!.yourRecentPlaylist, style: textStyle),
+                      const Divider(height: 10, color: Colors.transparent),
+                      SingleChildScrollView(
+                        padding: const EdgeInsets.all(8),
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: snapshot.data!,
+                        ),
+                      )
+                    ]);
+                  } else {
+                    return const SizedBox();
+                  }
+                },
+              ),
+              Text(AppLocalizations.of(context)!.offlineContent, style: textStyle),
+              const Divider(height: 10, color: Colors.transparent),
+              PlayListWidget(playlist: PlaylistOffline(context), onClick: onClicked)
+            ],
+          )));
     } else {
       return PlaylistView(_playListToView!, onBackPressed);
     }
