@@ -117,88 +117,92 @@ class _ResetPasswordState extends State<ResetPasswordView> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        decoration: AppStyle.scaffoldDecoration,
-        padding: const EdgeInsets.all(16),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Icon(Icons.arrow_back_ios, color: AppStyle.text))
-                ]),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Text(
-                    "Reset Password",
-                    style: AppStyle.textStyle,
-                  )
-                ]),
-                Form(
-                    key: _formKey,
-                    child: Column(children: [
-                      const SizedBox(height: 15),
-                      TextFormField(
-                          style: AppStyle.textStyle,
-                          decoration:
-                          generateInputDecoration("E-Mail", _errorMap[fieldsIds[_emailId]]),
-                          controller: _emailController,
-                          validator: (value) {
-                            if (value != null && value.isEmpty) {
-                              return AppLocalizations.of(context)!.pleaseEnterYourEmail;
-                            }
-                            if (!isEmail(value!)) {
-                              return AppLocalizations.of(context)!.itIsNotAnEmail;
-                            }
-                            return null;
-                          }),
-                      const SizedBox(height: 15),
-                      TextFormField(
-                          style: AppStyle.textStyle,
-                          decoration: generateInputDecoration(
-                              AppLocalizations.of(context)!.password,
-                              _errorMap[fieldsIds[_passwordId]]),
-                          obscureText: true,
-                          controller: _passwordController,
-                          validator: (value) {
-                            if (value != null && value.isEmpty) {
-                              return AppLocalizations.of(context)!.pleaseEnterYourPassword;
-                            }
-                            if (value!.length < 3) {
-                              return AppLocalizations.of(context)!.enterAtLeast3character;
-                            }
-                            return null;
-                          }),
-                      const SizedBox(height: 15),
-                      TextFormField(
-                          style: AppStyle.textStyle,
-                          decoration:
-                          generateInputDecoration(AppLocalizations.of(context)!.passwordRepeat),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value != null && value.isEmpty) {
-                              return AppLocalizations.of(context)!.pleaseRepeatYourPassword;
-                            }
-                            if (_passwordController.value.text != value) {
-                              return AppLocalizations.of(context)!.yourPasswordMustMatch;
-                            }
-                            return null;
-                          }),
-                    ])),
-                const SizedBox(height: 15),
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : CommonComponents.generateButton(
-                    text: "Reset", onClick: onRegisterClick),
-                const SizedBox(height: 15),
-              ],
+    return WillPopScope(
+        onWillPop: () async {
+          Navigator.pop(context);
+          return false;
+        },
+        child: SafeArea(
+          child: Container(
+            decoration: AppStyle.scaffoldDecoration,
+            padding: const EdgeInsets.all(16),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Icon(Icons.arrow_back_ios, color: AppStyle.text))
+                    ]),
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Text(
+                        "Reset Password",
+                        style: AppStyle.textStyle,
+                      )
+                    ]),
+                    Form(
+                        key: _formKey,
+                        child: Column(children: [
+                          const SizedBox(height: 15),
+                          TextFormField(
+                              style: AppStyle.textStyle,
+                              decoration:
+                                  generateInputDecoration("E-Mail", _errorMap[fieldsIds[_emailId]]),
+                              controller: _emailController,
+                              validator: (value) {
+                                if (value != null && value.isEmpty) {
+                                  return AppLocalizations.of(context)!.pleaseEnterYourEmail;
+                                }
+                                if (!isEmail(value!)) {
+                                  return AppLocalizations.of(context)!.itIsNotAnEmail;
+                                }
+                                return null;
+                              }),
+                          const SizedBox(height: 15),
+                          TextFormField(
+                              style: AppStyle.textStyle,
+                              decoration: generateInputDecoration(
+                                  AppLocalizations.of(context)!.password,
+                                  _errorMap[fieldsIds[_passwordId]]),
+                              obscureText: true,
+                              controller: _passwordController,
+                              validator: (value) {
+                                if (value != null && value.isEmpty) {
+                                  return AppLocalizations.of(context)!.pleaseEnterYourPassword;
+                                }
+                                if (value!.length < 3) {
+                                  return AppLocalizations.of(context)!.enterAtLeast3character;
+                                }
+                                return null;
+                              }),
+                          const SizedBox(height: 15),
+                          TextFormField(
+                              style: AppStyle.textStyle,
+                              decoration: generateInputDecoration(
+                                  AppLocalizations.of(context)!.passwordRepeat),
+                              obscureText: true,
+                              validator: (value) {
+                                if (value != null && value.isEmpty) {
+                                  return AppLocalizations.of(context)!.pleaseRepeatYourPassword;
+                                }
+                                if (_passwordController.value.text != value) {
+                                  return AppLocalizations.of(context)!.yourPasswordMustMatch;
+                                }
+                                return null;
+                              }),
+                        ])),
+                    const SizedBox(height: 15),
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                        : CommonComponents.generateButton(text: "Reset", onClick: onRegisterClick),
+                    const SizedBox(height: 15),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }

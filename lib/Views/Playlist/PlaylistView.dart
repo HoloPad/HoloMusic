@@ -33,7 +33,7 @@ class _PlaylistViewState extends State<PlaylistView> {
   double _imageSize = 150;
   var loadedElements = 0;
   final ValueNotifier<FollowButtonState> _isFavouriteListenable =
-      ValueNotifier(FollowButtonState.Loading);
+  ValueNotifier(FollowButtonState.Loading);
 
   @override
   void initState() {
@@ -41,15 +41,16 @@ class _PlaylistViewState extends State<PlaylistView> {
     if (widget.playlist.runtimeType == PlaylistSaved) {
       UserRequest.checkIfPlaylistIsFavourite(widget.playlist as PlaylistSaved).then((value) async {
         _isFavouriteListenable.value =
-            value ? FollowButtonState.Followed : FollowButtonState.Unfollowed;
+        value ? FollowButtonState.Followed : FollowButtonState.Unfollowed;
       });
-
-    } /*else if (widget.playlist.runtimeType == YoutubePlaylist) {
+    }
+    /*else if (widget.playlist.runtimeType == YoutubePlaylist) {
       UserRequest.isYoutubePlaylistFollowed(widget.playlist as YoutubePlaylist).then((value) {
         _isFavouriteListenable.value =
             value ? FollowButtonState.Followed : FollowButtonState.Unfollowed;
       });
-    } */else {
+    } */
+    else {
       _isFavouriteListenable.value = FollowButtonState.Hidden;
     }
   }
@@ -80,64 +81,71 @@ class _PlaylistViewState extends State<PlaylistView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(children: [
-          Row(children: [
-            TextButton(
-                onPressed: widget.onBackPressed,
-                child: const Icon(Icons.arrow_back_ios, color: Colors.white))
-          ]),
-          Expanded(
-              child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    setState(() {
-                      _imageSize = max(150 - notification.metrics.extentBefore, 0);
-                    });
-                    return true;
-                  },
-                  child: ListView(clipBehavior: Clip.antiAlias, children: <Widget>[
-                    Column(children: [
-                      Container(
-                          decoration: BoxDecoration(
-                              color: widget.playlist.backgroundColor ?? Colors.transparent,
-                              borderRadius: BorderRadius.circular(10)),
-                          child: FutureBuilder<ImageProvider<Object>>(
-                              future: widget.playlist.getImageProvider(),
-                              builder: (_, snapshot) {
-                                if (snapshot.hasData) {
-                                  return ExtendedImage(
-                                    image: snapshot.data!,
-                                    width: _imageSize,
-                                    height: _imageSize,
-                                  );
-                                } else {
-                                  return Padding(
-                                      padding: EdgeInsets.all((_imageSize - 50) / 2),
-                                      child: const SizedBox(
-                                          width: 50,
-                                          height: 50,
-                                          child: CircularProgressIndicator()));
-                                }
-                              })),
-                      const SizedBox(height: 5),
-                      Text(widget.playlist.name,
-                          style: TextStyle(color: AppStyle.text, fontSize: 25)),
-                      if (widget.playlist.runtimeType == PlaylistSaved &&
-                          (widget.playlist as PlaylistSaved).ownerId != null)
-                        Text((widget.playlist as PlaylistSaved).ownerId!,
-                            style: const TextStyle(color: Colors.grey, fontSize: 15)),
-                      const SizedBox(height: 15),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            widget.playlist.isOnline &&
+    return WillPopScope(
+        onWillPop: () async {
+          if (widget.onBackPressed != null) {
+            widget.onBackPressed!();
+          }
+          return false;
+        },
+        child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(children: [
+              Row(children: [
+                TextButton(
+                    onPressed: widget.onBackPressed,
+                    child: const Icon(Icons.arrow_back_ios, color: Colors.white))
+              ]),
+              Expanded(
+                  child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        setState(() {
+                          _imageSize = max(150 - notification.metrics.extentBefore, 0);
+                        });
+                        return true;
+                      },
+                      child: ListView(clipBehavior: Clip.antiAlias, children: <Widget>[
+                        Column(children: [
+                          Container(
+                              decoration: BoxDecoration(
+                                  color: widget.playlist.backgroundColor ?? Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: FutureBuilder<ImageProvider<Object>>(
+                                  future: widget.playlist.getImageProvider(),
+                                  builder: (_, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return ExtendedImage(
+                                        image: snapshot.data!,
+                                        width: _imageSize,
+                                        height: _imageSize,
+                                      );
+                                    } else {
+                                      return Padding(
+                                          padding: EdgeInsets.all((_imageSize - 50) / 2),
+                                          child: const SizedBox(
+                                              width: 50,
+                                              height: 50,
+                                              child: CircularProgressIndicator()));
+                                    }
+                                  })),
+                          const SizedBox(height: 5),
+                          Text(widget.playlist.name,
+                              style: TextStyle(color: AppStyle.text, fontSize: 25)),
+                          if (widget.playlist.runtimeType == PlaylistSaved &&
+                              (widget.playlist as PlaylistSaved).ownerId != null)
+                            Text((widget.playlist as PlaylistSaved).ownerId!,
+                                style: const TextStyle(color: Colors.grey, fontSize: 15)),
+                          const SizedBox(height: 15),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                widget.playlist.isOnline &&
                                     ((widget.playlist.runtimeType == PlaylistSaved &&
-                                            (widget.playlist as PlaylistSaved)
-                                                .isOtherUsersPlaylist) ||
+                                        (widget.playlist as PlaylistSaved)
+                                            .isOtherUsersPlaylist) ||
                                         widget.playlist.runtimeType == YoutubePlaylist)
-                                ? ValueListenableBuilder<FollowButtonState>(
+                                    ? ValueListenableBuilder<FollowButtonState>(
                                     valueListenable: _isFavouriteListenable,
                                     builder: (_, isFavourite, __) {
                                       bool isFollow = isFavourite == FollowButtonState.Followed;
@@ -150,11 +158,13 @@ class _PlaylistViewState extends State<PlaylistView> {
                                           enabled: isFavourite == FollowButtonState.Loading,
                                           //If loading show the shimmer
                                           child: OutlinedButton(
-                                            onPressed: isFollow ? onUnFollowClick : onFollowClick,
+                                            onPressed:
+                                            isFollow ? onUnFollowClick : onFollowClick,
                                             child: isFollow
                                                 ? Text(AppLocalizations.of(context)!
-                                                    .removeFromFavourite)
-                                                : Text(AppLocalizations.of(context)!.addToFavorite),
+                                                .removeFromFavourite)
+                                                : Text(AppLocalizations.of(context)!
+                                                .addToFavorite),
                                             style: OutlinedButton.styleFrom(
                                                 side: const BorderSide(
                                                     width: 0.5, color: Colors.white),
@@ -162,69 +172,74 @@ class _PlaylistViewState extends State<PlaylistView> {
                                                     borderRadius: BorderRadius.circular(50))),
                                           ));
                                     })
-                                : const SizedBox(),
-                            widget.playlist.getReferenceUrl() != null
-                                ? TextButton(
+                                    : const SizedBox(),
+                                widget.playlist.getReferenceUrl() != null
+                                    ? TextButton(
                                     onPressed: _onLinkClicked,
                                     child: const Icon(Icons.link_rounded),
                                     style: TextButton.styleFrom(
                                         padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
                                         minimumSize: Size.zero))
-                                : const SizedBox()
-                          ]),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          TextButton(
-                              onPressed: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => PlaylistOptions(widget.playlist))),
-                              child: Icon(
-                                Icons.more_vert,
-                                color: AppStyle.text,
-                              ),
-                              style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
-                                  minimumSize: Size.zero))
-                        ],
-                      )
-                    ]),
-                    const SizedBox(height: 15),
-                    FutureBuilder<List<Song>>(
-                      future: widget.playlist.getSongs(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          if (snapshot.data!.isEmpty) {
-                            return Text(
-                              AppLocalizations.of(context)!.noSongsInThisPlaylist,
-                              style: AppStyle.textStyle,
-                              textAlign: TextAlign.center,
-                            );
-                          } else {
-                            return NotificationShimmer(
-                                elementsToLoad: snapshot.data!.length,
-                                notificationId: 'songitem',
-                                child: ListBody(
-                                  children: snapshot.data!.map((e) {
-                                    return SongItem(e,
-                                        playlist: widget.playlist,
-                                        reloadList: () => setState(() {}));
-                                  }).toList(),
-                                ));
-                          }
-                        } else {
-                          return Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
-                            SizedBox(width: 50, height: 50, child: CircularProgressIndicator())
-                          ]);
-                        }
-                      },
-                    ),
-                    const SizedBox(
-                      height: 100,
-                    )
-                  ])))
-        ]));
+                                    : const SizedBox()
+                              ]),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              TextButton(
+                                  onPressed: () =>
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PlaylistOptions(widget.playlist))),
+                                  child: Icon(
+                                    Icons.more_vert,
+                                    color: AppStyle.text,
+                                  ),
+                                  style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
+                                      minimumSize: Size.zero))
+                            ],
+                          )
+                        ]),
+                        const SizedBox(height: 15),
+                        FutureBuilder<List<Song>>(
+                          future: widget.playlist.getSongs(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              if (snapshot.data!.isEmpty) {
+                                return Text(
+                                  AppLocalizations.of(context)!.noSongsInThisPlaylist,
+                                  style: AppStyle.textStyle,
+                                  textAlign: TextAlign.center,
+                                );
+                              } else {
+                                return NotificationShimmer(
+                                    elementsToLoad: snapshot.data!.length,
+                                    notificationId: 'songitem',
+                                    child: ListBody(
+                                      children: snapshot.data!.map((e) {
+                                        return SongItem(e,
+                                            playlist: widget.playlist,
+                                            reloadList: () => setState(() {}));
+                                      }).toList(),
+                                    ));
+                              }
+                            } else {
+                              return Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    SizedBox(
+                                        width: 50, height: 50, child: CircularProgressIndicator())
+                                  ]);
+                            }
+                          },
+                        ),
+                        const SizedBox(
+                          height: 100,
+                        )
+                      ])))
+            ])));
   }
 }
