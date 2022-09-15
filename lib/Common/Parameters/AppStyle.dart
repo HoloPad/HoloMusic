@@ -4,21 +4,17 @@ class AppStyle {
   static LinearGradient backgroundGradient = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [
-        Color.fromRGBO(27, 23, 137, 0.6),
-        Color.fromRGBO(31, 31, 31, 1.0)
-      ],
-      stops: [
-        0.01,
-        0.4
-      ]);
+      colors: [Color.fromRGBO(27, 23, 137, 0.6), Color.fromRGBO(31, 31, 31, 1.0)],
+      stops: [0.01, 0.4]);
 
-  static LinearGradient getStandardPaletteWithAnotherMainColor(Color color) {
+  static LinearGradient getStandardPaletteWithAnotherMainColor(Color color,
+      {double rotation = 0.00, stops = const [0.01, 0.4]}) {
     return LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [color, const Color.fromRGBO(31, 31, 31, 1.0)],
-        stops: const [0.01, 0.4]);
+        stops: stops,
+        transform: GradientRotation(rotation));
   }
 
   static Color text = const Color.fromRGBO(255, 255, 255, 0.8);
@@ -30,12 +26,8 @@ class AppStyle {
 
   static TextStyle textStyle = const TextStyle(color: Colors.white);
   static TextStyle errorTextStyle = const TextStyle(color: Colors.red);
-  static TextStyle titleStyle =
-      const TextStyle(color: Colors.white, fontSize: 15);
+  static TextStyle titleStyle = const TextStyle(color: Colors.white, fontSize: 15);
   static Color scaffoldBackgroundColor = Colors.blue;
   static BoxDecoration scaffoldDecoration = BoxDecoration(
-      gradient: AppStyle.getStandardPaletteWithAnotherMainColor(
-          AppStyle.scaffoldBackgroundColor));
-
-  
+      gradient: AppStyle.getStandardPaletteWithAnotherMainColor(AppStyle.scaffoldBackgroundColor));
 }

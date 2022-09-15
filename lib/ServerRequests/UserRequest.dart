@@ -330,7 +330,7 @@ class UserRequest {
     //Get request to get csrf
     final response0 = await dio.get(uri.toString());
     final cookie =
-    Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
+        Cookie.fromSetCookieValue(response0.headers.value("set-cookie")!); //Get the cookie for csrf
     var bodyContent = FormData.fromMap({});
     if (playlistBase.runtimeType == PlaylistSaved) {
       final playlist = playlistBase as PlaylistSaved;
@@ -342,16 +342,14 @@ class UserRequest {
       });
     } else if (playlistBase.runtimeType == YoutubePlaylist) {
       final playlist = playlistBase as YoutubePlaylist;
-      bodyContent = FormData.fromMap({
-        'playlist_id': playlist.id,
-        'csrfmiddlewaretoken': cookie.value
-      });
+      bodyContent =
+          FormData.fromMap({'playlist_id': playlist.id, 'csrfmiddlewaretoken': cookie.value});
     } else {
       return false;
     }
     final headers = {"X-CSRFToken": cookie.value};
     final response =
-    await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
+        await dio.post(uri.toString(), data: bodyContent, options: Options(headers: headers));
     return response.statusCode == 200 && response.data['success'];
   }
 
@@ -381,26 +379,34 @@ class UserRequest {
     return false;
   }
 
-  static Future<bool> addYoutubePlaylistToFavourite(YoutubePlaylist playlist) async{
+  static Future<PaginatedResponse<List<PlaylistSaved>>>? getUserOnlinePlaylists() {
+    final username = prefs.getString("username");
+    if (username != null) {
+      return getPlaylistsFromUsername(username);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<bool> addYoutubePlaylistToFavourite(YoutubePlaylist playlist) async {
     await Future.delayed(const Duration(seconds: 1));
     return false;
     //TODO
   }
 
-  static Future<bool> removeYoutubePlaylistToFavourite(YoutubePlaylist playlist) async{
+  static Future<bool> removeYoutubePlaylistToFavourite(YoutubePlaylist playlist) async {
     await Future.delayed(const Duration(seconds: 1));
     return false;
     //TODO
   }
 
-  static Future<List<YoutubePlaylist>> getFollowedYoutubePlaylist() async{
+  static Future<List<YoutubePlaylist>> getFollowedYoutubePlaylist() async {
     await Future.delayed(const Duration(seconds: 1));
     return List.empty();
     //TODO
   }
 
-  static Future<bool> isYoutubePlaylistFollowed(YoutubePlaylist playlist) async{
-    final playlists = await getFollowedYoutubePlaylist();
+  static Future<bool> isYoutubePlaylistFollowed(YoutubePlaylist playlist) async {
     return false;
     //TODO
   }

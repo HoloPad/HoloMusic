@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:android_long_task/android_long_task.dart';
 import 'package:android_long_task/long_task/service_client.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:holomusic/Common/Notifications/LoadingNotification.dart';
@@ -36,6 +37,7 @@ Future<void> main() async {
   SongStateManager.init();
   PlayerEngine.initialize();
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
@@ -46,6 +48,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return MaterialApp(
       onGenerateTitle: (context) {
         return AppLocalizations.of(context)!.appTitle;
